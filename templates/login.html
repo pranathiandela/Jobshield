@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — JobShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-page">
+  <a class="auth-back" href="{{ url_for('main.home') }}" aria-label="Back to JobShield">←</a>
+  <div class="auth-shell">
+    <section class="auth-panel">
+      <a class="auth-logo" href="{{ url_for('main.home') }}"><span class="auth-mark"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
+      <div class="auth-content">
+        <div class="eyebrow left">Secure job search</div>
+        <h1>Welcome back.</h1>
+        <p class="lead">Sign in to continue protecting your job search.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+        {% endwith %}
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="form-row">
+            {{ form.email.label }}
+            {{ form.email(class="auth-input", placeholder="you@example.com", autocomplete="email") }}
+            {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="form-row">
+            {{ form.password.label }}
+            {{ form.password(class="auth-input", placeholder="Enter your password", autocomplete="current-password") }}
+            {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="auth-options"><label class="remember"><input type="checkbox" name="remember"> <span>Remember me</span></label><a href="{{ url_for('auth.password_reset_request') }}">Forgot password?</a></div>
+          <button class="auth-submit" type="submit">Login <span>→</span></button>
+        </form>
+        <div class="or"><span></span><small>OR</small><span></span></div>
+        <a class="google-btn" href="{{ url_for('auth.google_login') }}"><b>G</b> Continue with Google</a>
+        <p class="switch-auth">Don't have an account? <a href="{{ url_for('auth.signup') }}">Create account</a></p>
+      </div>
+    </section>
+    {% include '_auth_visual.html' %}
+  </div>
+</body>
+</html>

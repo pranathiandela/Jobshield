@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="page">
+  <div class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">Account</div>
+      <h1>My Profile</h1>
+      <p>Your JobShield account information.</p>
+    </div>
+
+    <section class="panel profile-panel">
+      <div class="profile-avatar">{{ (current_user.username or current_user.email[:1])[:1]|upper }}</div>
+      <div class="profile-details">
+        <div class="profile-row">
+          <span class="profile-label">Username</span>
+          <span>{{ current_user.username or 'Not set' }}</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Email</span>
+          <span>{{ current_user.email }}</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Sign-in</span>
+          <span>{{ 'Google' if current_user.google_id else 'Email & Password' }}</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a class="btn btn-primary" href="{{ url_for('main.home') }}">Back to JobShield</a>
+        <a class="btn btn-nav" href="{{ url_for('auth.logout') }}">Logout</a>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block content %}
+<main class="page"><div class="wrap">
+<div class="page-head"><div class="eyebrow">AI Job Detector</div><h1>Know if the job is real.</h1><p>Paste a job description and JobShield checks common scam signals before you apply.</p></div>
+<div class="panel">
+<form id="detector-form">
+<div class="grid-2">
+<div class="form-row"><label for="job_text">Job description</label><textarea id="job_text" name="job_text" placeholder="Paste the complete job posting here..."></textarea></div>
+<div>
+<div class="form-row"><label for="job_url">Job URL (optional)</label><input id="job_url" name="job_url" placeholder="https://example.com/jobs/..."></div>
+<div class="form-row"><label for="recruiter_email">Recruiter email (optional)</label><input id="recruiter_email" name="recruiter_email" placeholder="recruiter@company.com"></div>
+<div class="actions"><button class="btn btn-primary" type="submit">Scan listing ↗</button><span class="small">No real payment or account details are requested by this demo.</span></div>
+</div></div></form>
+<div id="result" class="result" hidden></div>
+</div></div></main>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
