@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}
+<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">Resume Screening</div><h1>Check your resume safely.</h1><p>Upload a PDF or DOCX and review basic exposure signals. This starter keeps processing local to the Flask app.</p></div>
+<div class="panel"><form method="post" enctype="multipart/form-data"><div class="form-row"><label for="resume">Resume file</label><input id="resume" type="file" name="resume" accept=".pdf,.doc,.docx" required></div><button class="btn btn-primary" type="submit">Screen resume ↗</button></form>
+{% if result %}<div class="result"><div class="risk">{{ result.status }}</div><p>{{ result.message }}</p><div class="signal-list">{% for s in result.signals %}<div class="signal">{{ s }}</div>{% endfor %}</div></div>{% endif %}
+</div></div></main>
+{% endblock %}

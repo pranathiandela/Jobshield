@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobShield — Know if the job is real</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== Auros tokens (canvas, surfaces, type, accent) ===== */
+    --liquid-abyss:#012624;
+    --liquid-deep:#011d1c;
+    --liquid-kelp:#003734;
+    --liquid-kelp-soft: rgba(0,55,52,0.5);
+    --liquid-mist:#edfffe;
+    --platinum:#ffffff;
+    --silver-mist:#bbc7c6;
+    --ash:#f2f2f2;
+    --slate-deep:#707777;
+    --lavender:#fde9ff;
+    --gradient-aurora: linear-gradient(90deg, rgb(203,255,252) 0%, rgb(237,255,254) 26.25%, rgb(255,253,250) 47.57%, rgb(250,209,255) 88.96%);
+    --gradient-bio: linear-gradient(90deg, rgb(0,130,124) 0%, rgb(203,255,252) 100%);
+    --hairline: rgba(255,255,255,0.1);
+
+    --font-display: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-ui: Arial, ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    --radius-card:16px;
+    --radius-sm:6px;
+
+    --max-w:1200px;
+    --section-gap:68px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--liquid-abyss);
+    color:var(--platinum);
+    font-family:var(--font-display);
+    font-weight:400;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{ display:block; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--max-w); margin:0 auto; padding:0 32px; }
+  section{ position:relative; }
+
+  h1,h2,h3{ font-family:var(--font-display); font-weight:500; color:var(--platinum); line-height:1; }
+
+  .eyebrow{
+    display:flex; align-items:center; justify-content:center; gap:16px;
+    font-family:var(--font-display); font-weight:500; font-size:12px;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--silver-mist);
+    margin-bottom:20px;
+  }
+  .eyebrow::before, .eyebrow::after{
+    content:""; height:1px; width:56px;
+    background:linear-gradient(90deg, transparent, var(--hairline), transparent);
+  }
+  .eyebrow.left{ justify-content:flex-start; }
+  .eyebrow.left::before{ display:none; }
+  .eyebrow.left::after{ width:100%; }
+
+  .section-head{ max-width:620px; margin:0 auto 48px; text-align:center; }
+  .section-head h2{ font-size:36px; margin-bottom:16px; }
+  .section-head p{ color:var(--silver-mist); font-size:16px; }
+
+  /* ===================== NAVBAR — Auros ===================== */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(1,38,36,0.72);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+  header.nav .wrap{
+    height:80px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{ display:flex; align-items:center; gap:10px; font-weight:500; font-size:18px; letter-spacing:-0.02em; }
+  .logo .mark{
+    width:28px; height:28px; border-radius:6px;
+    background:var(--gradient-bio);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo .mark svg{ width:16px; height:16px; }
+
+  nav.links{ display:flex; align-items:center; gap:32px; }
+  nav.links a{
+    font-family:var(--font-display); font-weight:400; font-size:12px;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--silver-mist);
+    transition:color .15s ease;
+  }
+  nav.links a:hover{ color:var(--platinum); }
+
+  .btn{
+    font-family:var(--font-ui); font-size:14px; letter-spacing:0.02em;
+    display:inline-flex; align-items:center; gap:8px;
+    cursor:pointer; border:none; white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--gradient-aurora);
+    color:#1a1a1a;
+    font-weight:600;
+    text-transform:uppercase; font-size:12.5px; letter-spacing:0.06em;
+    padding:13px 22px; border-radius:6px;
+  }
+  .btn-nav{
+    background:var(--liquid-kelp);
+    color:var(--platinum);
+    padding:10px 18px; border-radius:6px;
+    font-size:13px; border:1px solid var(--hairline);
+  }
+  .btn-ghost{
+    background:transparent; color:var(--silver-mist);
+    padding:0; font-size:13px;
+    border-bottom:1px solid var(--hairline);
+    padding-bottom:2px;
+  }
+  .btn-ghost:hover{ color:var(--platinum); border-color:var(--platinum); }
+
+  .mobile-toggle{ display:none; }
+
+  /* ===================== HERO — AuthKit layout, Auros palette ===================== */
+  .hero{
+    padding:96px 0 40px;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 700px 420px at 50% 0%, rgba(0,130,124,0.35), transparent 70%),
+      var(--liquid-abyss);
+  }
+  .hero .grid-layer{
+    position:absolute; inset:0; z-index:0; opacity:0.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size:88px 88px;
+    -webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 20%, black 10%, transparent 75%);
+    mask-image:radial-gradient(ellipse 60% 55% at 50% 20%, black 10%, transparent 75%);
+  }
+  .hero-inner{ position:relative; z-index:1; text-align:center; }
+  .hero-inner .eyebrow{ margin-bottom:24px; }
+  .hero h1{
+    font-size:clamp(40px, 6vw, 72px);
+    letter-spacing:-0.03em;
+    max-width:820px; margin:0 auto 24px;
+    background:linear-gradient(180deg, #ffffff 0%, #bfe9e4 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{
+    max-width:560px; margin:0 auto 36px;
+    color:var(--silver-mist); font-size:17px; line-height:1.55;
+  }
+  .hero-ctas{ display:flex; gap:20px; align-items:center; justify-content:center; margin-bottom:88px; }
+
+  /* floating fanned cards, referenced from AuthKit's auth-form mockup fan */
+  .hero-cards{
+    position:relative; height:300px; max-width:900px; margin:0 auto;
+  }
+  .float-card{
+    position:absolute; top:0;
+    width:280px;
+    background:rgba(0,55,52,0.55);
+    border:1px solid var(--hairline);
+    border-radius:16px;
+    padding:24px;
+    backdrop-filter:blur(6px);
+  }
+  .float-card.left{ left:2%; top:36px; transform:rotate(-6deg); }
+  .float-card.center{ left:50%; transform:translateX(-50%); width:320px; z-index:2; box-shadow:0 24px 60px rgba(0,0,0,0.45); }
+  .float-card.right{ right:2%; top:36px; transform:rotate(6deg); }
+
+  .card-label{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--silver-mist); margin-bottom:14px; }
+  .job-row{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+  .job-title{ font-size:14px; color:var(--platinum); font-weight:500; margin-bottom:4px; }
+  .job-meta{ font-size:12px; color:var(--slate-deep); }
+  .risk-tag{
+    font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:4px 8px; border-radius:6px; font-weight:600;
+  }
+  .risk-tag.high{ background:rgba(253,233,255,0.14); color:var(--lavender); border:1px solid rgba(253,233,255,0.25); }
+  .risk-tag.ok{ background:rgba(203,255,252,0.1); color:var(--liquid-mist); border:1px solid rgba(203,255,252,0.2); }
+  .scan-bar{ height:4px; border-radius:2px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:8px; }
+  .scan-bar span{ display:block; height:100%; width:72%; background:var(--gradient-bio); }
+  .center-body{ font-size:13px; color:var(--silver-mist); margin-top:10px; line-height:1.5; }
+  .verify-row{ display:flex; align-items:center; gap:10px; margin-top:14px; font-size:12px; color:var(--liquid-mist); }
+  .verify-dot{ width:8px; height:8px; border-radius:50%; background:var(--liquid-mist); box-shadow:0 0 8px rgba(203,255,252,0.7); }
+
+  /* ===================== FEATURES INTRO ===================== */
+  .features-intro{ padding:var(--section-gap) 0 20px; }
+
+  /* ===================== FEATURE — shared shell ===================== */
+  .feature{ padding:56px 0; border-top:1px solid var(--hairline); }
+  .feature .wrap{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:64px; align-items:start; }
+  .feature-copy .tag{
+    font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--liquid-mist);
+    margin-bottom:14px; display:inline-block;
+  }
+  .feature-copy h3{ font-size:32px; margin-bottom:16px; letter-spacing:-0.01em; }
+  .feature-copy p{ color:var(--silver-mist); font-size:16px; margin-bottom:28px; max-width:420px; }
+  .feature-copy .btn-ghost{ font-family:var(--font-ui); }
+
+  /* Detector workflow: horizontal icon timeline (AuthKit pattern) */
+  .timeline{ display:flex; align-items:flex-start; gap:0; }
+  .timeline .step{ flex:1; text-align:center; position:relative; padding:0 8px; }
+  .timeline .connector{ position:absolute; top:32px; left:-50%; width:100%; height:1px; background:var(--hairline); z-index:0; }
+  .timeline .step:first-child .connector{ display:none; }
+  .tile{
+    width:64px; height:64px; border-radius:9999px; margin:0 auto 16px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--hairline);
+    display:flex; align-items:center; justify-content:center; position:relative; z-index:1;
+  }
+  .tile svg{ width:24px; height:24px; stroke:var(--liquid-mist); }
+  .timeline .step h4{ font-size:13px; font-weight:500; color:var(--platinum); margin-bottom:6px; }
+  .timeline .step p{ font-size:12px; color:var(--slate-deep); line-height:1.4; }
+
+  /* Resume workflow: vertical numbered stepper w/ description cards (deliberately different structure) */
+  .stepper{ display:flex; flex-direction:column; }
+  .stepper .row{ display:flex; gap:20px; position:relative; padding-bottom:32px; }
+  .stepper .row:last-child{ padding-bottom:0; }
+  .stepper .rail{ display:flex; flex-direction:column; align-items:center; }
+  .stepper .num{
+    width:32px; height:32px; border-radius:6px; flex-shrink:0;
+    background:var(--liquid-kelp); border:1px solid var(--hairline);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:500; color:var(--platinum);
+  }
+  .stepper .line{ flex:1; width:1px; background:var(--hairline); margin-top:4px; }
+  .stepper .row:last-child .line{ display:none; }
+  .stepper .content{ background:var(--liquid-kelp); border-radius:16px; padding:20px 24px; flex:1; }
+  .stepper .content h4{ font-size:15px; font-weight:500; color:var(--platinum); margin-bottom:6px; }
+  .stepper .content p{ font-size:13px; color:var(--silver-mist); line-height:1.5; }
+
+  /* ===================== STATS — screenshot layout, Auros palette ===================== */
+  .stats{ padding:var(--section-gap) 0 var(--section-gap); }
+  .stats-head{ margin-bottom:56px; }
+  .stats-head .eyebrow{ margin-bottom:8px; }
+  .stats-head h2{
+    font-size:clamp(44px, 7vw, 78px);
+    letter-spacing:-0.02em; line-height:0.98;
+    text-transform:uppercase; text-align:center;
+    background:linear-gradient(90deg, var(--platinum), var(--silver-mist));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .stats-row{
+    display:grid; grid-template-columns:repeat(4, 1fr);
+    border-top:1px solid var(--hairline);
+  }
+  .stat{
+    padding:40px 28px 0; border-right:1px solid var(--hairline);
+  }
+  .stat:last-child{ border-right:none; }
+  .stat .num{
+    font-size:clamp(40px, 4.4vw, 64px); font-weight:500; letter-spacing:-0.02em;
+    color:var(--platinum); display:flex; align-items:baseline; gap:2px; margin-bottom:20px;
+  }
+  .stat .num .accent{ color:var(--lavender); }
+  .stat .label{ font-size:14px; color:var(--silver-mist); line-height:1.4; max-width:180px; }
+
+  /* ===================== TESTIMONIALS — Auros surface cards ===================== */
+  .testimonials{ padding:var(--section-gap) 0; }
+  .t-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; }
+  .t-card{
+    background:var(--liquid-kelp); border-radius:16px; padding:36px;
+    display:flex; flex-direction:column; justify-content:space-between; min-height:240px;
+  }
+  .t-card blockquote{ font-size:16px; color:var(--ash); line-height:1.55; margin-bottom:28px; }
+  .t-person{ display:flex; align-items:center; gap:12px; }
+  .t-avatar{
+    width:36px; height:36px; border-radius:9999px; flex-shrink:0;
+    background:var(--gradient-bio); display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600; color:#012624;
+  }
+  .t-person .name{ font-size:14px; color:var(--platinum); font-weight:500; }
+  .t-person .role{ font-size:12px; color:var(--slate-deep); }
+
+  /* ===================== FOOTER — Auros recessed well ===================== */
+  footer{
+    background:var(--liquid-deep);
+    padding:100px 0 48px;
+    margin-top:var(--section-gap);
+  }
+  .footer-top{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:48px; margin-bottom:80px; }
+  .footer-brand p{ color:var(--silver-mist); font-size:14px; max-width:280px; margin-top:16px; line-height:1.55; }
+  .footer-col h5{ font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--silver-mist); margin-bottom:20px; font-weight:500; }
+  .footer-col a{ display:block; font-size:14px; color:var(--platinum); margin-bottom:14px; opacity:0.85; }
+  .footer-col a:hover{ opacity:1; }
+  .footer-bottom{
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--hairline); padding-top:32px;
+    font-size:13px; color:var(--slate-deep);
+  }
+  .footer-social{ display:flex; gap:16px; }
+  .footer-social a{ color:var(--silver-mist); }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 900px){
+    nav.links{ display:none; }
+    .feature .wrap{ grid-template-columns:1fr; gap:40px; }
+    .hero-cards{ display:none; }
+    .hero{ padding-bottom:56px; }
+    .stats-row{ grid-template-columns:repeat(2,1fr); row-gap:40px; }
+    .stat:nth-child(2){ border-right:none; }
+    .t-grid{ grid-template-columns:1fr; }
+    .footer-top{ grid-template-columns:1fr 1fr; row-gap:40px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a href="/" class="logo" aria-label="JobShield home">
+      <span class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#012624" stroke-width="2">
+          <path d="M4 12l5 5L20 6"/>
+        </svg>
+      </span>
+      JOBSHIELD
+    </a>
+
+    <nav class="links" aria-label="Main navigation">
+      <a href="/detector">Detector</a>
+      <a href="/resume-screening">Resume Screening</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">History</a>
+      <a href="/about-help">About &amp; Help</a>
+    </nav>
+
+    <a href="/login" class="btn btn-nav">Get Started</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="grid-layer"></div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow">AI-Powered Hiring Safety</div>
+    <h1>Know if the job is real before you apply.</h1>
+    <p class="hero-sub">JobShield scans job postings and screens resumes in seconds, flagging scams, ghost listings, and fraudulent recruiters before they cost you time, money, or your data.</p>
+    <div class="hero-ctas">
+      <a href="/detector" class="btn btn-primary">Scan a job listing</a>
+      <a href="/resume-screening" class="btn btn-ghost">See how it works</a>
+    </div>
+
+    <div class="hero-cards">
+      <div class="float-card left">
+        <div class="card-label">Listing Risk Score</div>
+        <div class="job-row">
+          <div>
+            <div class="job-title">Remote Data Entry</div>
+            <div class="job-meta">$45/hr · Posted 2h ago</div>
+          </div>
+          <span class="risk-tag high">High risk</span>
+        </div>
+        <div class="scan-bar"><span></span></div>
+      </div>
+
+      <div class="float-card center">
+        <div class="card-label">Resume Safety Scan</div>
+        <div class="job-title" style="font-size:16px;">alex_martinez_resume.pdf</div>
+        <div class="center-body">Checked against 40,000+ known scam recruiter patterns and exposed-data listings.</div>
+        <div class="verify-row"><span class="verify-dot"></span> No exposure found</div>
+      </div>
+
+      <div class="float-card right">
+        <div class="card-label">Recruiter Verification</div>
+        <div class="job-row">
+          <div>
+            <div class="job-title">Nova Logistics Inc.</div>
+            <div class="job-meta">novalogistics-careers.net</div>
+          </div>
+          <span class="risk-tag ok">Verified</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-intro">
+  <div class="wrap section-head">
+    <div class="eyebrow">Our Tools</div>
+    <h2>Two systems, one goal: safer job searches</h2>
+    <p>One catches bad listings before you click apply. The other watches your resume after you send it.</p>
+  </div>
+</section>
+
+<section class="feature" id="detector">
+  <div class="wrap">
+    <div class="feature-copy">
+      <span class="tag">Job Listing Detector</span>
+      <h3>Paste a listing. Get a verdict.</h3>
+      <p>Drop in a job post URL or the raw text and JobShield cross-checks it against known scam language, spoofed company domains, and reused fraudulent postings — then hands back a plain-language risk score.</p>
+      <a href="/detector" class="btn-ghost">Try the detector</a>
+    </div>
+
+    <div class="timeline">
+      <div class="step">
+        <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M8 4h8v16H8z"/><path d="M10 9h4M10 13h4"/></svg></div>
+        <h4>Paste the listing</h4>
+        <p>URL or full text, either works.</p>
+      </div>
+      <div class="step">
+        <div class="connector"></div>
+        <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg></div>
+        <h4>Pattern scan</h4>
+        <p>Matched against known scam language.</p>
+      </div>
+      <div class="step">
+        <div class="connector"></div>
+        <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 7l7 9M16 7l-7 9"/></svg></div>
+        <h4>Cross-check sources</h4>
+        <p>Company domain and history verified.</p>
+      </div>
+      <div class="step">
+        <div class="connector"></div>
+        <div class="tile"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg></div>
+        <h4>Get your risk score</h4>
+        <p>Clear verdict, no jargon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="resume">
+  <div class="wrap">
+    <div class="feature-copy">
+      <span class="tag">Resume Screening</span>
+      <h3>We watch what happens after you apply.</h3>
+      <p>Upload your resume once and JobShield flags any listing or recruiter reaching out about it that doesn't check out — so you catch a scam before you hand over more information.</p>
+      <a href="/resume-screening" class="btn-ghost">Screen your resume</a>
+    </div>
+
+    <div class="stepper">
+      <div class="row">
+        <div class="rail"><div class="num">1</div><div class="line"></div></div>
+        <div class="content">
+          <h4>Upload your resume</h4>
+          <p>PDF or DOCX — we only read what's needed to watch for exposure.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="rail"><div class="num">2</div><div class="line"></div></div>
+        <div class="content">
+          <h4>We check for exposure</h4>
+          <p>Compared against a growing database of scam recruiter activity.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="rail"><div class="num">3</div><div class="line"></div></div>
+        <div class="content">
+          <h4>Get alerted on suspicious contact</h4>
+          <p>Notified the moment a matching listing looks off.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="rail"><div class="num">4</div></div>
+        <div class="content">
+          <h4>Review your safety report</h4>
+          <p>See exactly why a recruiter was flagged before you reply.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="stats">
+  <div class="wrap">
+    <div class="stats-head">
+      <div class="eyebrow">The Numbers</div>
+      <h2>Scams don't get past us.</h2>
+    </div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="num">12,400<span class="accent">+</span></div>
+        <div class="label">Fake listings caught this year</div>
+      </div>
+      <div class="stat">
+        <div class="num">3.2<span class="accent">M+</span></div>
+        <div class="label">Resumes screened for exposure</div>
+      </div>
+      <div class="stat">
+        <div class="num">98<span class="accent">%</span></div>
+        <div class="label">Detection accuracy on known scam patterns</div>
+      </div>
+      <div class="stat">
+        <div class="num">50<span class="accent">K+</span></div>
+        <div class="label">Job seekers actively protected</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials" id="testimonials">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Trusted By Job Seekers</div>
+      <h2>What people are saying</h2>
+    </div>
+    <div class="t-grid">
+      <div class="t-card">
+        <blockquote>"A recruiter texted me about a listing I never applied to. JobShield flagged the company domain as fake within seconds."</blockquote>
+        <div class="t-person">
+          <div class="t-avatar">RM</div>
+          <div>
+            <div class="name">Renee M.</div>
+            <div class="role">Marketing Coordinator</div>
+          </div>
+        </div>
+      </div>
+      <div class="t-card">
+        <blockquote>"I run every remote listing through the detector now. It's caught three scams in the last month alone."</blockquote>
+        <div class="t-person">
+          <div class="t-avatar">DK</div>
+          <div>
+            <div class="name">David K.</div>
+            <div class="role">Recent Graduate</div>
+          </div>
+        </div>
+      </div>
+      <div class="t-card">
+        <blockquote>"The resume screening caught that my info was being reused in a fake posting before I even knew it happened."</blockquote>
+        <div class="t-person">
+          <div class="t-avatar">SP</div>
+          <div>
+            <div class="name">Sana P.</div>
+            <div class="role">UX Designer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#012624" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>
+          </span>
+          VERIDECT
+        </a>
+        <p>Helping job seekers tell a real offer from a scam, one scan at a time.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#detector">Job Detector</a>
+        <a href="#resume">Resume Screening</a>
+        <a href="#stats">Why JobShield</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#">About</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Resources</h5>
+        <a href="#">Scam glossary</a>
+        <a href="#">Report a listing</a>
+        <a href="#">Help center</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 JobShield. All rights reserved.</span>
+      <div class="footer-social">
+        <a href="#">X</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Instagram</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

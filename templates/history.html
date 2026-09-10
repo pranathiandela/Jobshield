@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">History</div><h1>Your scan history.</h1><p>Every detector scan is stored in this starter app's local JSON history.</p></div>
+<div class="panel">{% if history %}<table class="history-table"><thead><tr><th>Date</th><th>Title</th><th>Risk</th><th>Score</th></tr></thead><tbody>{% for x in history|reverse %}<tr><td>{{ x.date }}</td><td>{{ x.title }}</td><td>{{ x.risk }}</td><td>{{ x.score }}/100</td></tr>{% endfor %}</tbody></table>{% else %}<div class="notice">No scans yet. Run your first check from Detector.</div>{% endif %}</div>
+</div></main>
+{% endblock %}
