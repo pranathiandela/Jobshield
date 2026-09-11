@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Account — JobShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-page">
+  <a class="auth-back" href="{{ url_for('main.home') }}">←</a>
+  <div class="auth-shell">
+    <section class="auth-panel">
+      <a class="auth-logo" href="{{ url_for('main.home') }}"><span class="auth-mark"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
+      <div class="auth-content">
+        <div class="eyebrow left">Start secure</div>
+        <h1>Create your account.</h1>
+        <p class="lead">Build a safer workspace for every job you check.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="form-row">{{ form.email.label }}{{ form.email(class="auth-input", placeholder="you@example.com", autocomplete="email") }}{% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <div class="form-row">{{ form.password1.label }}{{ form.password1(class="auth-input", placeholder="At least 8 characters", autocomplete="new-password") }}{% for error in form.password1.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <div class="form-row">{{ form.password2.label }}{{ form.password2(class="auth-input", placeholder="Repeat your password", autocomplete="new-password") }}{% for error in form.password2.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <button class="auth-submit" type="submit">Create account <span>→</span></button>
+        </form>
+        <div class="or"><span></span><small>OR</small><span></span></div>
+        <a class="google-btn" href="{{ url_for('auth.google_login') }}"><b>G</b> Continue with Google</a>
+        <p class="switch-auth">Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+      </div>
+    </section>
+    {% include '_auth_visual.html' %}
+  </div>
+</body>
+</html>

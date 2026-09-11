@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="page detector-page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <div class="eyebrow">AI Job Detector</div>
+
+      <h1>Protect Your Career From <span>Fake Opportunities</span></h1>
+
+      <p>
+        JobShield checks company, career, recruiter, salary, contact and scam signals in one scan.
+      </p>
+    </div>
+
+
+    <div class="detector-panel">
+
+      <form id="detector-form" enctype="multipart/form-data">
+
+        <!-- =====================================================
+             SECTION 01 - JOB INFORMATION
+        ====================================================== -->
+
+        <div class="detector-section">
+
+          <div class="section-title">
+            <span>01</span>
+
+            <div>
+              <h2>Job information</h2>
+
+              <p>
+                Enter the details exactly as they appear in the listing.
+              </p>
+            </div>
+          </div>
+
+
+          <div class="detector-grid two">
+
+            <!-- JOB TITLE -->
+
+            <div class="form-row">
+
+              <label for="job_title">
+                Job Title
+              </label>
+
+              <input
+                id="job_title"
+                name="job_title"
+                placeholder="e.g. Software Engineer"
+              >
+
+            </div>
+
+
+            <!-- COMPANY -->
+
+            <div class="form-row">
+
+              <label for="company_name">
+                Company Name
+              </label>
+
+              <input
+                id="company_name"
+                name="company_name"
+                placeholder="e.g. ABC Technologies"
+              >
+
+            </div>
+
+
+            <!-- =================================================
+                 JOB DESCRIPTION / SCREENSHOT
+            ================================================== -->
+
+            <div class="form-row wide">
+
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  gap:15px;
+                  margin-bottom:8px;
+                  flex-wrap:wrap;
+                "
+              >
+
+                <label
+                  for="job_text"
+                  style="margin-bottom:0;"
+                >
+                  Job Description
+                </label>
+
+
+                <!-- SCREENSHOT SWITCH -->
+
+                <button
+                  type="button"
+                  id="screenshot-toggle"
+                  class="btn btn-nav"
+                  style="white-space:nowrap;"
+                >
+                  📷 Use Screenshot
+                </button>
+
+              </div>
+
+
+              <!-- =================================================
+                   TEXT MODE - DEFAULT
+              ================================================== -->
+
+              <div id="description-mode">
+
+                <textarea
+                  id="job_text"
+                  name="job_text"
+                  placeholder="Paste the complete job description here..."
+                ></textarea>
+
+              </div>
+
+
+              <!-- =================================================
+                   SCREENSHOT MODE
+              ================================================== -->
+
+              <div
+                id="screenshot-mode"
+                hidden
+              >
+
+                <div
+                  style="
+                    border:2px dashed rgba(0,0,0,0.15);
+                    border-radius:12px;
+                    padding:28px 20px;
+                    text-align:center;
+                  "
+                >
+
+                  <div
+                    style="
+                      font-size:32px;
+                      margin-bottom:8px;
+                    "
+                  >
+                    📷
+                  </div>
+
+
+                  <strong>
+                    Upload job screenshot
+                  </strong>
+
+
+                  <p
+                    style="
+                      margin:6px 0 16px;
+                      opacity:.7;
+                    "
+                  >
+                    Upload a screenshot of the job listing or recruiter message.
+                  </p>
+
+
+                  <input
+                    id="screenshot"
+                    name="screenshot"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                  >
+
+
+                  <div
+                    id="file-name"
+                    class="file-help"
+                    style="margin-top:10px;"
+                  >
+                    No screenshot selected.
+                  </div>
+
+                </div>
+
+
+                <!-- SWITCH BACK -->
+
+                <button
+                  type="button"
+                  id="description-toggle"
+                  class="btn btn-nav"
+                  style="
+                    margin-top:12px;
+                  "
+                >
+                  📝 Use Job Description
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-row">
+
+              <label for="location">
+                Location
+              </label>
+
+              <input
+                id="location"
+                name="location"
+                placeholder="e.g. Hyderabad / Remote"
+              >
+
+            </div>
+
+
+            <!-- SALARY -->
+
+            <div class="form-row">
+
+              <label for="salary">
+                Salary
+              </label>
+
+              <input
+                id="salary"
+                name="salary"
+                placeholder="e.g. ₹6–8 LPA"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SECTION 02 - VERIFICATION DETAILS
+        ====================================================== -->
+
+        <div class="detector-section">
+
+          <div class="section-title">
+
+            <span>02</span>
+
+            <div>
+
+              <h2>
+                Verification details
+              </h2>
+
+              <p>
+                These fields help JobShield cross-check identity and contact signals.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="detector-grid two">
+
+
+            <!-- JOB URL -->
+
+            <div class="form-row">
+
+              <label for="job_url">
+                Job URL
+              </label>
+
+              <input
+                id="job_url"
+                name="job_url"
+                type="url"
+                placeholder="https://example.com/jobs/123"
+              >
+
+            </div>
+
+
+            <!-- COMPANY WEBSITE -->
+
+            <div class="form-row">
+
+              <label for="company_website">
+                Company Website
+              </label>
+
+              <input
+                id="company_website"
+                name="company_website"
+                type="url"
+                placeholder="https://company.com"
+              >
+
+            </div>
+
+
+            <!-- RECRUITER -->
+
+            <div class="form-row">
+
+              <label for="recruiter_name">
+                Recruiter Name
+              </label>
+
+              <input
+                id="recruiter_name"
+                name="recruiter_name"
+                placeholder="e.g. Priya Sharma"
+              >
+
+            </div>
+
+
+            <!-- RECRUITER CONTACT -->
+
+            <div class="form-row">
+
+              <label for="recruiter_contact">
+                Recruiter Email / Phone
+              </label>
+
+              <input
+                id="recruiter_contact"
+                name="recruiter_contact"
+                placeholder="recruiter@company.com or phone"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SCAN BAR
+        ====================================================== -->
+
+        <div class="scan-bar">
+
+          <div>
+
+            <strong>
+              Ready to scan
+            </strong>
+
+            <span>
+              All analysis is performed by the JobShield detection engine.
+            </span>
+
+          </div>
+
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+            id="scan-btn"
+          >
+            <span>
+              Run full verification
+            </span>
+
+            ↗
+          </button>
+
+        </div>
+
+      </form>
+
+
+      <!-- =====================================================
+           SCAN PROGRESS
+      ====================================================== -->
+
+      <div
+        id="scan-progress"
+        class="scan-progress"
+        hidden
+      >
+
+        <div class="progress-head">
+
+          <strong>
+            Analyzing listing
+          </strong>
+
+          <span id="progress-label">
+            Preparing checks…
+          </span>
+
+        </div>
+
+
+        <div class="progress-track">
+
+          <div id="progress-fill"></div>
+
+        </div>
+
+
+        <div class="progress-steps">
+
+          <span>Company</span>
+          <span>Careers</span>
+          <span>Recruiter</span>
+          <span>Salary</span>
+          <span>Scam patterns</span>
+          <span>Evidence</span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           RESULT
+      ====================================================== -->
+
+      <div
+        id="result"
+        class="detector-result"
+        hidden
+      ></div>
+
+    </div>
+
+  </div>
+</main>
+
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+
+<!-- =========================================================
+     SCREENSHOT / DESCRIPTION TOGGLE
+========================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const screenshotToggle =
+    document.getElementById("screenshot-toggle");
+
+  const descriptionToggle =
+    document.getElementById("description-toggle");
+
+  const descriptionMode =
+    document.getElementById("description-mode");
+
+  const screenshotMode =
+    document.getElementById("screenshot-mode");
+
+  const screenshotInput =
+    document.getElementById("screenshot");
+
+  const fileName =
+    document.getElementById("file-name");
+
+
+  if (!screenshotToggle ||
+      !descriptionToggle ||
+      !descriptionMode ||
+      !screenshotMode) {
+    return;
+  }
+
+
+  /* ==========================================================
+     SWITCH TO SCREENSHOT
+  ========================================================== */
+
+  screenshotToggle.addEventListener("click", () => {
+
+    descriptionMode.hidden = true;
+
+    screenshotMode.hidden = false;
+
+    screenshotToggle.hidden = true;
+
+  });
+
+
+  /* ==========================================================
+     SWITCH BACK TO DESCRIPTION
+  ========================================================== */
+
+  descriptionToggle.addEventListener("click", () => {
+
+    screenshotMode.hidden = true;
+
+    descriptionMode.hidden = false;
+
+    screenshotToggle.hidden = false;
+
+  });
+
+
+  /* ==========================================================
+     SHOW SELECTED FILE NAME
+  ========================================================== */
+
+  if (screenshotInput) {
+
+    screenshotInput.addEventListener("change", () => {
+
+      if (screenshotInput.files.length > 0) {
+
+        fileName.textContent =
+          "Selected: " +
+          screenshotInput.files[0].name;
+
+      } else {
+
+        fileName.textContent =
+          "No screenshot selected.";
+
+      }
+
+    });
+
+  }
+
+});
+
+</script>
+
+{% endblock %}

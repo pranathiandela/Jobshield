@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choose Username — JobShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-page">
+  <a class="auth-back" href="{{ url_for('main.home') }}">←</a>
+  <div class="auth-shell">
+    <section class="auth-panel">
+      <a class="auth-logo" href="{{ url_for('main.home') }}"><span class="auth-mark"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
+      <div class="auth-content">
+        <div class="eyebrow left">One last step</div>
+        <h1>Choose your username.</h1>
+        <p class="lead">This is the name you'll use inside your JobShield workspace.</p>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="form-row">{{ form.username.label }}{{ form.username(class="auth-input", placeholder="yourusername", autocomplete="username") }}{% for error in form.username.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <button class="auth-submit" type="submit">Continue <span>→</span></button>
+        </form>
+      </div>
+    </section>
+    {% include '_auth_visual.html' %}
+  </div>
+</body>
+</html>

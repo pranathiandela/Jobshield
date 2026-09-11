@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}
+<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">Dashboard</div><h1>Your safety overview.</h1><p>A simple command center for your recent checks.</p></div>
+<div class="stat-grid"><div class="stat-box"><div class="stat-number">{{ stats.total }}</div><div class="stat-label">Total scans</div></div><div class="stat-box"><div class="stat-number">{{ stats.high }}</div><div class="stat-label">High-risk listings</div></div><div class="stat-box"><div class="stat-number">{{ stats.medium }}</div><div class="stat-label">Medium-risk listings</div></div><div class="stat-box"><div class="stat-number">{{ stats.low }}</div><div class="stat-label">Low-risk listings</div></div></div>
+<div style="height:24px"></div><div class="cards"><div class="card"><h3>Detector</h3><p>Analyze a job listing and receive a risk score.</p><br><a class="btn-ghost" href="/detector">Open detector</a></div><div class="card"><h3>Resume Screening</h3><p>Upload your resume and review basic exposure signals.</p><br><a class="btn-ghost" href="/resume-screening">Open screening</a></div><div class="card"><h3>History</h3><p>Review your previous job checks and their signals.</p><br><a class="btn-ghost" href="/history">View history</a></div></div>
+</div></main>
+{% endblock %}

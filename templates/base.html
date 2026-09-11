@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} — JobShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#012624" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
+    <nav class="links">
+      <a href="/detector" class="{{ 'active' if active=='detector' else '' }}">Detector</a>
+      <a href="/resume-screening" class="{{ 'active' if active=='resume' else '' }}">Resume Screening</a>
+      <a href="/dashboard" class="{{ 'active' if active=='dashboard' else '' }}">Dashboard</a>
+      <a href="/history" class="{{ 'active' if active=='history' else '' }}">History</a>
+      <a href="/about-help" class="{{ 'active' if active=='help' else '' }}">About &amp; Help</a>
+    </nav>
+    {% if current_user.is_authenticated %}
+      <div class="account-menu">
+        <button type="button" class="btn btn-nav account-trigger" aria-expanded="false" aria-haspopup="true">
+          {{ current_user.username or 'Account' }} <span class="account-chevron">⌄</span>
+        </button>
+        <div class="account-dropdown" role="menu">
+          <a href="{{ url_for('profile') }}" role="menuitem">👤 <span>My Profile</span></a>
+          <a href="{{ url_for('auth.logout') }}" role="menuitem">↪ <span>Logout</span></a>
+        </div>
+      </div>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-nav btn-nav-gradient">Get Started</a>
+    {% endif %}
+  </div>
+</header>
+{% block content %}{% endblock %}
+<footer><div class="wrap"><div class="footer-bottom"><span>© 2026 JobShield. All rights reserved.</span><span>AI-powered hiring safety</span></div></div></footer>
+<script>
+(function () {
+  const menu = document.querySelector('.account-menu');
+  if (!menu) return;
+  const trigger = menu.querySelector('.account-trigger');
+  trigger.addEventListener('click', function (event) {
+    event.stopPropagation();
+    const open = menu.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', function () {
+    menu.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+})();
+</script>
+</body>
+</html>
