@@ -1,47 +1,353 @@
+```html
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Login — JobShield</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/auth.css') }}"
+  >
 </head>
+
 <body class="auth-page">
-  <a class="auth-back" href="{{ url_for('main.home') }}" aria-label="Back to JobShield">←</a>
+
+  <!-- Back -->
+  <a
+    class="auth-back"
+    href="{{ url_for('main.home') }}"
+    aria-label="Back to JobShield"
+  >
+    ←
+  </a>
+
   <div class="auth-shell">
+
+    <!-- AUTH PANEL -->
     <section class="auth-panel">
-      <a class="auth-logo" href="{{ url_for('main.home') }}"><span class="auth-mark"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
+
+      <!-- Logo -->
+      <a
+        class="auth-logo"
+        href="{{ url_for('main.home') }}"
+      >
+
+        <span class="auth-mark">
+
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 12l5 5L20 6"/>
+          </svg>
+
+        </span>
+
+        JOBSHIELD
+
+      </a>
+
       <div class="auth-content">
-        <div class="eyebrow left">Secure job search</div>
-        <h1>Welcome back.</h1>
-        <p class="lead">Sign in to continue protecting your job search.</p>
+
+        <!-- Heading -->
+        <div class="eyebrow left">
+          Secure job search
+        </div>
+
+        <h1>
+          Welcome back.
+        </h1>
+
+        <p class="lead">
+          Sign in to continue protecting your job search.
+        </p>
+
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+
+          {% for category, message in messages %}
+
+            <div class="flash {{ category }}">
+              {{ message }}
+            </div>
+
+          {% endfor %}
+
         {% endwith %}
+
+        <!-- LOGIN FORM -->
         <form method="post" novalidate>
+
           {{ form.hidden_tag() }}
+
+          <!-- EMAIL -->
           <div class="form-row">
+
             {{ form.email.label }}
-            {{ form.email(class="auth-input", placeholder="you@example.com", autocomplete="email") }}
-            {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+
+            {{ form.email(
+              class="auth-input",
+              placeholder="you@example.com",
+              autocomplete="email"
+            ) }}
+
+            {% for error in form.email.errors %}
+
+              <div class="field-error">
+                {{ error }}
+              </div>
+
+            {% endfor %}
+
           </div>
+
+          <!-- PASSWORD -->
           <div class="form-row">
+
             {{ form.password.label }}
-            {{ form.password(class="auth-input", placeholder="Enter your password", autocomplete="current-password") }}
-            {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+
+            <div class="password-wrapper">
+
+              {{ form.password(
+                class="auth-input",
+                placeholder="Enter your password",
+                autocomplete="current-password",
+                id="password"
+              ) }}
+
+              <!-- Eye Button -->
+              <button
+                type="button"
+                class="password-toggle"
+                id="passwordToggle"
+                aria-label="Show password"
+                title="Show password"
+                onclick="toggleLoginPassword()"
+              >
+
+                <svg
+                  id="eyeIcon"
+                  class="eye-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+
+                  <!-- Password is hidden initially -->
+                  <!-- Closed / slashed eye -->
+                  <path d="M3 3l18 18"/>
+                  <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>
+                  <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c6.5 0 10 8 10 8a16.5 16.5 0 0 1-3.1 4.3"/>
+                  <path d="M6.2 6.2C3.6 8.1 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.3"/>
+
+                </svg>
+
+              </button>
+
+            </div>
+
+            {% for error in form.password.errors %}
+
+              <div class="field-error">
+                {{ error }}
+              </div>
+
+            {% endfor %}
+
           </div>
-          <div class="auth-options"><label class="remember"><input type="checkbox" name="remember"> <span>Remember me</span></label><a href="{{ url_for('auth.password_reset_request') }}">Forgot password?</a></div>
-          <button class="auth-submit" type="submit">Login <span>→</span></button>
+
+          <!-- REMEMBER / FORGOT -->
+          <div class="auth-options">
+
+            <label class="remember">
+
+              <input
+                type="checkbox"
+                name="remember"
+              >
+
+              <span>
+                Remember me
+              </span>
+
+            </label>
+
+            <a
+              href="{{ url_for('auth.password_reset_request') }}"
+            >
+              Forgot password?
+            </a>
+
+          </div>
+
+          <!-- LOGIN BUTTON -->
+          <button
+            class="auth-submit"
+            type="submit"
+          >
+
+            Login
+
+            <span>
+              →
+            </span>
+
+          </button>
+
         </form>
-        <div class="or"><span></span><small>OR</small><span></span></div>
-        <a class="google-btn" href="{{ url_for('auth.google_login') }}"><b>G</b> Continue with Google</a>
-        <p class="switch-auth">Don't have an account? <a href="{{ url_for('auth.signup') }}">Create account</a></p>
+
+        <!-- DIVIDER -->
+        <div class="or">
+
+          <span></span>
+
+          <small>
+            OR
+          </small>
+
+          <span></span>
+
+        </div>
+
+        <!-- GOOGLE -->
+        <a
+          class="google-btn"
+          href="{{ url_for('auth.google_login') }}"
+        >
+
+          <b>
+            G
+          </b>
+
+          Continue with Google
+
+        </a>
+
+        <!-- SIGNUP -->
+        <p class="switch-auth">
+
+          Don't have an account?
+
+          <a href="{{ url_for('auth.signup') }}">
+            Create account
+          </a>
+
+        </p>
+
       </div>
+
     </section>
+
+    <!-- AUTH VISUAL -->
     {% include '_auth_visual.html' %}
+
   </div>
+
+  <!-- =====================================================
+       LOGIN PASSWORD SHOW / HIDE
+       ===================================================== -->
+  <script>
+
+    function toggleLoginPassword() {
+
+      const passwordInput =
+        document.getElementById("password");
+
+      const passwordToggle =
+        document.getElementById("passwordToggle");
+
+      const eyeIcon =
+        document.getElementById("eyeIcon");
+
+
+      /* Safety check */
+      if (!passwordInput || !passwordToggle || !eyeIcon) {
+        console.error("Login password eye elements not found.");
+        return;
+      }
+
+
+      /* =========================
+         SHOW PASSWORD
+         ========================= */
+      if (passwordInput.type === "password") {
+
+        passwordInput.type = "text";
+
+        passwordToggle.setAttribute(
+          "aria-label",
+          "Hide password"
+        );
+
+        passwordToggle.setAttribute(
+          "title",
+          "Hide password"
+        );
+
+
+        /* OPEN EYE
+           Password is now visible */
+        eyeIcon.innerHTML = `
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+          <circle cx="12" cy="12" r="2.8"/>
+        `;
+
+      }
+
+
+      /* =========================
+         HIDE PASSWORD
+         ========================= */
+      else {
+
+        passwordInput.type = "password";
+
+        passwordToggle.setAttribute(
+          "aria-label",
+          "Show password"
+        );
+
+        passwordToggle.setAttribute(
+          "title",
+          "Show password"
+        );
+
+
+        /* CLOSED / SLASHED EYE
+           Password is now hidden */
+        eyeIcon.innerHTML = `
+          <path d="M3 3l18 18"/>
+          <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>
+          <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c6.5 0 10 8 10 8a16.5 16.5 0 0 1-3.1 4.3"/>
+          <path d="M6.2 6.2C3.6 8.1 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.3"/>
+        `;
+
+      }
+
+    }
+
+  </script>
+
 </body>
 </html>
+```
