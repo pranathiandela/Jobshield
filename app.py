@@ -4,6 +4,8 @@ from pathlib import Path
 from datetime import datetime
 import json, re
 from job_analyzer import analyze_job
+from resume_analyzer import analyze_resume
+from file_processor import extract_text, SUPPORTED_EXTENSIONS, UnsupportedFileType
 
 from config import Config
 from extensions import db, login_manager, mail, csrf
@@ -79,28 +81,40 @@ def api_analyze():
     return jsonify(result)
 
 
-@app.route("/resume-screening", methods=["GET", "POST"])
+@app.route("/resume-screening")
 @login_required
 def resume_screening():
-    result = None
-    if request.method == "POST":
-        f = request.files.get("resume")
-        if not f or not f.filename:
-            result = {"status": "Needs attention", "message": "Please select a resume file.", "signals": []}
-        else:
-            ext = Path(f.filename).suffix.lower()
-            if ext not in {".pdf", ".doc", ".docx"}:
-                result = {"status": "Unsupported", "message": "Please upload PDF, DOC, or DOCX.", "signals": []}
-            else:
-                safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", f.filename)
-                f.save(UPLOAD_DIR / safe_name)
-                result = {
-                    "status": "Screened",
-                    "message": "The resume file was received successfully. Advanced ML exposure matching can be connected next.",
-                    "signals": ["File type accepted.", "Resume is stored in the local project uploads folder.", "No external exposure database is queried by this starter version."]
-                }
-    return render_template("resume.html", title="Resume Screening", active="resume", result=result)
+    return render_template("resume.html", title="Resume Screening", active="resume")
 
+
+@app.route("/api/screen-resume", methods=["POST"])
+@login_required
+@csrf.exempt
+def api_screen_resume():
+    resume_text = (request.form.get("resume_text") or "").strip()
+    job_description = (request.form.get("job_description") or "").strip()
+    resume_file = request.files.get("resume")
+
+    if resume_file and resume_file.filename:
+        ext = Path(resume_file.filename).suffix.lower()
+        if ext not in SUPPORTED_EXTENSIONS:
+            return jsonify({"error": "Please upload a PDF or DOCX file."}), 400
+        safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", resume_file.filename)
+        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        saved_path = UPLOAD_DIR / f"resume_{stamp}_{safe_name}"
+        resume_file.save(saved_path)
+        try:
+            resume_text = extract_text(saved_path)
+        except UnsupportedFileType:
+            return jsonify({"error": "Could not read that file type."}), 400
+        if not resume_text:
+            return jsonify({"error": "No readable text was found in that file. Try pasting your resume text instead."}), 400
+
+    if not resume_text:
+        return jsonify({"error": "Paste your resume text or upload a PDF/DOCX file."}), 400
+
+    result = analyze_resume(resume_text, job_description or None)
+    return jsonify(result)
 
 @app.route("/dashboard")
 @login_required
