@@ -36,6 +36,9 @@ STOPWORDS = {
     "this", "that", "must", "have", "has", "role", "job", "experience",
     "years", "year", "work", "working", "team", "including", "etc",
     "strong", "ability", "skills", "using", "who", "their", "they",
+    "looking", "seeking", "candidate", "candidates", "plus", "preferred",
+    "required", "ideal", "position", "responsibilities", "please",
+    "someone", "person", "individual", "applicant",
 }
 
 
@@ -128,21 +131,65 @@ def _keywords_from_jd(jd_text):
     return keywords[:40]  # cap so relevancy scoring stays meaningful
 
 
+NEGATION_WORDS = {
+    "no", "not", "without", "lack", "lacking", "never", "none",
+    "unfamiliar", "excluding", "except", "n't", "nor", "neither",
+}
+
+
+def _is_negated_context(text_before_keyword):
+    """Check the words immediately before a keyword for negation cues
+    (e.g. "I don't know Python", "no experience with SQL")."""
+    words = re.findall(r"[a-z']+", text_before_keyword.lower())
+    window = words[-5:]  # only the nearest few words matter
+    for w in window:
+        if w in NEGATION_WORDS or w.endswith("n't"):
+            return True
+    return False
+
+
+def _keyword_status(keyword, resume_lower):
+    """Returns (present_unnegated, present_negated) for a keyword in the resume."""
+    pattern = re.compile(r"\b" + re.escape(keyword) + r"\b")
+    present_unnegated = False
+    present_negated = False
+    for m in pattern.finditer(resume_lower):
+        context_before = resume_lower[max(0, m.start() - 60):m.start()]
+        if _is_negated_context(context_before):
+            present_negated = True
+        else:
+            present_unnegated = True
+            break  # a genuine, un-negated mention is enough
+    return present_unnegated, present_negated
+
+
 def match_job_description(resume_text, jd_text):
-    """Compare resume text against a pasted job description's keywords."""
+    """Compare resume text against a pasted job description's keywords.
+    Negation-aware: "I don't know Python" does NOT count as a Python match."""
     keywords = _keywords_from_jd(jd_text)
     if not keywords:
         return None
 
     resume_lower = (resume_text or "").lower()
-    matched = [k for k in keywords if k in resume_lower]
-    missing = [k for k in keywords if k not in resume_lower]
+    matched, missing, negated = [], [], []
+
+    for k in keywords:
+        present_unnegated, present_negated = _keyword_status(k, resume_lower)
+        if present_unnegated:
+            matched.append(k)
+        elif present_negated:
+            missing.append(k)
+            negated.append(k)
+        else:
+            missing.append(k)
+
     relevancy = round((len(matched) / len(keywords)) * 100) if keywords else 0
 
     return {
         "relevancy_score": relevancy,
         "matched_keywords": matched,
         "missing_keywords": missing,
+        "negated_keywords": negated,  # explicitly disclaimed, e.g. "no experience with X"
         "keyword_total": len(keywords),
     }
 
