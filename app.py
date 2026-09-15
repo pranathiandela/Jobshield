@@ -5,6 +5,7 @@ from datetime import datetime
 import json, re
 from job_analyzer import analyze_job
 from resume_analyzer import analyze_resume
+from ml_domain_matcher import screen_for_domain
 from file_processor import extract_text, SUPPORTED_EXTENSIONS, UnsupportedFileType
 
 from config import Config
@@ -115,6 +116,46 @@ def api_screen_resume():
 
     result = analyze_resume(resume_text, job_description or None)
     return jsonify(result)
+
+@app.route("/api/screen-domain", methods=["POST"])
+@login_required
+@csrf.exempt
+def api_screen_domain():
+    resume_text = (request.form.get("resume_text") or "").strip()
+    chosen_domain = (request.form.get("domain") or "").strip() or None
+    resume_file = request.files.get("resume")
+
+    if resume_file and resume_file.filename:
+        ext = Path(resume_file.filename).suffix.lower()
+        if ext not in SUPPORTED_EXTENSIONS:
+            return jsonify({"error": "Please upload a PDF or DOCX file."}), 400
+        safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", resume_file.filename)
+        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        saved_path = UPLOAD_DIR / f"domain_{stamp}_{safe_name}"
+        resume_file.save(saved_path)
+        try:
+            resume_text = extract_text(saved_path)
+        except UnsupportedFileType:
+            return jsonify({"error": "Could not read that file type."}), 400
+        if not resume_text:
+            return jsonify({"error": "No readable text was found in that file."}), 400
+
+    if not resume_text:
+        return jsonify({"error": "Paste your resume text or upload a PDF/DOCX file."}), 400
+
+    result = screen_for_domain(resume_text, chosen_domain)
+    if not result:
+        return jsonify({"error": "Could not screen this resume."}), 400
+
+    return jsonify(result)
+
+
+@app.route("/api/domain-list")
+@login_required
+def api_domain_list():
+    """So the frontend can populate a manual domain-picker dropdown."""
+    from ml_domain_matcher import get_domain_names
+    return jsonify({"domains": sorted(get_domain_names())})
 
 @app.route("/dashboard")
 @login_required
