@@ -1,6 +1,666 @@
-{% extends 'base.html' %}{% block content %}
-<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">Resume Screening</div><h1>Check your resume safely.</h1><p>Upload a PDF or DOCX and review basic exposure signals. This starter keeps processing local to the Flask app.</p></div>
-<div class="panel"><form method="post" enctype="multipart/form-data"><div class="form-row"><label for="resume">Resume file</label><input id="resume" type="file" name="resume" accept=".pdf,.doc,.docx" required></div><button class="btn btn-primary" type="submit">Screen resume ↗</button></form>
-{% if result %}<div class="result"><div class="risk">{{ result.status }}</div><p>{{ result.message }}</p><div class="signal-list">{% for s in result.signals %}<div class="signal">{{ s }}</div>{% endfor %}</div></div>{% endif %}
-</div></div></main>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="page detector-page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <div class="eyebrow">Resume Screening</div>
+
+      <h1>Score Your Resume <span>Before You Apply</span></h1>
+
+      <p>
+        JobShield checks your bullets for weak language, missing impact, and how well you match a target role.
+      </p>
+    </div>
+
+
+    <div class="detector-panel">
+
+      <form id="resume-form" enctype="multipart/form-data">
+
+        <!-- =====================================================
+             SECTION 01 - RESUME INPUT
+        ====================================================== -->
+
+        <div class="detector-section">
+
+          <div class="section-title">
+            <span>01</span>
+
+            <div>
+              <h2>Your resume</h2>
+
+              <p>
+                Paste your resume text, or upload a PDF/DOCX file.
+              </p>
+            </div>
+          </div>
+
+
+          <div class="detector-grid two">
+
+            <div class="form-row wide">
+
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  gap:15px;
+                  margin-bottom:8px;
+                  flex-wrap:wrap;
+                "
+              >
+
+                <label
+                  for="resume_text"
+                  style="margin-bottom:0;"
+                >
+                  Resume Text
+                </label>
+
+
+                <!-- UPLOAD SWITCH -->
+
+                <button
+                  type="button"
+                  id="upload-toggle"
+                  class="btn btn-nav"
+                  style="white-space:nowrap;"
+                >
+                  📄 Upload File
+                </button>
+
+              </div>
+
+
+              <!-- =================================================
+                   PASTE MODE - DEFAULT
+              ================================================== -->
+
+              <div id="paste-mode">
+
+                <textarea
+                  id="resume_text"
+                  name="resume_text"
+                  placeholder="Paste your resume text here, one bullet per line..."
+                ></textarea>
+
+              </div>
+
+
+              <!-- =================================================
+                   UPLOAD MODE
+              ================================================== -->
+
+              <div
+                id="upload-mode"
+                hidden
+              >
+
+                <div
+                  style="
+                    border:2px dashed rgba(0,0,0,0.15);
+                    border-radius:12px;
+                    padding:28px 20px;
+                    text-align:center;
+                  "
+                >
+
+                  <div
+                    style="
+                      font-size:32px;
+                      margin-bottom:8px;
+                    "
+                  >
+                    📄
+                  </div>
+
+
+                  <strong>
+                    Upload resume file
+                  </strong>
+
+
+                  <p
+                    style="
+                      margin:6px 0 16px;
+                      opacity:.7;
+                    "
+                  >
+                    PDF or DOCX only.
+                  </p>
+
+
+                  <input
+                    id="resume"
+                    name="resume"
+                    type="file"
+                    accept=".pdf,.docx"
+                  >
+
+
+                  <div
+                    id="resume-file-name"
+                    class="file-help"
+                    style="margin-top:10px;"
+                  >
+                    No file selected.
+                  </div>
+
+                </div>
+
+
+                <!-- SWITCH BACK -->
+
+                <button
+                  type="button"
+                  id="paste-toggle"
+                  class="btn btn-nav"
+                  style="
+                    margin-top:12px;
+                  "
+                >
+                  📝 Paste Text Instead
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SECTION 02 - TARGET JOB (OPTIONAL)
+        ====================================================== -->
+
+        <div class="detector-section">
+
+          <div class="section-title">
+
+            <span>02</span>
+
+            <div>
+
+              <h2>
+                Target job description
+              </h2>
+
+              <p>
+                Optional — paste a job posting to see how well your resume matches it.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="detector-grid two">
+
+            <div class="form-row wide">
+
+              <label for="job_description">
+                Job Description
+              </label>
+
+              <textarea
+                id="job_description"
+                name="job_description"
+                placeholder="Paste a job description to check keyword match (optional)..."
+              ></textarea>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SCAN BAR
+        ====================================================== -->
+
+        <div class="scan-bar">
+
+          <div>
+
+            <strong>
+              Ready to score
+            </strong>
+
+            <span>
+              All scoring is performed by the JobShield resume engine.
+            </span>
+
+          </div>
+
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+            id="score-btn"
+          >
+            <span>
+              Score my resume
+            </span>
+
+            ↗
+          </button>
+
+        </div>
+
+      </form>
+
+
+      <!-- =====================================================
+           SCORE PROGRESS
+      ====================================================== -->
+
+      <div
+        id="score-progress"
+        class="scan-progress"
+        hidden
+      >
+
+        <div class="progress-head">
+
+          <strong>
+            Analyzing resume
+          </strong>
+
+          <span id="resume-progress-label">
+            Preparing checks…
+          </span>
+
+        </div>
+
+
+        <div class="progress-track">
+
+          <div id="resume-progress-fill"></div>
+
+        </div>
+
+
+        <div class="progress-steps">
+
+          <span>Bullets</span>
+          <span>Verbs</span>
+          <span>Impact</span>
+          <span>Keywords</span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           RESULT
+      ====================================================== -->
+
+      <div
+        id="resume-result"
+        class="detector-result"
+        hidden
+      ></div>
+
+    </div>
+
+  </div>
+</main>
+
+
+<!-- =========================================================
+     UPLOAD / PASTE TOGGLE + SUBMIT + RESULT RENDER
+========================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const uploadToggle =
+    document.getElementById("upload-toggle");
+
+  const pasteToggle =
+    document.getElementById("paste-toggle");
+
+  const pasteMode =
+    document.getElementById("paste-mode");
+
+  const uploadMode =
+    document.getElementById("upload-mode");
+
+  const resumeInput =
+    document.getElementById("resume");
+
+  const resumeFileName =
+    document.getElementById("resume-file-name");
+
+
+  if (uploadToggle && pasteToggle && pasteMode && uploadMode) {
+
+    uploadToggle.addEventListener("click", () => {
+      pasteMode.hidden = true;
+      uploadMode.hidden = false;
+      uploadToggle.hidden = true;
+    });
+
+    pasteToggle.addEventListener("click", () => {
+      uploadMode.hidden = true;
+      pasteMode.hidden = false;
+      uploadToggle.hidden = false;
+    });
+
+    if (resumeInput) {
+
+      resumeInput.addEventListener("change", () => {
+
+        if (resumeInput.files.length > 0) {
+          resumeFileName.textContent =
+            "Selected: " + resumeInput.files[0].name;
+        } else {
+          resumeFileName.textContent =
+            "No file selected.";
+        }
+
+      });
+
+    }
+
+  }
+
+
+  const form =
+    document.getElementById("resume-form");
+
+  if (!form) return;
+
+
+  const result =
+    document.getElementById("resume-result");
+
+  const progress =
+    document.getElementById("score-progress");
+
+  const fill =
+    document.getElementById("resume-progress-fill");
+
+  const label =
+    document.getElementById("resume-progress-label");
+
+  const button =
+    document.getElementById("score-btn");
+
+
+  form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+
+    const textElement =
+      document.getElementById("resume_text");
+
+    const text =
+      textElement ? textElement.value.trim() : "";
+
+    const fileSelected =
+      resumeInput &&
+      resumeInput.files &&
+      resumeInput.files.length > 0;
+
+
+    if (!text && !fileSelected) {
+
+      result.hidden = false;
+
+      result.innerHTML =
+        '<div class="notice">' +
+        'Paste your resume text or upload a PDF/DOCX file before scoring.' +
+        '</div>';
+
+      if (textElement) {
+        textElement.focus();
+      }
+
+      return;
+    }
+
+
+    button.disabled = true;
+    button.style.opacity = ".65";
+
+    progress.hidden = false;
+    result.hidden = true;
+
+    fill.style.width = "0%";
+    label.textContent = "Preparing checks...";
+
+
+    const scanSteps = [
+      [25, "Reading resume content..."],
+      [50, "Checking verbs and impact..."],
+      [75, "Matching against job description..."],
+      [92, "Calculating score..."]
+    ];
+
+
+    try {
+
+      for (const step of scanSteps) {
+        await wait(200);
+        fill.style.width = step[0] + "%";
+        label.textContent = step[1];
+      }
+
+
+      const payload = new FormData(form);
+
+      const response =
+        await fetch("/api/screen-resume", {
+          method: "POST",
+          body: payload
+        });
+
+      let data;
+
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        throw new Error("The server returned an invalid response.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Scoring failed.");
+      }
+
+      fill.style.width = "100%";
+      label.textContent = "Scoring complete.";
+
+      await wait(250);
+
+      renderResumeResult(data);
+
+    } catch (error) {
+
+      console.error("JobShield resume scoring error:", error);
+
+      result.hidden = false;
+
+      result.innerHTML =
+        '<div class="notice">' +
+        escapeHtml(error.message || "The resume could not be scored.") +
+        "</div>";
+
+    } finally {
+
+      button.disabled = false;
+      button.style.opacity = "1";
+
+    }
+
+  });
+
+
+  function renderResumeResult(data) {
+
+    const score = Number(data.score ?? 0);
+
+    const lineFeedback = data.line_feedback || [];
+
+    const jdMatch = data.jd_match || null;
+
+    const verdictClass =
+      score >= 80 ? "safe" :
+      score >= 50 ? "medium" :
+      "risky";
+
+    const verdictLabel =
+      score >= 80 ? "Strong resume" :
+      score >= 50 ? "Needs work" :
+      "Weak resume";
+
+
+    const lineRows =
+      lineFeedback.length
+        ? lineFeedback.map((item) => {
+
+            const rowClass =
+              item.status === "strong" || item.status === "good"
+                ? "good"
+                : item.status === "needs work"
+                  ? "warn"
+                  : "neutral";
+
+            const flagText =
+              (item.flags || []).join(", ");
+
+            return `
+              <div class="metric">
+                <span>${escapeHtml(item.line)}</span>
+                <strong class="${rowClass}">${escapeHtml(flagText)}</strong>
+              </div>
+            `;
+
+          }).join("")
+        : '<div class="neutral">No bullets found to review.</div>';
+
+
+    let jdSection = "";
+
+    if (jdMatch) {
+
+      const matchedTags =
+        (jdMatch.matched_keywords || [])
+          .map((k) => `<span class="keyword-tag matched">${escapeHtml(k)}</span>`)
+          .join("");
+
+      const missingTags =
+        (jdMatch.missing_keywords || [])
+          .map((k) => `<span class="keyword-tag missing">${escapeHtml(k)}</span>`)
+          .join("");
+
+      jdSection = `
+        <div class="report-card">
+          <h3>Job description match — ${escapeHtml(String(jdMatch.relevancy_score))}%</h3>
+          <div style="margin-bottom:10px;">
+            ${matchedTags || '<span class="neutral">No keywords matched yet.</span>'}
+          </div>
+          <div style="opacity:.75; font-size:.85em; margin-bottom:6px;">Missing from your resume:</div>
+          <div>
+            ${missingTags || '<span class="neutral">Nothing missing — great match.</span>'}
+          </div>
+        </div>
+      `;
+
+    }
+
+
+    result.hidden = false;
+
+    result.innerHTML = `
+      <div class="result-hero">
+        <div>
+          <div class="result-score">
+            <span id="animated-resume-score">0</span>
+            <small>RESUME SCORE / 100</small>
+          </div>
+        </div>
+
+        <div>
+          <div class="verdict ${verdictClass}">${escapeHtml(verdictLabel)}</div>
+          <h2>Resume report</h2>
+          <p>${escapeHtml(data.summary || "Review the bullet feedback below.")}</p>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="report-card">
+          <h3>Bullet-by-bullet feedback</h3>
+          ${lineRows}
+        </div>
+
+        ${jdSection}
+      </div>
+    `;
+
+    animateResumeScore(score);
+
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  }
+
+
+  function animateResumeScore(targetScore) {
+
+    const scoreElement =
+      document.getElementById("animated-resume-score");
+
+    if (!scoreElement) return;
+
+    targetScore = Math.max(0, Math.min(100, Math.round(Number(targetScore) || 0)));
+
+    let currentScore = 0;
+    scoreElement.textContent = "0";
+
+    if (targetScore === 0) return;
+
+    const animation = setInterval(() => {
+      currentScore++;
+      scoreElement.textContent = String(currentScore);
+      if (currentScore >= targetScore) {
+        clearInterval(animation);
+        scoreElement.textContent = String(targetScore);
+      }
+    }, 30);
+
+  }
+
+
+  function wait(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  }
+
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      };
+      return entities[character];
+    });
+  }
+
+});
+
+</script>
+
 {% endblock %}

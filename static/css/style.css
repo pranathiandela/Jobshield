@@ -1085,3 +1085,22 @@ footer{
   }
 
 }
+.keyword-tag{
+  display:inline-block;
+  padding:5px 10px;
+  margin:0 6px 6px 0;
+  border-radius:20px;
+  border:1px solid var(--hairline);
+  font-size:11px;
+  color:var(--silver-mist)
+}
+
+.keyword-tag.matched{
+  border-color:rgba(203,255,252,.35);
+  color:var(--liquid-mist)
+}
+
+.keyword-tag.missing{
+  border-color:rgba(255,210,180,.35);
+  color:#ffd2b4
+}
