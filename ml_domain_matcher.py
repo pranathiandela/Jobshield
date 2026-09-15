@@ -43,9 +43,16 @@ def get_domain_names():
     return list(keywords.keys())
 
 
+CONFIDENCE_THRESHOLD = 20  # below this, the top prediction is too uncertain to present as fact
+
+
 def predict_domain(resume_text):
     """Returns the model's best-fit category for this resume, plus a
-    confidence score and the full ranked list of categories."""
+    confidence score and the full ranked list of categories. `confident`
+    is a soft hint for the UI (e.g. show a "double check this" note) —
+    it should NEVER be used to hide the ranked_domains list. Some
+    categories genuinely overlap in the training data, so the model can
+    be confidently wrong; always let the user see alternatives."""
     model, _ = _load()
 
     if not (resume_text or "").strip():
@@ -61,10 +68,15 @@ def predict_domain(resume_text):
     ]
 
     best = ranked_domains[0]
+    runner_up = ranked_domains[1] if len(ranked_domains) > 1 else None
+    gap = best["score"] - runner_up["score"] if runner_up else best["score"]
+
+    confident = best["score"] >= CONFIDENCE_THRESHOLD and gap >= 8
 
     return {
         "best_domain": best["domain"],
         "best_score": best["score"],
+        "confident": confident,
         "ranked_domains": ranked_domains,
     }
 

@@ -17,8 +17,8 @@ MERGES TWO DATA SOURCES:
 
 Both CSVs are gitignored (large, and job_dataset.csv especially is
 easy to re-obtain) - only this script's OUTPUT is committed:
-  - resume_classifier.joblib   - the trained TF-IDF + Logistic Regression
-                                  pipeline, trained on the MERGED data
+  - resume_classifier.joblib   - the trained pipeline (TF-IDF + calibrated
+                                  LinearSVC), trained on the MERGED data
   - domain_keywords.json       - for each of the 32 categories, the words
                                   most strongly associated with it, learned
                                   directly from the merged training data
@@ -31,9 +31,10 @@ import re
 import joblib
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
+from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
 
 RESUME_CSV_PATH = "Resume.csv"
@@ -52,8 +53,6 @@ BOILERPLATE_TERMS = {
     "understanding", "exposure", "intermediate", "proficiency",
 }
 
-# Non-tech job titles in job_dataset.csv - already reasonably covered by
-# Resume.csv's own categories, so excluded from the tech-domain merge.
 NON_TECH_EXCLUDE = {
     "content writer", "copywriter", "business analyst", "product manager",
     "project manager", "marketing specialist", "seo specialist",
@@ -63,9 +62,6 @@ NON_TECH_EXCLUDE = {
 
 
 def _classify_tech_title(title):
-    """Groups job_dataset.csv's 218 specific titles (e.g. "Senior iOS
-    Engineer", "DevOps Engineer - Fresher") into a manageable set of new
-    tech domain categories."""
     t = title.lower()
     if t in NON_TECH_EXCLUDE:
         return None
@@ -85,7 +81,7 @@ def _classify_tech_title(title):
         return "CLOUD-DEVOPS"
     if any(k in t for k in ["software developer", "software engineer", "full stack", "backend developer", "frontend developer", "web developer", "java developer", "python developer", "javascript developer", ".net developer", "game developer", "blockchain developer", "ar/vr developer", "vibe coder", "fintech engineer", "iot engineer", "robotics"]):
         return "SOFTWARE-DEVELOPMENT"
-    return None  # left ungrouped rather than guessed
+    return None
 
 
 def _load_merged_dataset():
@@ -120,46 +116,56 @@ def _is_clean_term(term):
     return True
 
 
-def main():
-    df = _load_merged_dataset()
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        df["Resume_str"], df["Category"],
-        test_size=0.2, random_state=42, stratify=df["Category"],
-    )
-
-    pipeline = Pipeline([
+def _build_pipeline():
+    return Pipeline([
         ("tfidf", TfidfVectorizer(
             stop_words="english", max_features=6000,
             ngram_range=(1, 2), min_df=3,
         )),
-        ("clf", LogisticRegression(max_iter=1000, class_weight="balanced")),
+        ("clf", CalibratedClassifierCV(
+            LinearSVC(class_weight="balanced", max_iter=3000), cv=3,
+        )),
     ])
 
-    print("Training classifier...")
-    pipeline.fit(X_train, y_train)
 
+def main():
+    df = _load_merged_dataset()
+
+    print("Running 5-fold cross-validation for an honest accuracy estimate...")
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_scores = cross_val_score(_build_pipeline(), df["Resume_str"], df["Category"], cv=cv, scoring="accuracy")
+    print(f"Cross-validated accuracy: {cv_scores.mean():.1%} "
+          f"(fold scores: {[round(s, 3) for s in cv_scores]})\n")
+
+    print("Training on an 80/20 split to see a detailed per-category report...")
+    X_train, X_test, y_train, y_test = train_test_split(
+        df["Resume_str"], df["Category"],
+        test_size=0.2, random_state=42, stratify=df["Category"],
+    )
+    pipeline = _build_pipeline()
+    pipeline.fit(X_train, y_train)
     preds = pipeline.predict(X_test)
-    accuracy = accuracy_score(y_test, preds)
-    print(f"\nTest accuracy: {accuracy:.1%}\n")
     print(classification_report(y_test, preds))
 
     print("Retraining on the FULL merged dataset for the version we ship...")
-    pipeline.fit(df["Resume_str"], df["Category"])
+    final_pipeline = _build_pipeline()
+    final_pipeline.fit(df["Resume_str"], df["Category"])
 
-    joblib.dump(pipeline, MODEL_PATH)
+    joblib.dump(final_pipeline, MODEL_PATH)
     print(f"Saved trained model to {MODEL_PATH}")
 
     print("Extracting data-driven skill keywords per category...")
-    vectorizer = pipeline.named_steps["tfidf"]
-    clf = pipeline.named_steps["clf"]
+    vectorizer = final_pipeline.named_steps["tfidf"]
+    calibrated = final_pipeline.named_steps["clf"]
+    base_svc = calibrated.calibrated_classifiers_[0].estimator
     feature_names = vectorizer.get_feature_names_out()
+    classes = calibrated.classes_
 
     domain_keywords = {}
-    for category in clf.classes_:
+    for category in classes:
         category_words = set(w.lower() for w in category.replace("-", " ").split())
-        idx = list(clf.classes_).index(category)
-        ranked_indices = clf.coef_[idx].argsort()[::-1]
+        idx = list(classes).index(category)
+        ranked_indices = base_svc.coef_[idx].argsort()[::-1]
 
         terms = []
         for i in ranked_indices:
