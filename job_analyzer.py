@@ -5,7 +5,10 @@ without changing the detector UI or authentication flow.
 """
 import re
 from urllib.parse import urlparse
-
+from detection_ml.ml_detector import (
+    MLDetectorError,
+    predict_fake_job,
+)
 FREE_EMAILS = {"gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "proton.me", "protonmail.com", "icloud.com", "aol.com"}
 SHORTENERS = {"bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "cutt.ly"}
 SUSPICIOUS_TLDS = {".tk", ".ml", ".ga", ".cf", ".gq"}
@@ -84,7 +87,23 @@ def analyze_job(data=None):
     recruiter_contact = (data.get("recruiter_contact") or "").strip()
     recruiter_email = _email(recruiter_contact)
     combined = f"{title} {company} {text}".lower()
+    # ML fake-job prediction
+    ml_available = False
+    ml_prediction = "Unavailable"
+    ml_fraud_probability = None
+    ml_fraud_percentage = None
 
+    ml_text = f"{title}\n{text}".strip()
+
+    if ml_text:
+        try:
+            ml_result = predict_fake_job(ml_text)
+            ml_available = True
+            ml_prediction = ml_result["prediction"]
+            ml_fraud_probability = ml_result["fraud_probability"]
+            ml_fraud_percentage = ml_result["fraud_percentage"]
+        except MLDetectorError:
+            pass
     risk = 0
     suspicious = []
     safe = []
@@ -252,4 +271,7 @@ def analyze_job(data=None):
         "evidence": list(dict.fromkeys(evidence)),
         "next_steps": list(dict.fromkeys(next_steps)),
         "detected_keywords": [w for words, _, _ in SCAM_RULES for w in words if w in combined],
-    }
+   "ml_available": ml_available,
+"ml_prediction": ml_prediction,
+"ml_fraud_probability": ml_fraud_probability,
+"ml_fraud_percentage": ml_fraud_percentage, }

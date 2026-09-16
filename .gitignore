@@ -7,3 +7,7 @@ history.json
 .env
 Resume.csv
 job_dataset.csv
+instance/
+
+detection_ml/DataSet.csv
+detection_ml/cleaned_dataset.csv

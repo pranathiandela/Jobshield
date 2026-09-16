@@ -1545,3 +1545,201 @@ footer{
   .print-only .print-date{ color:#777; margin-bottom:14px }
   .print-only .print-footer{ margin-top:24px; color:#999; font-size:10px }
 }
+/* ==========================================================
+   JOBSHIELD DETECTION RESULT — VISUAL POLISH
+   Detection page only
+   ========================================================== */
+
+.detector-result .result-hero{
+  padding:4px 0 6px;
+  gap:34px;
+}
+
+.detector-result .result-score{
+  font-size:78px;
+  font-weight:600;
+  letter-spacing:-.04em;
+}
+
+.detector-result .result-score small{
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:.14em;
+}
+
+.detector-result .verdict{
+  padding:8px 13px;
+  border-radius:8px;
+  font-weight:600;
+  letter-spacing:.11em;
+}
+
+.detector-result .result-hero h2{
+  font-size:26px;
+  line-height:1.25;
+  margin-bottom:9px;
+}
+
+.detector-result .result-hero p{
+  line-height:1.7;
+}
+
+.detector-result .report-grid{
+  gap:18px;
+}
+
+.detector-result .report-card{
+  padding:21px;
+  border-radius:13px;
+}
+
+.detector-result .report-card h3{
+  font-size:15px;
+  margin-bottom:14px;
+}
+
+.detector-result .ml-assessment{
+  margin-top:18px;
+  padding:22px 24px;
+  border-color:rgba(203,255,252,.22);
+  background:rgba(1,29,28,.48);
+}
+
+.detector-result .ml-assessment h3{
+  margin-bottom:16px;
+  letter-spacing:.01em;
+}
+
+.detector-result .ml-assessment .metric{
+  padding:11px 0;
+  font-size:13px;
+}
+
+.detector-result .ml-assessment .metric strong{
+  font-weight:600;
+}
+
+.detector-result .ml-assessment .neutral{
+  margin-top:12px;
+  line-height:1.6;
+}
+
+.detector-result .next-steps{
+  margin-top:18px;
+  padding:22px 24px;
+}
+
+.detector-result .next-steps li{
+  line-height:1.55;
+  margin:8px 0;
+}
+
+.detector-result .report-footer{
+  margin-top:24px;
+  padding-top:21px;
+}
+
+/* Better spacing on smaller screens */
+@media(max-width:760px){
+
+  .detector-result{
+    padding:24px 20px;
+  }
+
+  .detector-result .result-hero{
+    gap:20px;
+  }
+
+  .detector-result .result-score{
+    font-size:62px;
+  }
+
+  .detector-result .result-hero h2{
+    font-size:22px;
+  }
+
+  .detector-result .ml-assessment,
+  .detector-result .next-steps{
+    padding:18px;
+  }
+
+  .detector-result .report-footer{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+}
+
+
+/* ==========================================================
+   JOBSHIELD DETECTION — RESULT HIERARCHY
+   Small visual enhancement, Detection only
+   ========================================================== */
+
+.detector-result .result-hero{
+  position:relative;
+  padding:24px 26px;
+  margin-bottom:22px;
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  background:rgba(1,29,28,.28);
+}
+
+.detector-result .result-score{
+  font-size:82px;
+  font-weight:600;
+  letter-spacing:-.05em;
+  line-height:.85;
+}
+
+.detector-result .result-score small{
+  margin-top:14px;
+  font-size:10px;
+  font-weight:500;
+}
+
+.detector-result .verdict.safe{
+  border-color:rgba(203,255,252,.35);
+  background:rgba(203,255,252,.06);
+}
+
+.detector-result .verdict.medium{
+  background:rgba(255,210,180,.05);
+}
+
+.detector-result .verdict.risky{
+  background:rgba(255,120,120,.05);
+}
+
+.detector-result .ml-assessment{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(203,255,252,.30);
+  background:rgba(203,255,252,.025);
+}
+
+.detector-result .ml-assessment::before{
+  content:"";
+  display:block;
+  width:42px;
+  height:2px;
+  margin-bottom:16px;
+  background:currentColor;
+  opacity:.65;
+}
+
+.detector-result .ml-assessment .metric strong{
+  font-size:14px;
+}
+
+@media(max-width:760px){
+
+  .detector-result .result-hero{
+    padding:20px;
+  }
+
+  .detector-result .result-score{
+    font-size:64px;
+  }
+
+}

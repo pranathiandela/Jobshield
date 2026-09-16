@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const descriptionElement =
       document.getElementById("job_text");
 
-    const screenshotElement =
-      document.getElementById("screenshot");
+    const jobFileElement =
+      document.getElementById("job_file");
 
 
     const description =
@@ -39,10 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
         : "";
 
 
-    const screenshotSelected =
-      screenshotElement &&
-      screenshotElement.files &&
-      screenshotElement.files.length > 0;
+    const jobFileSelected =
+      jobFileElement &&
+      jobFileElement.files &&
+      jobFileElement.files.length > 0;
 
 
     /*
@@ -50,16 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
      *
      * 1. Job description
      * OR
-     * 2. Screenshot
+     * 2. Job file
      */
 
-    if (!description && !screenshotSelected) {
+    if (!description && !jobFileSelected) {
 
       result.hidden = false;
 
       result.innerHTML =
         '<div class="notice">' +
-        'Please enter a job description or upload a screenshot before scanning.' +
+        'Please enter a job description or upload a PDF, DOCX, or TXT job file before scanning.' +
         '</div>';
 
 
@@ -133,6 +133,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       /*
        * Create form data
+       *
+       * The form uses multipart/form-data,
+       * so this includes both normal fields
+       * and the optional PDF/DOCX/TXT file.
        */
 
       const payload =
@@ -270,6 +274,27 @@ document.addEventListener("DOMContentLoaded", () => {
       data.verdict ||
       data.risk ||
       "Caution";
+
+
+    /*
+     * ML assessment
+     */
+
+    const mlAvailable =
+      data.ml_available === true;
+
+
+    const mlPrediction =
+      data.ml_prediction ||
+      "Unavailable";
+
+
+    const mlFraudPercentage =
+      Number.isFinite(
+        Number(data.ml_fraud_percentage)
+      )
+        ? Number(data.ml_fraud_percentage)
+        : null;
 
 
     /*
@@ -485,6 +510,59 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
       </div>
+
+
+      ${
+        mlAvailable
+          ? `
+
+            <div class="report-card ml-assessment">
+
+              <h3>
+                AI / ML Assessment
+              </h3>
+
+
+              <div class="metric">
+
+                <span>
+                  Fraud probability
+                </span>
+
+                <strong>
+                  ${mlFraudPercentage.toFixed(2)}%
+                </strong>
+
+              </div>
+
+
+              <div class="metric">
+
+                <span>
+                  ML prediction
+                </span>
+
+                <strong>
+                  ${escapeHtml(mlPrediction)}
+                </strong>
+
+              </div>
+
+
+              <p class="neutral">
+
+                This machine-learning signal is based on patterns
+                learned from the training dataset. It is one screening
+                signal and does not independently prove whether a job
+                is fraudulent.
+
+              </p>
+
+            </div>
+
+          `
+          : ""
+      }
 
 
       <div class="report-card next-steps">

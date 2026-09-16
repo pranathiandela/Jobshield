@@ -76,7 +76,7 @@
 
 
             <!-- =================================================
-                 JOB DESCRIPTION / SCREENSHOT
+                 JOB DESCRIPTION / JOB FILE
             ================================================== -->
 
             <div class="form-row wide">
@@ -100,15 +100,15 @@
                 </label>
 
 
-                <!-- SCREENSHOT SWITCH -->
+                <!-- JOB FILE SWITCH -->
 
                 <button
                   type="button"
-                  id="screenshot-toggle"
+                  id="job-file-toggle"
                   class="btn btn-nav"
                   style="white-space:nowrap;"
                 >
-                  📷 Use Screenshot
+                  📁 Upload Job File
                 </button>
 
               </div>
@@ -130,11 +130,11 @@
 
 
               <!-- =================================================
-                   SCREENSHOT MODE
+                   JOB FILE MODE
               ================================================== -->
 
               <div
-                id="screenshot-mode"
+                id="job-file-mode"
                 hidden
               >
 
@@ -153,12 +153,12 @@
                       margin-bottom:8px;
                     "
                   >
-                    📷
+                    📄
                   </div>
 
 
                   <strong>
-                    Upload job screenshot
+                    Upload Job File
                   </strong>
 
 
@@ -168,24 +168,25 @@
                       opacity:.7;
                     "
                   >
-                    Upload a screenshot of the job listing or recruiter message.
+                    Upload a job description in PDF, DOCX, or TXT format.
+                    Maximum file size: 5 MB.
                   </p>
 
 
                   <input
-                    id="screenshot"
-                    name="screenshot"
+                    id="job_file"
+                    name="job_file"
                     type="file"
-                    accept="image/png,image/jpeg,image/webp"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
                   >
 
 
                   <div
-                    id="file-name"
+                    id="job-file-name"
                     class="file-help"
                     style="margin-top:10px;"
                   >
-                    No screenshot selected.
+                    No job file selected.
                   </div>
 
                 </div>
@@ -449,15 +450,15 @@
 
 
 <!-- =========================================================
-     SCREENSHOT / DESCRIPTION TOGGLE
+     JOB FILE / DESCRIPTION TOGGLE
 ========================================================== -->
 
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const screenshotToggle =
-    document.getElementById("screenshot-toggle");
+  const jobFileToggle =
+    document.getElementById("job-file-toggle");
 
   const descriptionToggle =
     document.getElementById("description-toggle");
@@ -465,35 +466,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const descriptionMode =
     document.getElementById("description-mode");
 
-  const screenshotMode =
-    document.getElementById("screenshot-mode");
+  const jobFileMode =
+    document.getElementById("job-file-mode");
 
-  const screenshotInput =
-    document.getElementById("screenshot");
+  const jobFileInput =
+    document.getElementById("job_file");
 
   const fileName =
-    document.getElementById("file-name");
+    document.getElementById("job-file-name");
 
 
-  if (!screenshotToggle ||
-      !descriptionToggle ||
-      !descriptionMode ||
-      !screenshotMode) {
+  if (
+    !jobFileToggle ||
+    !descriptionToggle ||
+    !descriptionMode ||
+    !jobFileMode
+  ) {
     return;
   }
 
 
   /* ==========================================================
-     SWITCH TO SCREENSHOT
+     SWITCH TO JOB FILE
   ========================================================== */
 
-  screenshotToggle.addEventListener("click", () => {
+  jobFileToggle.addEventListener("click", () => {
 
     descriptionMode.hidden = true;
 
-    screenshotMode.hidden = false;
+    jobFileMode.hidden = false;
 
-    screenshotToggle.hidden = true;
+    jobFileToggle.hidden = true;
 
   });
 
@@ -504,35 +507,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   descriptionToggle.addEventListener("click", () => {
 
-    screenshotMode.hidden = true;
+    jobFileMode.hidden = true;
 
     descriptionMode.hidden = false;
 
-    screenshotToggle.hidden = false;
+    jobFileToggle.hidden = false;
 
   });
 
 
   /* ==========================================================
-     SHOW SELECTED FILE NAME
+     SHOW SELECTED FILE NAME + CLIENT-SIDE VALIDATION
   ========================================================== */
 
-  if (screenshotInput) {
+  if (jobFileInput) {
 
-    screenshotInput.addEventListener("change", () => {
+    jobFileInput.addEventListener("change", () => {
 
-      if (screenshotInput.files.length > 0) {
-
-        fileName.textContent =
-          "Selected: " +
-          screenshotInput.files[0].name;
-
-      } else {
+      if (!jobFileInput.files.length) {
 
         fileName.textContent =
-          "No screenshot selected.";
+          "No job file selected.";
+
+        return;
 
       }
+
+
+      const file =
+        jobFileInput.files[0];
+
+      const allowedExtensions = [
+        ".pdf",
+        ".docx",
+        ".txt"
+      ];
+
+      const fileNameLower =
+        file.name.toLowerCase();
+
+      const validExtension =
+        allowedExtensions.some(
+          extension =>
+            fileNameLower.endsWith(extension)
+        );
+
+      const maxSize =
+        5 * 1024 * 1024;
+
+
+      if (!validExtension) {
+
+        fileName.textContent =
+          "Invalid file type. Please choose PDF, DOCX, or TXT.";
+
+        jobFileInput.value = "";
+
+        return;
+
+      }
+
+
+      if (file.size > maxSize) {
+
+        fileName.textContent =
+          "File is too large. Maximum size is 5 MB.";
+
+        jobFileInput.value = "";
+
+        return;
+
+      }
+
+
+      fileName.textContent =
+        "Selected: " + file.name;
 
     });
 

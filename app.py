@@ -3,10 +3,17 @@ from flask_login import login_required, current_user
 from pathlib import Path
 from datetime import datetime
 import json, re
+from uuid import uuid4
+
 from job_analyzer import analyze_job
 from resume_analyzer import analyze_resume
 from ml_domain_matcher import screen_for_domain
-from file_processor import extract_text, SUPPORTED_EXTENSIONS, UnsupportedFileType
+from file_processor import (
+    extract_text,
+    extract_detection_text,
+    SUPPORTED_EXTENSIONS,
+    UnsupportedFileType,
+)
 from models import User, UserProfile, Scan
 
 from werkzeug.utils import secure_filename
@@ -43,21 +50,152 @@ def detector():
     return render_template("detector.html", title="Detector", active="detector")
 
 
+# ============================================================
+# DETECTION
+# ============================================================
+
 @app.route("/api/analyze-job", methods=["POST"])
 @login_required
 @csrf.exempt
 def api_analyze():
-    # Detector accepts multipart/form-data so the optional screenshot can be received
-    # without changing the existing authentication or other project pages.
+    """Analyze a pasted job description or an uploaded job file."""
+
     data = request.form.to_dict(flat=True)
     data["recruiter_contact"] = data.get("recruiter_contact", "")
-    screenshot = request.files.get("screenshot")
-    if screenshot and screenshot.filename:
-        safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", screenshot.filename)
-        stamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        screenshot.save(UPLOAD_DIR / f"detector_{stamp}_{safe_name}")
 
-    result = analyze_job(data)
+    # --------------------------------------------------------
+    # 1. Get job description from pasted text or uploaded file
+    # --------------------------------------------------------
+
+    job_text = (data.get("job_text") or "").strip()
+    job_file = request.files.get("job_file")
+
+    if not job_text and (not job_file or not job_file.filename):
+        return jsonify({
+            "error": (
+                "Please paste a job description or upload a "
+                "PDF, DOCX, or TXT job file."
+            )
+        }), 400
+
+    if job_file and job_file.filename:
+
+        original_name = job_file.filename
+        safe_name = secure_filename(original_name)
+
+        if not safe_name:
+            return jsonify({
+                "error": "The uploaded file has an invalid filename."
+            }), 400
+
+        extension = Path(safe_name).suffix.lower()
+
+        # Detection-specific supported file types.
+        allowed_extensions = {
+            ".pdf",
+            ".docx",
+            ".txt",
+        }
+
+        if extension not in allowed_extensions:
+            return jsonify({
+                "error": (
+                    "Unsupported job file. Please upload "
+                    "a PDF, DOCX, or TXT file."
+                )
+            }), 400
+
+        # ----------------------------------------------------
+        # 5 MB maximum for Detection files.
+        #
+        # This is route-specific so Resume Screening and other
+        # project uploads are not affected.
+        # ----------------------------------------------------
+
+        job_file.stream.seek(0, 2)
+        file_size = job_file.stream.tell()
+        job_file.stream.seek(0)
+
+        max_file_size = 5 * 1024 * 1024
+
+        if file_size > max_file_size:
+            return jsonify({
+                "error": (
+                    "Job file is too large. Please upload "
+                    "a file smaller than 5 MB."
+                )
+            }), 400
+
+        # ----------------------------------------------------
+        # Save temporarily using a unique server-side filename.
+        # The original filename is never used as the storage
+        # filename.
+        # ----------------------------------------------------
+
+        temp_name = f"detector_{uuid4().hex}{extension}"
+        saved_path = UPLOAD_DIR / temp_name
+
+        try:
+            job_file.save(saved_path)
+
+            try:
+                extracted_text = extract_detection_text(saved_path)
+
+            except UnsupportedFileType:
+                return jsonify({
+                    "error": "Unsupported job file type."
+                }), 400
+
+            except Exception:
+                return jsonify({
+                    "error": (
+                        "The uploaded job file could not be read. "
+                        "Please try another file or paste the "
+                        "job description."
+                    )
+                }), 400
+
+            if not extracted_text:
+                return jsonify({
+                    "error": (
+                        "No readable text was found in the uploaded file. "
+                        "Please upload a text-based PDF/DOCX/TXT file "
+                        "or paste the job description."
+                    )
+                }), 400
+
+            job_text = extracted_text.strip()
+
+        finally:
+            # Detection files are temporary.
+            # Delete them after text extraction.
+            try:
+                if saved_path.exists():
+                    saved_path.unlink()
+            except OSError:
+                pass
+
+    # --------------------------------------------------------
+    # 2. Give the extracted/pasted text to the existing
+    #    rule-based Detection engine.
+    # --------------------------------------------------------
+
+    data["job_text"] = job_text
+
+    try:
+        result = analyze_job(data)
+
+    except Exception:
+        return jsonify({
+            "error": (
+                "The job listing could not be analyzed. "
+                "Please check the supplied information and try again."
+            )
+        }), 400
+
+    # --------------------------------------------------------
+    # 3. Save successful Detection scan to the logged-in user.
+    # --------------------------------------------------------
 
     title = (data.get("job_title") or "Untitled job").strip()
     company = (data.get("company_name") or "").strip()
