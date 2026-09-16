@@ -1,34 +1,1589 @@
 {% extends "base.html" %}
+
 {% block content %}
+
+<style>
+
+/* =========================================================
+   PROFILE PAGE
+   ========================================================= */
+
+.profile-panel {
+    position: relative;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.profile-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+
+/* IMPORTANT:
+   Uploaded image stays INSIDE the circle.
+*/
+
+.profile-avatar {
+    width: 90px !important;
+    height: 90px !important;
+    min-width: 90px !important;
+    min-height: 90px !important;
+
+    border-radius: 50% !important;
+
+    overflow: hidden !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    position: relative !important;
+
+    background: linear-gradient(
+        135deg,
+        #edfffe,
+        #fde9ff
+    );
+
+    border: 2px solid rgba(255,255,255,0.35);
+}
+
+
+/* Uploaded profile image */
+
+.profile-avatar img {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+
+    border-radius: 50% !important;
+
+    display: block !important;
+}
+
+
+/* Character */
+
+.profile-avatar span {
+    font-size: 42px;
+    line-height: 1;
+}
+
+
+/* =========================================================
+   AVATAR BUTTONS
+   ========================================================= */
+
+.avatar-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   CHARACTER PICKER
+   ========================================================= */
+
+.character-picker {
+    margin-top: 4px;
+    padding: 16px;
+
+    width: 100%;
+    max-width: 430px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+
+    background: rgba(0,0,0,0.16);
+}
+
+
+.character-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(6, 1fr);
+
+    gap: 8px;
+}
+
+
+.character-option {
+    width: 48px;
+    height: 48px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.04);
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.character-option:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.10);
+}
+
+
+/* =========================================================
+   PROFILE ROWS
+   ========================================================= */
+
+.profile-details {
+    width: 100%;
+}
+
+
+.profile-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 18px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
+}
+
+
+.profile-label {
+    font-size: 12px;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    opacity: 0.65;
+}
+
+
+.profile-value-with-action {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   EDIT USERNAME
+   ========================================================= */
+
+.profile-edit-section {
+    margin-top: 12px;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: rgba(0,0,0,0.14);
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+}
+
+
+.profile-edit-section input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 13px 14px;
+
+    border-radius: 8px;
+
+    border:
+        1px solid rgba(255,255,255,0.20);
+
+    background: rgba(0,0,0,0.20);
+
+    color: inherit;
+
+    outline: none;
+
+    font-size: 15px;
+}
+
+
+.profile-edit-section input:focus {
+    border-color: #edfffe;
+}
+
+
+.edit-actions {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+
+#usernameMessage,
+#passwordMessage {
+    margin-top: 10px;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   MAIN ACTIONS
+   ========================================================= */
+
+.profile-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 28px;
+}
+
+
+/* =========================================================
+   SECURITY CARD
+   ========================================================= */
+
+.password-section {
+    margin-top: 30px;
+
+    padding: 24px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.055),
+            rgba(0,0,0,0.12)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,0.12);
+}
+
+
+.password-header {
+    margin-bottom: 22px;
+}
+
+
+.password-header h3 {
+    margin: 0 0 6px;
+
+    font-size: 20px;
+}
+
+
+.password-header p {
+    margin: 0;
+
+    font-size: 13px;
+
+    opacity: 0.65;
+
+    line-height: 1.5;
+}
+
+
+/* Password fields */
+
+.password-fields {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+
+.form-group label {
+    font-size: 11px;
+
+    letter-spacing: 0.8px;
+
+    text-transform: uppercase;
+
+    opacity: 0.65;
+}
+
+
+.form-group input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 13px 14px;
+
+    border-radius: 9px;
+
+    border:
+        1px solid rgba(255,255,255,0.16);
+
+    background: rgba(0,0,0,0.20);
+
+    color: inherit;
+
+    outline: none;
+
+    font-size: 14px;
+}
+
+
+.form-group input:focus {
+    border-color: #edfffe;
+
+    box-shadow:
+        0 0 0 2px rgba(237,255,254,0.06);
+}
+
+
+.password-actions {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================================
+   SMALL BUTTON
+   ========================================================= */
+
+.btn-small {
+    padding: 8px 12px !important;
+
+    font-size: 12px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .profile-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 8px;
+    }
+
+    .profile-value-with-action {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+    .character-grid {
+        grid-template-columns:
+            repeat(4, 1fr);
+    }
+
+    .password-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: auto;
+    }
+
+}
+
+</style>
+
+
 <main class="page">
-  <div class="wrap">
-    <div class="page-head">
-      <div class="eyebrow">Account</div>
-      <h1>My Profile</h1>
-      <p>Your JobShield account information.</p>
+
+    <div class="wrap">
+
+        <!-- =================================================
+             PAGE HEADER
+             ================================================= -->
+
+        <div class="page-head">
+
+            <div class="eyebrow">
+                Account
+            </div>
+
+            <h1>
+                My Profile
+            </h1>
+
+            <p>
+                Manage your JobShield profile and account settings.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             PROFILE CARD
+             ================================================= -->
+
+        <section class="panel profile-panel">
+
+
+            <!-- ===============================
+                 AVATAR
+                 =============================== -->
+
+            <div class="profile-avatar-section">
+
+                <div
+                    class="profile-avatar"
+                    id="profileAvatar"
+                >
+
+                    {% if profile
+                        and profile.avatar_type == "upload"
+                        and profile.avatar_value %}
+
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename='uploads/profiles/' ~ profile.avatar_value
+                            ) }}"
+                            alt="Profile picture"
+                        >
+
+                    {% elif profile
+                        and profile.avatar_type == "character"
+                        and profile.avatar_value %}
+
+                        <span>
+                            {{ profile.avatar_value }}
+                        </span>
+
+                    {% else %}
+
+                        <span>
+                            {{
+                                (
+                                    current_user.username
+                                    or current_user.email[:1]
+                                )[:1]|upper
+                            }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Avatar buttons -->
+
+                <div class="avatar-actions">
+
+                    <label
+                        class="btn btn-nav"
+                        for="avatarInput"
+                    >
+                        Upload Picture
+                    </label>
+
+                    <input
+                        type="file"
+                        id="avatarInput"
+                        name="avatar"
+                        accept=".png,.jpg,.jpeg,.webp"
+                        style="display:none;"
+                    >
+
+
+                    <button
+                        type="button"
+                        class="btn btn-nav"
+                        id="chooseCharacterButton"
+                    >
+                        Choose Character
+                    </button>
+
+                </div>
+
+
+                <!-- Character picker -->
+
+                <div
+                    id="characterPicker"
+                    class="character-picker"
+                    style="display:none;"
+                >
+
+                    <div class="character-grid">
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="👨‍💻"
+                        >👨‍💻</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="👩‍💻"
+                        >👩‍💻</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🧑‍💻"
+                        >🧑‍💻</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🤖"
+                        >🤖</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🦊"
+                        >🦊</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐼"
+                        >🐼</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐱"
+                        >🐱</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐯"
+                        >🐯</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🦁"
+                        >🦁</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐸"
+                        >🐸</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐨"
+                        >🐨</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐰"
+                        >🐰</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🐻"
+                        >🐻</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🦄"
+                        >🦄</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="👾"
+                        >👾</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="🚀"
+                        >🚀</button>
+
+                        <button
+                            type="button"
+                            class="character-option"
+                            data-character="⭐"
+                        >⭐</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROFILE INFORMATION
+                 ================================================= -->
+
+            <div class="profile-details">
+
+
+                <!-- USERNAME -->
+
+                <div class="profile-row">
+
+                    <span class="profile-label">
+                        Username
+                    </span>
+
+                    <div class="profile-value-with-action">
+
+                        <span id="usernameDisplay">
+                            {{ current_user.username or 'Not set' }}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="btn btn-nav btn-small"
+                            id="editUsernameButton"
+                        >
+                            Edit
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- USERNAME EDIT -->
+
+                <div
+                    id="usernameEditSection"
+                    class="profile-edit-section"
+                    style="display:none;"
+                >
+
+                    <input
+                        type="text"
+                        id="usernameInput"
+                        value="{{ current_user.username or '' }}"
+                        placeholder="Enter your username"
+                        maxlength="80"
+                    >
+
+                    <div class="edit-actions">
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="saveUsernameButton"
+                        >
+                            Save
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-nav"
+                            id="cancelUsernameButton"
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                    <p id="usernameMessage"></p>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="profile-row">
+
+                    <span class="profile-label">
+                        Email
+                    </span>
+
+                    <span>
+                        {{ current_user.email }}
+                    </span>
+
+                </div>
+
+
+                <!-- SIGN IN -->
+
+                <div class="profile-row">
+
+                    <span class="profile-label">
+                        Sign-in
+                    </span>
+
+                    <span>
+                        {{
+                            'Google'
+                            if current_user.google_id
+                            else 'Email & Password'
+                        }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROFILE ACTIONS
+                 ================================================= -->
+
+            <div class="profile-actions">
+
+                <a
+                    class="btn btn-primary"
+                    href="{{ url_for('main.home') }}"
+                >
+                    Back to JobShield
+                </a>
+
+
+                <button
+                    type="button"
+                    class="btn btn-nav"
+                    id="changePasswordButton"
+                >
+                    Change Password
+                </button>
+
+
+                <a
+                    class="btn btn-nav"
+                    href="{{ url_for('auth.logout') }}"
+                >
+                    Logout
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECURITY CARD
+                 Hidden until Change Password is clicked
+                 ================================================= -->
+
+            <div
+                id="passwordSection"
+                class="password-section"
+                style="display:none;"
+            >
+
+                <div class="password-header">
+
+                    <h3>
+                        Change Password
+                    </h3>
+
+                    <p>
+                        Update your JobShield account password.
+                    </p>
+
+                </div>
+
+
+                {% if current_user.password_hash %}
+
+                    <div class="password-fields">
+
+
+                        <!-- CURRENT PASSWORD -->
+
+                        <div class="form-group full-width">
+
+                            <label for="currentPassword">
+                                Current Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="currentPassword"
+                                placeholder="Enter current password"
+                                autocomplete="current-password"
+                            >
+
+                        </div>
+
+
+                        <!-- NEW PASSWORD -->
+
+                        <div class="form-group">
+
+                            <label for="newPassword">
+                                New Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="newPassword"
+                                placeholder="Enter new password"
+                                autocomplete="new-password"
+                            >
+
+                        </div>
+
+
+                        <!-- CONFIRM -->
+
+                        <div class="form-group">
+
+                            <label for="confirmPassword">
+                                Confirm New Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                placeholder="Confirm new password"
+                                autocomplete="new-password"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="password-actions">
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="updatePasswordButton"
+                        >
+                            Update Password
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-nav"
+                            id="cancelPasswordButton"
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                {% else %}
+
+                    <!-- GOOGLE ACCOUNT -->
+
+                    <div>
+
+                        <p style="
+                            margin:0;
+                            line-height:1.6;
+                            opacity:0.75;
+                        ">
+                            Your account currently uses
+                            <strong>Google sign-in</strong>.
+                            You don't have a JobShield password yet.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+
+                <p id="passwordMessage"></p>
+
+            </div>
+
+        </section>
+
     </div>
 
-    <section class="panel profile-panel">
-      <div class="profile-avatar">{{ (current_user.username or current_user.email[:1])[:1]|upper }}</div>
-      <div class="profile-details">
-        <div class="profile-row">
-          <span class="profile-label">Username</span>
-          <span>{{ current_user.username or 'Not set' }}</span>
-        </div>
-        <div class="profile-row">
-          <span class="profile-label">Email</span>
-          <span>{{ current_user.email }}</span>
-        </div>
-        <div class="profile-row">
-          <span class="profile-label">Sign-in</span>
-          <span>{{ 'Google' if current_user.google_id else 'Email & Password' }}</span>
-        </div>
-      </div>
-      <div class="profile-actions">
-        <a class="btn btn-primary" href="{{ url_for('main.home') }}">Back to JobShield</a>
-        <a class="btn btn-nav" href="{{ url_for('auth.logout') }}">Logout</a>
-      </div>
-    </section>
-  </div>
 </main>
+
+
+<script>
+
+/* =========================================================
+   AVATAR UPLOAD
+   ========================================================= */
+
+const avatarInput =
+    document.getElementById("avatarInput");
+
+
+if (avatarInput) {
+
+    avatarInput.addEventListener(
+        "change",
+        async function () {
+
+            if (
+                !this.files ||
+                this.files.length === 0
+            ) {
+                return;
+            }
+
+            const file = this.files[0];
+
+            const formData = new FormData();
+
+            formData.append(
+                "avatar",
+                file
+            );
+
+            try {
+
+                const response = await fetch(
+                    "{{ url_for('profile_avatar') }}",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    alert(
+                        data.error ||
+                        "Image upload failed."
+                    );
+
+                    return;
+                }
+
+
+                window.location.reload();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Avatar upload error:",
+                    error
+                );
+
+                alert(
+                    "Could not upload the profile picture."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CHARACTER PICKER
+   ========================================================= */
+
+const chooseCharacterButton =
+    document.getElementById(
+        "chooseCharacterButton"
+    );
+
+const characterPicker =
+    document.getElementById(
+        "characterPicker"
+    );
+
+
+if (
+    chooseCharacterButton &&
+    characterPicker
+) {
+
+    chooseCharacterButton.addEventListener(
+        "click",
+        function () {
+
+            const isHidden =
+                characterPicker.style.display ===
+                "none";
+
+            characterPicker.style.display =
+                isHidden ? "block" : "none";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CHARACTER SELECTION
+   ========================================================= */
+
+document
+    .querySelectorAll(".character-option")
+    .forEach(function (button) {
+
+        button.addEventListener(
+            "click",
+            async function () {
+
+                const character =
+                    this.dataset.character;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "{{ url_for('profile_character') }}",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    character:
+                                        character
+                                })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        alert(
+                            data.error ||
+                            "Could not save character."
+                        );
+
+                        return;
+                    }
+
+
+                    window.location.reload();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Character error:",
+                        error
+                    );
+
+                    alert(
+                        "Could not save character."
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   EDIT USERNAME
+   ========================================================= */
+
+const editUsernameButton =
+    document.getElementById(
+        "editUsernameButton"
+    );
+
+const usernameEditSection =
+    document.getElementById(
+        "usernameEditSection"
+    );
+
+const usernameInput =
+    document.getElementById(
+        "usernameInput"
+    );
+
+const usernameDisplay =
+    document.getElementById(
+        "usernameDisplay"
+    );
+
+const saveUsernameButton =
+    document.getElementById(
+        "saveUsernameButton"
+    );
+
+const cancelUsernameButton =
+    document.getElementById(
+        "cancelUsernameButton"
+    );
+
+const usernameMessage =
+    document.getElementById(
+        "usernameMessage"
+    );
+
+
+if (editUsernameButton) {
+
+    editUsernameButton.addEventListener(
+        "click",
+        function () {
+
+            usernameEditSection.style.display =
+                "block";
+
+            usernameInput.focus();
+
+        }
+    );
+
+}
+
+
+if (cancelUsernameButton) {
+
+    cancelUsernameButton.addEventListener(
+        "click",
+        function () {
+
+            usernameInput.value =
+                usernameDisplay.textContent.trim();
+
+            usernameEditSection.style.display =
+                "none";
+
+            usernameMessage.textContent =
+                "";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SAVE USERNAME
+   ========================================================= */
+
+if (saveUsernameButton) {
+
+    saveUsernameButton.addEventListener(
+        "click",
+        async function () {
+
+            const username =
+                usernameInput.value.trim();
+
+
+            if (!username) {
+
+                usernameMessage.textContent =
+                    "Username cannot be empty.";
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "{{ url_for('profile_update') }}",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                username:
+                                    username
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    usernameMessage.textContent =
+                        data.error ||
+                        "Could not update username.";
+
+                    return;
+
+                }
+
+
+                usernameDisplay.textContent =
+                    data.username;
+
+                usernameInput.value =
+                    data.username;
+
+                usernameEditSection.style.display =
+                    "none";
+
+                usernameMessage.textContent =
+                    "";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Username update error:",
+                    error
+                );
+
+                usernameMessage.textContent =
+                    "Could not update username.";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CHANGE PASSWORD CARD
+   ========================================================= */
+
+const changePasswordButton =
+    document.getElementById(
+        "changePasswordButton"
+    );
+
+const passwordSection =
+    document.getElementById(
+        "passwordSection"
+    );
+
+
+if (
+    changePasswordButton &&
+    passwordSection
+) {
+
+    changePasswordButton.addEventListener(
+        "click",
+        function () {
+
+            const isHidden =
+                passwordSection.style.display ===
+                "none";
+
+            passwordSection.style.display =
+                isHidden ? "block" : "none";
+
+
+            if (isHidden) {
+
+                passwordSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest"
+                });
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CANCEL PASSWORD
+   ========================================================= */
+
+const cancelPasswordButton =
+    document.getElementById(
+        "cancelPasswordButton"
+    );
+
+
+if (cancelPasswordButton) {
+
+    cancelPasswordButton.addEventListener(
+        "click",
+        function () {
+
+            document.getElementById(
+                "passwordSection"
+            ).style.display = "none";
+
+
+            document.getElementById(
+                "currentPassword"
+            ).value = "";
+
+
+            document.getElementById(
+                "newPassword"
+            ).value = "";
+
+
+            document.getElementById(
+                "confirmPassword"
+            ).value = "";
+
+
+            document.getElementById(
+                "passwordMessage"
+            ).textContent = "";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE PASSWORD
+   ========================================================= */
+
+const updatePasswordButton =
+    document.getElementById(
+        "updatePasswordButton"
+    );
+
+
+if (updatePasswordButton) {
+
+    updatePasswordButton.addEventListener(
+        "click",
+        async function () {
+
+            const currentPassword =
+                document.getElementById(
+                    "currentPassword"
+                ).value;
+
+            const newPassword =
+                document.getElementById(
+                    "newPassword"
+                ).value;
+
+            const confirmPassword =
+                document.getElementById(
+                    "confirmPassword"
+                ).value;
+
+            const passwordMessage =
+                document.getElementById(
+                    "passwordMessage"
+                );
+
+
+            if (!currentPassword) {
+
+                passwordMessage.textContent =
+                    "Please enter your current password.";
+
+                return;
+
+            }
+
+
+            if (!newPassword) {
+
+                passwordMessage.textContent =
+                    "Please enter a new password.";
+
+                return;
+
+            }
+
+
+            if (newPassword.length < 8) {
+
+                passwordMessage.textContent =
+                    "New password must be at least 8 characters.";
+
+                return;
+
+            }
+
+
+            if (
+                newPassword !==
+                confirmPassword
+            ) {
+
+                passwordMessage.textContent =
+                    "New passwords do not match.";
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "{{ url_for('profile_password') }}",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                current_password:
+                                    currentPassword,
+
+                                new_password:
+                                    newPassword,
+
+                                confirm_password:
+                                    confirmPassword
+
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    passwordMessage.textContent =
+                        data.error ||
+                        "Could not change password.";
+
+                    return;
+
+                }
+
+
+                passwordMessage.textContent =
+                    "Password updated successfully.";
+
+
+                document.getElementById(
+                    "currentPassword"
+                ).value = "";
+
+                document.getElementById(
+                    "newPassword"
+                ).value = "";
+
+                document.getElementById(
+                    "confirmPassword"
+                ).value = "";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Password update error:",
+                    error
+                );
+
+                passwordMessage.textContent =
+                    "Could not change password.";
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
 {% endblock %}

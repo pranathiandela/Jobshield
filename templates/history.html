@@ -1,5 +1,618 @@
-{% extends 'base.html' %}{% block content %}
-<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">History</div><h1>Your scan history.</h1><p>Every detector scan is stored in this starter app's local JSON history.</p></div>
-<div class="panel">{% if history %}<table class="history-table"><thead><tr><th>Date</th><th>Title</th><th>Risk</th><th>Score</th></tr></thead><tbody>{% for x in history|reverse %}<tr><td>{{ x.date }}</td><td>{{ x.title }}</td><td>{{ x.risk }}</td><td>{{ x.score }}/100</td></tr>{% endfor %}</tbody></table>{% else %}<div class="notice">No scans yet. Run your first check from Detector.</div>{% endif %}</div>
-</div></main>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <div class="eyebrow">History</div>
+      <h1>Your scan history.</h1>
+      <p>Every scan is stored for your account.</p>
+    </div>
+
+    {% if selected_scan %}
+
+    <!-- SAVED RESULT CARD -->
+    <div class="history-result-card">
+
+      <div class="result-card-top">
+        <div>
+          <div class="eyebrow">Saved Result</div>
+
+          <h2>
+            {{ selected_scan.job_title }}
+          </h2>
+
+          {% if selected_scan.company_name %}
+            <p class="result-company">
+              {{ selected_scan.company_name }}
+            </p>
+          {% else %}
+            <p class="result-company">
+              Company not provided
+            </p>
+          {% endif %}
+        </div>
+
+        <a class="back-link" href="/history">
+          ← Back
+        </a>
+      </div>
+
+
+      <!-- SCORE CARD -->
+      <div class="score-card">
+
+        <div class="score-header">
+          <div>
+            <span class="score-label">Safety Score</span>
+
+            <div class="score-value">
+              {{ selected_scan.score }}
+              <span>/100</span>
+            </div>
+          </div>
+
+          <div class="risk-badge risk-{{ selected_scan.risk|lower }}">
+            {{ selected_scan.risk }}
+          </div>
+        </div>
+
+
+        <!-- PROGRESS BAR -->
+        <div class="progress-section">
+
+          <div class="progress-labels">
+            <span>Risk / Safety level</span>
+            <span>{{ selected_scan.score }}%</span>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              style="width: {{ [selected_scan.score, 100]|min }}%;"
+            ></div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RESULT DETAILS -->
+      {% if selected_result %}
+
+      <div class="details-card">
+
+        {% set actual_result = selected_result.get('result', selected_result) %}
+
+        {% if actual_result.get('summary') %}
+        <div class="detail-section">
+          <h3>Summary</h3>
+          <p>{{ actual_result.get('summary') }}</p>
+        </div>
+        {% endif %}
+
+
+        {% if actual_result.get('checks') %}
+        <div class="detail-section">
+          <h3>Checks</h3>
+
+          <div class="detail-list">
+            {% for check in actual_result.get('checks', []) %}
+              <div class="detail-item">
+                {{ check }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% if actual_result.get('suspicious_signals') %}
+        <div class="detail-section">
+          <h3>Suspicious Signals</h3>
+
+          <div class="detail-list">
+            {% for signal in actual_result.get('suspicious_signals', []) %}
+              <div class="detail-item">
+                {{ signal }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% if actual_result.get('safe_signals') %}
+        <div class="detail-section">
+          <h3>Safe Signals</h3>
+
+          <div class="detail-list">
+            {% for signal in actual_result.get('safe_signals', []) %}
+              <div class="detail-item">
+                {{ signal }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% if actual_result.get('evidence') %}
+        <div class="detail-section">
+          <h3>Evidence</h3>
+          <p>{{ actual_result.get('evidence') }}</p>
+        </div>
+        {% endif %}
+
+
+        {% if actual_result.get('next_steps') %}
+        <div class="detail-section">
+          <h3>Next Steps</h3>
+
+          <div class="detail-list">
+            {% for step in actual_result.get('next_steps', []) %}
+              <div class="detail-item">
+                {{ step }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+
+        <!-- RESUME SCREENING DETAILS -->
+        {% if actual_result.get('relevancy_score') is not none %}
+
+        <div class="detail-section">
+
+          <h3>Resume Relevancy</h3>
+
+          <div class="resume-score-row">
+
+            <strong>
+              {{ actual_result.get('relevancy_score') }}%
+            </strong>
+
+            <span>
+              {{ actual_result.get('keyword_total', 0) }}
+              keywords analyzed
+            </span>
+
+          </div>
+
+
+          <div class="progress-track resume-progress">
+            <div
+              class="progress-fill"
+              style="width: {{ [actual_result.get('relevancy_score', 0), 100]|min }}%;"
+            ></div>
+          </div>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if actual_result.get('matched_keywords') %}
+
+        <div class="detail-section">
+          <h3>Matched Keywords</h3>
+
+          <div class="keyword-list">
+            {% for keyword in actual_result.get('matched_keywords', []) %}
+              <span class="keyword">{{ keyword }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% endif %}
+
+
+        {% if actual_result.get('missing_keywords') %}
+
+        <div class="detail-section">
+          <h3>Missing Keywords</h3>
+
+          <div class="keyword-list">
+            {% for keyword in actual_result.get('missing_keywords', []) %}
+              <span class="keyword missing">{{ keyword }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% endif %}
+
+      </div>
+
+      {% endif %}
+
+    </div>
+
+
+    {% else %}
+
+    <!-- HISTORY TABLE -->
+    <div class="panel">
+
+      {% if history %}
+
+      <table class="history-table">
+
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Risk</th>
+            <th>Score</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for x in history %}
+
+          <tr>
+
+            <td>
+              {{ x.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </td>
+
+            <td>
+              {{ x.job_title }}
+            </td>
+
+            <td>
+              {{ x.company_name or '—' }}
+            </td>
+
+            <td>
+              {{ x.risk }}
+            </td>
+
+            <td>
+              {{ x.score }}/100
+            </td>
+
+            <td>
+              <a
+                class="btn-ghost"
+                href="{{ url_for('history_detail', scan_id=x.id) }}"
+              >
+                View
+              </a>
+            </td>
+
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+      {% else %}
+
+      <div class="notice">
+        No scans yet. Run your first check from Detector or Resume Screening.
+      </div>
+
+      {% endif %}
+
+    </div>
+
+    {% endif %}
+
+  </div>
+</main>
+
+
+<style>
+
+/* ================================
+   SAVED RESULT CARD
+================================ */
+
+.history-result-card {
+  margin-top: 34px;
+  background: rgba(0, 55, 52, 0.55);
+  border: 1px solid rgba(187, 199, 198, 0.18);
+  border-radius: 20px;
+  padding: 32px;
+  overflow: hidden;
+}
+
+
+.result-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+
+.result-card-top h2 {
+  margin: 10px 0 4px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+
+.result-company {
+  margin: 0;
+  opacity: 0.72;
+}
+
+
+.back-link {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.75;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+
+.back-link:hover {
+  opacity: 1;
+}
+
+
+/* ================================
+   SCORE CARD
+================================ */
+
+.score-card {
+  background: rgba(1, 29, 28, 0.85);
+  border: 1px solid rgba(187, 199, 198, 0.16);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+
+.score-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+
+.score-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.6;
+  margin-bottom: 8px;
+}
+
+
+.score-value {
+  font-size: 52px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+
+.score-value span {
+  font-size: 18px;
+  opacity: 0.45;
+  font-weight: 400;
+}
+
+
+/* ================================
+   RISK BADGE
+================================ */
+
+.risk-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+
+.risk-safe {
+  background: rgba(70, 200, 140, 0.14);
+}
+
+
+.risk-caution {
+  background: rgba(240, 190, 70, 0.14);
+}
+
+
+.risk-risky {
+  background: rgba(230, 90, 90, 0.14);
+}
+
+
+/* ================================
+   PROGRESS BAR
+================================ */
+
+.progress-section {
+  margin-top: 30px;
+}
+
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.09);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #66d9c9,
+    #edfffe
+  );
+  transition: width 0.8s ease;
+}
+
+
+.resume-progress {
+  margin-top: 14px;
+}
+
+
+/* ================================
+   DETAILS
+================================ */
+
+.details-card {
+  margin-top: 24px;
+  background: rgba(1, 29, 28, 0.55);
+  border: 1px solid rgba(187, 199, 198, 0.12);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+
+.detail-section {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+
+.detail-section:first-child {
+  padding-top: 0;
+}
+
+
+.detail-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+
+.detail-section h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+
+.detail-section p {
+  margin: 0;
+  line-height: 1.7;
+  opacity: 0.75;
+}
+
+
+.detail-list {
+  display: grid;
+  gap: 8px;
+}
+
+
+.detail-item {
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.035);
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+
+.resume-score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+
+.resume-score-row strong {
+  font-size: 30px;
+}
+
+
+.resume-score-row span {
+  opacity: 0.55;
+  font-size: 13px;
+}
+
+
+/* ================================
+   KEYWORDS
+================================ */
+
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+.keyword {
+  display: inline-block;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(102, 187, 106, 0.12);
+  border: 1px solid rgba(102, 187, 106, 0.18);
+  font-size: 12px;
+}
+
+
+.keyword.missing {
+  background: rgba(230, 90, 90, 0.1);
+  border-color: rgba(230, 90, 90, 0.18);
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 700px) {
+
+  .history-result-card {
+    padding: 20px;
+  }
+
+  .result-card-top {
+    flex-direction: column;
+  }
+
+  .score-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .score-value {
+    font-size: 44px;
+  }
+
+  .resume-score-row {
+    flex-direction: column;
+  }
+
+}
+
+</style>
+
 {% endblock %}
