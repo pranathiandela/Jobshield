@@ -8,6 +8,6 @@ history.json
 Resume.csv
 job_dataset.csv
 instance/
-
+*.db
 detection_ml/DataSet.csv
 detection_ml/cleaned_dataset.csv

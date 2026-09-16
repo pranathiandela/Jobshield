@@ -1,29 +1,7 @@
 """One-time training script for JobShield's resume domain classifier.
 
-Run this manually (not part of the Flask app) whenever you want to
-(re)train the model:
-
+Run manually to retrain:
     python train_resume_classifier.py
-
-MERGES TWO DATA SOURCES:
-  1. Resume.csv - the Kaggle "Resume Dataset": 2,484 real, labeled resumes
-     across 24 broad job categories (Chef, Teacher, HR, Finance, etc.)
-  2. job_dataset.csv - 1,068 tech job postings (Title/Skills/Responsibilities/
-     Keywords) covering modern software/tech roles this first dataset is
-     missing (Software Development, Data Science/ML, Cloud/DevOps,
-     Cybersecurity, Mobile Development, Network Engineering, QA/Testing,
-     UX/UI Design). Each posting is converted into pseudo-resume text and
-     added as additional labeled training data.
-
-Both CSVs are gitignored (large, and job_dataset.csv especially is
-easy to re-obtain) - only this script's OUTPUT is committed:
-  - resume_classifier.joblib   - the trained pipeline (TF-IDF + calibrated
-                                  LinearSVC), trained on the MERGED data
-  - domain_keywords.json       - for each of the 32 categories, the words
-                                  most strongly associated with it, learned
-                                  directly from the merged training data
-                                  (not hand-picked) - used for missing-skill
-                                  suggestions.
 """
 import json
 import re
@@ -42,17 +20,6 @@ JOB_CSV_PATH = "job_dataset.csv"
 MODEL_PATH = "resume_classifier.joblib"
 KEYWORDS_PATH = "domain_keywords.json"
 
-TERMS_PER_DOMAIN = 18
-
-BOILERPLATE_TERMS = {
-    "summary", "experience", "objective", "skills", "education", "references",
-    "highlights", "accomplishments", "professional", "company", "name",
-    "high school", "city", "state", "present", "current", "various",
-    "other", "related", "general", "school diploma",
-    "basics", "advanced", "fundamentals", "familiarity", "knowledge",
-    "understanding", "exposure", "intermediate", "proficiency",
-}
-
 NON_TECH_EXCLUDE = {
     "content writer", "copywriter", "business analyst", "product manager",
     "project manager", "marketing specialist", "seo specialist",
@@ -65,22 +32,59 @@ def _classify_tech_title(title):
     t = title.lower()
     if t in NON_TECH_EXCLUDE:
         return None
-    if "android" in t or "ios " in t or t.startswith("ios") or "swift developer" in t or "mobile" in t:
-        return "MOBILE-DEVELOPMENT"
-    if any(k in t for k in ["cyber", "security analyst", "soc analyst", "ethical hacker", "incident response", "information security"]):
-        return "CYBERSECURITY"
-    if any(k in t for k in ["data scientist", "data science", "machine learning", "ml engineer", "ml/ai", "ml infrastructure", "ai engineer", "ai prompt", "data engineer", "data analyst", "bi analyst", "big data"]):
+
+    # Priority 1: Data Science & AI/ML
+    if any(k in t for k in [
+        "data scientist", "data science", "machine learning", "ml engineer",
+        "ai engineer", "deep learning", "nlp", "computer vision",
+        "artificial intelligence", "data analyst", "bi analyst", "big data"
+    ]):
         return "DATA-SCIENCE-ML"
-    if any(k in t for k in ["qa engineer", "test automation", "software tester", "sdet"]):
+
+    # Priority 2: Cybersecurity
+    if any(k in t for k in [
+        "cyber", "security analyst", "soc analyst", "ethical hacker",
+        "incident response", "infosec", "penetration tester", "vulnerability"
+    ]):
+        return "CYBERSECURITY"
+
+    # Priority 3: Cloud & DevOps
+    if any(k in t for k in [
+        "cloud", "devops", "site reliability", "sre", "platform engineer",
+        "solutions architect", "infrastructure engineer"
+    ]):
+        return "CLOUD-DEVOPS"
+
+    # Priority 4: QA & Testing
+    if any(k in t for k in [
+        "qa", "test automation", "tester", "quality assurance", "sdet", "test engineer"
+    ]):
         return "QA-TESTING"
-    if any(k in t for k in ["ux", "ui designer", "product designer", "graphic designer", "interaction designer"]):
+
+    # Priority 5: Mobile Development
+    if any(k in t for k in [
+        "android", "ios", "swift developer", "flutter", "mobile engineer", "react native"
+    ]):
+        return "MOBILE-DEVELOPMENT"
+
+    # Priority 6: UI/UX Design
+    if any(k in t for k in [
+        "ux", "ui designer", "product designer", "interaction designer", "user experience"
+    ]):
         return "UX-UI-DESIGN"
+
+    # Priority 7: Network Engineering
     if "network" in t:
         return "NETWORK-ENGINEERING"
-    if any(k in t for k in ["cloud", "devops", "site reliability", "system engineer", "solutions architect"]):
-        return "CLOUD-DEVOPS"
-    if any(k in t for k in ["software developer", "software engineer", "full stack", "backend developer", "frontend developer", "web developer", "java developer", "python developer", "javascript developer", ".net developer", "game developer", "blockchain developer", "ar/vr developer", "vibe coder", "fintech engineer", "iot engineer", "robotics"]):
+
+    # Priority 8: Generic Software Development fallback
+    if any(k in t for k in [
+        "software developer", "software engineer", "full stack", "backend",
+        "frontend", "web developer", "java developer", "python developer",
+        ".net developer", "golang developer"
+    ]):
         return "SOFTWARE-DEVELOPMENT"
+
     return None
 
 
@@ -101,29 +105,25 @@ def _load_merged_dataset():
     jobs = jobs[["Resume_str", "Category"]]
 
     merged = pd.concat([resumes, jobs], ignore_index=True)
-    print(f"Merged dataset: {len(resumes)} real resumes + {len(jobs)} tech job postings "
-          f"= {len(merged)} total rows across {merged['Category'].nunique()} categories.")
+    print(
+        f"Merged dataset: {len(resumes)} resumes + {len(jobs)} tech postings "
+        f"= {len(merged)} total records across {merged['Category'].nunique()} categories."
+    )
     return merged
-
-
-def _is_clean_term(term):
-    if re.search(r"\d", term):
-        return False
-    if term in BOILERPLATE_TERMS:
-        return False
-    if any(word in BOILERPLATE_TERMS for word in term.split()):
-        return False
-    return True
 
 
 def _build_pipeline():
     return Pipeline([
         ("tfidf", TfidfVectorizer(
-            stop_words="english", max_features=6000,
-            ngram_range=(1, 2), min_df=3,
+            stop_words="english",
+            max_features=7000,
+            ngram_range=(1, 2),
+            min_df=2,
+            sublinear_tf=True
         )),
         ("clf", CalibratedClassifierCV(
-            LinearSVC(class_weight="balanced", max_iter=3000), cv=3,
+            LinearSVC(class_weight="balanced", max_iter=4000, C=1.0),
+            cv=3
         )),
     ])
 
@@ -131,61 +131,17 @@ def _build_pipeline():
 def main():
     df = _load_merged_dataset()
 
-    print("Running 5-fold cross-validation for an honest accuracy estimate...")
+    print("Running 5-fold cross-validation...")
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     cv_scores = cross_val_score(_build_pipeline(), df["Resume_str"], df["Category"], cv=cv, scoring="accuracy")
-    print(f"Cross-validated accuracy: {cv_scores.mean():.1%} "
-          f"(fold scores: {[round(s, 3) for s in cv_scores]})\n")
+    print(f"Cross-validated accuracy: {cv_scores.mean():.1%}\n")
 
-    print("Training on an 80/20 split to see a detailed per-category report...")
-    X_train, X_test, y_train, y_test = train_test_split(
-        df["Resume_str"], df["Category"],
-        test_size=0.2, random_state=42, stratify=df["Category"],
-    )
-    pipeline = _build_pipeline()
-    pipeline.fit(X_train, y_train)
-    preds = pipeline.predict(X_test)
-    print(classification_report(y_test, preds))
-
-    print("Retraining on the FULL merged dataset for the version we ship...")
+    print("Training on full dataset...")
     final_pipeline = _build_pipeline()
     final_pipeline.fit(df["Resume_str"], df["Category"])
 
     joblib.dump(final_pipeline, MODEL_PATH)
     print(f"Saved trained model to {MODEL_PATH}")
-
-    print("Extracting data-driven skill keywords per category...")
-    vectorizer = final_pipeline.named_steps["tfidf"]
-    calibrated = final_pipeline.named_steps["clf"]
-    base_svc = calibrated.calibrated_classifiers_[0].estimator
-    feature_names = vectorizer.get_feature_names_out()
-    classes = calibrated.classes_
-
-    domain_keywords = {}
-    for category in classes:
-        category_words = set(w.lower() for w in category.replace("-", " ").split())
-        idx = list(classes).index(category)
-        ranked_indices = base_svc.coef_[idx].argsort()[::-1]
-
-        terms = []
-        for i in ranked_indices:
-            term = feature_names[i]
-            if set(term.split()).issubset(category_words):
-                continue
-            if not _is_clean_term(term):
-                continue
-            terms.append(term)
-            if len(terms) >= TERMS_PER_DOMAIN:
-                break
-
-        domain_keywords[category] = terms
-
-    with open(KEYWORDS_PATH, "w") as f:
-        json.dump(domain_keywords, f, indent=2)
-    print(f"Saved skill keywords to {KEYWORDS_PATH}")
-
-    print(f"\nDone. Commit {MODEL_PATH} and {KEYWORDS_PATH}")
-    print(f"(do NOT commit {RESUME_CSV_PATH} or {JOB_CSV_PATH} - they stay local/gitignored).")
 
 
 if __name__ == "__main__":
