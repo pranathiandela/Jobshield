@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from pathlib import Path
 from datetime import datetime
 import json, re
@@ -12,6 +12,7 @@ from config import Config
 from extensions import db, login_manager, mail, csrf
 from google_auth import init_google_oauth
 from auth import auth_bp
+from models import Scan
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -26,23 +27,8 @@ init_google_oauth(app)
 app.register_blueprint(auth_bp)
 
 BASE = Path(__file__).resolve().parent
-HISTORY_FILE = BASE / "history.json"
 UPLOAD_DIR = BASE / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
-
-
-def load_history():
-    if not HISTORY_FILE.exists():
-        return []
-    try:
-        return json.loads(HISTORY_FILE.read_text())
-    except Exception:
-        return []
-
-
-def save_history(items):
-    HISTORY_FILE.write_text(json.dumps(items[-100:], indent=2))
-
 
 @app.route("/", endpoint="main.home")
 def home():
@@ -70,15 +56,22 @@ def api_analyze():
         screenshot.save(UPLOAD_DIR / f"detector_{stamp}_{safe_name}")
 
     result = analyze_job(data)
-    history = load_history()
-    history.append({
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "title": (data.get("job_title") or data.get("job_text", "").strip().splitlines() or ["Untitled job"])[0][:80],
-        "company": data.get("company_name", ""),
-        "risk": result["risk"],
-        "score": result["score"]
-    })
-    save_history(history)
+
+    title = (data.get("job_title") or "Untitled job").strip()
+    company = (data.get("company_name") or "").strip()
+
+    scan = Scan(
+        user_id=current_user.id,
+        job_title=title[:255],
+        company_name=company[:255],
+        score=int(result.get("score", result.get("legitimacy_score", 0))),
+        risk=str(result.get("risk", result.get("verdict", "Caution")))[:50],
+        result_json=json.dumps(result, ensure_ascii=False),
+    )
+    db.session.add(scan)
+    db.session.commit()
+
+    result["scan_id"] = scan.id
     return jsonify(result)
 
 
@@ -100,21 +93,81 @@ def api_screen_resume():
         ext = Path(resume_file.filename).suffix.lower()
         if ext not in SUPPORTED_EXTENSIONS:
             return jsonify({"error": "Please upload a PDF or DOCX file."}), 400
+
         safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", resume_file.filename)
         stamp = datetime.now().strftime("%Y%m%d%H%M%S")
         saved_path = UPLOAD_DIR / f"resume_{stamp}_{safe_name}"
         resume_file.save(saved_path)
+
         try:
             resume_text = extract_text(saved_path)
         except UnsupportedFileType:
             return jsonify({"error": "Could not read that file type."}), 400
+
         if not resume_text:
-            return jsonify({"error": "No readable text was found in that file. Try pasting your resume text instead."}), 400
+            return jsonify({
+                "error": "No readable text was found in that file. "
+                         "Try pasting your resume text instead."
+            }), 400
 
     if not resume_text:
-        return jsonify({"error": "Paste your resume text or upload a PDF/DOCX file."}), 400
+        return jsonify({
+            "error": "Paste your resume text or upload a PDF/DOCX file."
+        }), 400
 
+    # Analyze resume
     result = analyze_resume(resume_text, job_description or None)
+
+    # -------------------------------
+    # SAVE RESUME SCREENING TO DB
+    # -------------------------------
+
+    # Try to find whatever score your resume analyzer provides.
+    score = (
+        result.get("score")
+        or result.get("match_score")
+        or result.get("compatibility_score")
+        or result.get("resume_score")
+        or 0
+    )
+
+    try:
+        score = int(float(score))
+    except (TypeError, ValueError):
+        score = 0
+
+    score = max(0, min(100, score))
+
+    # Convert resume score into the same risk categories
+    # used by the Dashboard/History system.
+    if score >= 70:
+        risk = "Safe"
+    elif score >= 40:
+        risk = "Caution"
+    else:
+        risk = "Risky"
+
+    scan = Scan(
+        user_id=current_user.id,
+        job_title="Resume Screening",
+        company_name="",
+        score=score,
+        risk=risk,
+        result_json=json.dumps(
+            {
+                "scan_type": "resume_screening",
+                "result": result,
+            },
+            ensure_ascii=False
+        ),
+    )
+
+    db.session.add(scan)
+    db.session.commit()
+
+    # Give frontend the database ID too
+    result["scan_id"] = scan.id
+
     return jsonify(result)
 
 @app.route("/api/screen-domain", methods=["POST"])
@@ -160,19 +213,56 @@ def api_domain_list():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    h = load_history()
-    return render_template("dashboard.html", title="Dashboard", active="dashboard", stats={
-        "total": len(h),
-        "high": sum(x.get("risk") == "High" for x in h),
-        "medium": sum(x.get("risk") == "Medium" for x in h),
-        "low": sum(x.get("risk") == "Low" for x in h)
-    })
+    scans = (
+        Scan.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Scan.created_at.desc())
+        .all()
+    )
+    return render_template(
+        "dashboard.html",
+        title="Dashboard",
+        active="dashboard",
+        stats={
+            "total": len(scans),
+            "high": sum(x.risk == "Risky" for x in scans),
+            "medium": sum(x.risk == "Caution" for x in scans),
+            "low": sum(x.risk == "Safe" for x in scans),
+        },
+        recent_scans=scans[:5],
+    )
 
 
 @app.route("/history")
 @login_required
 def history():
-    return render_template("history.html", title="History", active="history", history=load_history())
+    scans = (
+        Scan.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Scan.created_at.desc())
+        .all()
+    )
+    return render_template(
+        "history.html",
+        title="History",
+        active="history",
+        history=scans,
+    )
+
+
+@app.route("/history/<int:scan_id>")
+@login_required
+def history_detail(scan_id):
+    scan = Scan.query.filter_by(id=scan_id, user_id=current_user.id).first_or_404()
+    result = scan.get_result()
+    return render_template(
+        "history.html",
+        title="History",
+        active="history",
+        history=[scan],
+        selected_scan=scan,
+        selected_result=result,
+    )
 
 
 @app.route("/profile")
