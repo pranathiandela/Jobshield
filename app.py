@@ -7,7 +7,9 @@ from job_analyzer import analyze_job
 from resume_analyzer import analyze_resume
 from ml_domain_matcher import screen_for_domain
 from file_processor import extract_text, SUPPORTED_EXTENSIONS, UnsupportedFileType
+from models import User, UserProfile, Scan
 
+from werkzeug.utils import secure_filename
 from config import Config
 from extensions import db, login_manager, mail, csrf
 from google_auth import init_google_oauth
@@ -264,12 +266,310 @@ def history_detail(scan_id):
         selected_result=result,
     )
 
-
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", title="My Profile", active="profile")
+    profile = UserProfile.query.filter_by(
+        user_id=current_user.id
+    ).first()
 
+    if not profile:
+        profile = UserProfile(
+            user_id=current_user.id,
+            avatar_type="character",
+            avatar_value="👤"
+        )
+        db.session.add(profile)
+        db.session.commit()
+
+    return render_template(
+        "profile.html",
+        title="My Profile",
+        active="profile",
+        profile=profile
+    )
+@app.route("/profile/update", methods=["POST"])
+@login_required
+@csrf.exempt
+def profile_update():
+
+    try:
+        # Support JSON and normal form submissions
+        data = request.get_json(silent=True)
+
+        if data is None:
+            data = request.form
+
+        username = str(
+            data.get("username", "")
+        ).strip()
+
+        if not username:
+            return jsonify({
+                "success": False,
+                "error": "Username cannot be empty."
+            }), 400
+
+        if len(username) > 80:
+            return jsonify({
+                "success": False,
+                "error": "Username must be 80 characters or less."
+            }), 400
+
+        # Check whether another user already has this username
+        existing = User.query.filter(
+            User.username == username,
+            User.id != current_user.id
+        ).first()
+
+        if existing:
+            return jsonify({
+                "success": False,
+                "error": "That username is already taken."
+            }), 400
+
+        # Update logged-in user
+        current_user.username = username
+
+        if hasattr(current_user, "needs_username"):
+            current_user.needs_username = False
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "username": current_user.username
+        }), 200
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        print(
+            "PROFILE USERNAME ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Could not update username."
+        }), 500
+
+
+@app.route("/profile/password", methods=["POST"])
+@login_required
+@csrf.exempt
+def profile_password():
+    # Accept both JSON and normal form data
+    data = request.get_json(silent=True) or request.form
+
+    current_password = data.get("current_password") or ""
+    new_password = data.get("new_password") or ""
+    confirm_password = data.get("confirm_password") or ""
+
+    # Google-only account
+    if not current_user.password_hash:
+        return jsonify({
+            "success": False,
+            "error": (
+                "This account uses Google sign-in and does not "
+                "have a JobShield password yet."
+            )
+        }), 400
+
+    # Check current password
+    if not current_user.check_password(current_password):
+        return jsonify({
+            "success": False,
+            "error": "Current password is incorrect."
+        }), 400
+
+    # New password validation
+    if len(new_password) < 8:
+        return jsonify({
+            "success": False,
+            "error": "New password must be at least 8 characters."
+        }), 400
+
+    if new_password != confirm_password:
+        return jsonify({
+            "success": False,
+            "error": "New passwords do not match."
+        }), 400
+
+    # Don't allow same password
+    if current_user.check_password(new_password):
+        return jsonify({
+            "success": False,
+            "error": "New password must be different from your current password."
+        }), 400
+
+    current_user.set_password(new_password)
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Password updated successfully."
+    })
+
+
+@app.route("/profile/avatar", methods=["POST"])
+@login_required
+@csrf.exempt
+def profile_avatar():
+    image = request.files.get("avatar")
+
+    if image is None:
+        return jsonify({
+            "success": False,
+            "error": "No image was received by the server."
+        }), 400
+
+    if not image.filename:
+        return jsonify({
+            "success": False,
+            "error": "Please choose an image."
+        }), 400
+
+    allowed_extensions = {
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp"
+    }
+
+    ext = Path(image.filename).suffix.lower()
+
+    if ext not in allowed_extensions:
+        return jsonify({
+            "success": False,
+            "error": "Please upload PNG, JPG, JPEG or WEBP."
+        }), 400
+
+    profile_dir = BASE / "static" / "uploads" / "profiles"
+    profile_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    filename = secure_filename(
+        f"user_{current_user.id}{ext}"
+    )
+
+    save_path = profile_dir / filename
+
+    try:
+        # Save image
+        image.save(str(save_path))
+
+        # Verify file actually exists
+        if not save_path.exists():
+            return jsonify({
+                "success": False,
+                "error": "The image could not be saved."
+            }), 500
+
+        # Get profile
+        profile = UserProfile.query.filter_by(
+            user_id=current_user.id
+        ).first()
+
+        if not profile:
+            profile = UserProfile(
+                user_id=current_user.id,
+                avatar_type="character",
+                avatar_value="👤"
+            )
+
+            db.session.add(profile)
+
+        # Save uploaded image information
+        profile.avatar_type = "upload"
+        profile.avatar_value = filename
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "avatar_url": url_for(
+                "static",
+                filename=f"uploads/profiles/{filename}"
+            )
+        })
+
+    except Exception as e:
+        db.session.rollback()
+
+        print(
+            "PROFILE IMAGE ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Could not save profile image."
+        }), 500
+
+
+@app.route("/profile/character", methods=["POST"])
+@login_required
+@csrf.exempt
+def profile_character():
+    # Accept both JSON and form data
+    data = request.get_json(silent=True) or request.form
+
+    character = (data.get("character") or "").strip()
+
+    allowed_characters = {
+        "👨‍💻",
+        "👩‍💻",
+        "🧑‍💻",
+        "🤖",
+        "🦊",
+        "🐼",
+        "🐱",
+        "🐯",
+        "🦁",
+        "🐸",
+        "🐨",
+        "🐰",
+        "🐻",
+        "🦄",
+        "👾",
+        "🚀",
+        "⭐",
+        "👨",
+        "👩",
+        "🧑"
+    }
+
+    if character not in allowed_characters:
+        return jsonify({
+            "success": False,
+            "error": "Invalid character."
+        }), 400
+
+    profile = UserProfile.query.filter_by(
+        user_id=current_user.id
+    ).first()
+
+    if not profile:
+        profile = UserProfile(
+            user_id=current_user.id
+        )
+
+        db.session.add(profile)
+
+    profile.avatar_type = "character"
+    profile.avatar_value = character
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "character": character
+    })
 
 @app.route("/about-help")
 def about_help():
