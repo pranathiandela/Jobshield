@@ -5,662 +5,410 @@
 <main class="page detector-page">
   <div class="wrap">
 
-    <div class="page-head">
+    <div class="page-head" id="intro-hero">
       <div class="eyebrow">Resume Screening</div>
-
       <h1>Score Your Resume <span>Before You Apply</span></h1>
-
-      <p>
-        JobShield checks your bullets for weak language, missing impact, and how well you match a target role.
-      </p>
+      <p>JobShield checks your bullets for weak language, missing impact, and how well you match a target role.</p>
     </div>
 
+    <div class="scan-hero-grid" id="input-section">
 
-    <div class="detector-panel">
+      <div class="detector-panel">
+        <form id="resume-form" enctype="multipart/form-data">
 
-      <form id="resume-form" enctype="multipart/form-data">
-
-        <!-- =====================================================
-             SECTION 01 - RESUME INPUT
-        ====================================================== -->
-
-        <div class="detector-section">
-
-          <div class="section-title">
-            <span>01</span>
-
-            <div>
-              <h2>Your resume</h2>
-
-              <p>
-                Paste your resume text, or upload a PDF/DOCX file.
-              </p>
+          <div class="detector-section">
+            <div class="section-title">
+              <span>01</span>
+              <div>
+                <h2>Your resume</h2>
+                <p>Paste your resume text, or upload a PDF/DOCX file.</p>
+              </div>
             </div>
-          </div>
-
-
-          <div class="detector-grid two">
 
             <div class="form-row wide">
-
-              <div
-                style="
-                  display:flex;
-                  justify-content:space-between;
-                  align-items:center;
-                  gap:15px;
-                  margin-bottom:8px;
-                  flex-wrap:wrap;
-                "
-              >
-
-                <label
-                  for="resume_text"
-                  style="margin-bottom:0;"
-                >
-                  Resume Text
-                </label>
-
-
-                <!-- UPLOAD SWITCH -->
-
-                <button
-                  type="button"
-                  id="upload-toggle"
-                  class="btn btn-nav"
-                  style="white-space:nowrap;"
-                >
-                  📄 Upload File
-                </button>
-
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:8px; flex-wrap:wrap;">
+                <label for="resume_text" style="margin-bottom:0;">Resume Text</label>
+                <button type="button" id="upload-toggle" class="btn btn-nav" style="white-space:nowrap;">📄 Upload File</button>
               </div>
-
-
-              <!-- =================================================
-                   PASTE MODE - DEFAULT
-              ================================================== -->
 
               <div id="paste-mode">
-
-                <textarea
-                  id="resume_text"
-                  name="resume_text"
-                  placeholder="Paste your resume text here, one bullet per line..."
-                ></textarea>
-
+                <textarea id="resume_text" name="resume_text" placeholder="Paste your resume text here, one line per bullet..."></textarea>
               </div>
 
-
-              <!-- =================================================
-                   UPLOAD MODE
-              ================================================== -->
-
-              <div
-                id="upload-mode"
-                hidden
-              >
-
-                <div
-                  style="
-                    border:2px dashed rgba(0,0,0,0.15);
-                    border-radius:12px;
-                    padding:28px 20px;
-                    text-align:center;
-                  "
-                >
-
-                  <div
-                    style="
-                      font-size:32px;
-                      margin-bottom:8px;
-                    "
-                  >
-                    📄
-                  </div>
-
-
-                  <strong>
-                    Upload resume file
-                  </strong>
-
-
-                  <p
-                    style="
-                      margin:6px 0 16px;
-                      opacity:.7;
-                    "
-                  >
-                    PDF or DOCX only.
-                  </p>
-
-
-                  <input
-                    id="resume"
-                    name="resume"
-                    type="file"
-                    accept=".pdf,.docx"
-                  >
-
-
-                  <div
-                    id="resume-file-name"
-                    class="file-help"
-                    style="margin-top:10px;"
-                  >
-                    No file selected.
-                  </div>
-
+              <div id="upload-mode" hidden>
+                <div style="border:2px dashed rgba(0,0,0,0.15); border-radius:12px; padding:28px 20px; text-align:center;">
+                  <div style="font-size:32px; margin-bottom:8px;">📄</div>
+                  <strong>Upload resume file</strong>
+                  <p style="margin:6px 0 16px; opacity:.7;">PDF or DOCX only.</p>
+                  <input id="resume" name="resume" type="file" accept=".pdf,.docx">
+                  <div id="resume-file-name" class="file-help" style="margin-top:10px;">No file selected.</div>
                 </div>
-
-
-                <!-- SWITCH BACK -->
-
-                <button
-                  type="button"
-                  id="paste-toggle"
-                  class="btn btn-nav"
-                  style="
-                    margin-top:12px;
-                  "
-                >
-                  📝 Paste Text Instead
-                </button>
-
+                <button type="button" id="paste-toggle" class="btn btn-nav" style="margin-top:12px;">📝 Paste Text Instead</button>
               </div>
 
+              <label style="margin:14px 0 8px;">Preview</label>
+              <div id="resume-preview" class="resume-preview">
+                <div class="resume-preview-empty">Your resume text will appear here, split line by line.</div>
+              </div>
             </div>
-
           </div>
 
-        </div>
-
-
-        <!-- =====================================================
-             SECTION 02 - TARGET JOB (OPTIONAL)
-        ====================================================== -->
-
-        <div class="detector-section">
-
-          <div class="section-title">
-
-            <span>02</span>
-
-            <div>
-
-              <h2>
-                Target job description
-              </h2>
-
-              <p>
-                Optional — paste a job posting to see how well your resume matches it.
-              </p>
-
+          <div class="detector-section">
+            <div class="section-title">
+              <span>02</span>
+              <div>
+                <h2>Choose preferred job role</h2>
+                <p>Optional. Pick a role to see skills you're missing for it. Leave on "Auto-detect" if you just want our best guess.</p>
+              </div>
             </div>
-
-          </div>
-
-
-          <div class="detector-grid two">
 
             <div class="form-row wide">
-
-              <label for="job_description">
-                Job Description
-              </label>
-
-              <textarea
-                id="job_description"
-                name="job_description"
-                placeholder="Paste a job description to check keyword match (optional)..."
-              ></textarea>
-
+              <label for="domain_select">Role</label>
+              <select id="domain_select" name="domain">
+                <option value="">Auto-detect for me</option>
+              </select>
             </div>
-
           </div>
 
-        </div>
-
-
-        <!-- =====================================================
-             SCAN BAR
-        ====================================================== -->
-
-        <div class="scan-bar">
-
-          <div>
-
-            <strong>
-              Ready to score
-            </strong>
-
-            <span>
-              All scoring is performed by the JobShield resume engine.
-            </span>
-
+          <div class="scan-bar">
+            <div>
+              <strong>Ready to score</strong>
+              <span>All scoring is performed by the JobShield resume engine.</span>
+            </div>
+            <button class="btn btn-primary" type="submit" id="score-btn">
+              <span>Score my resume</span> ↗
+            </button>
           </div>
+        </form>
 
-
-          <button
-            class="btn btn-primary"
-            type="submit"
-            id="score-btn"
-          >
-            <span>
-              Score my resume
-            </span>
-
-            ↗
-          </button>
-
+        <div id="score-progress" class="scan-progress" hidden>
+          <div class="progress-head">
+            <strong>Analyzing resume</strong>
+            <span id="resume-progress-label">Preparing checks…</span>
+          </div>
+          <div class="progress-track"><div id="resume-progress-fill"></div></div>
+          <div class="progress-steps"><span>Bullets</span><span>Verbs</span><span>Impact</span><span>Roles</span></div>
         </div>
-
-      </form>
-
-
-      <!-- =====================================================
-           SCORE PROGRESS
-      ====================================================== -->
-
-      <div
-        id="score-progress"
-        class="scan-progress"
-        hidden
-      >
-
-        <div class="progress-head">
-
-          <strong>
-            Analyzing resume
-          </strong>
-
-          <span id="resume-progress-label">
-            Preparing checks…
-          </span>
-
-        </div>
-
-
-        <div class="progress-track">
-
-          <div id="resume-progress-fill"></div>
-
-        </div>
-
-
-        <div class="progress-steps">
-
-          <span>Bullets</span>
-          <span>Verbs</span>
-          <span>Impact</span>
-          <span>Keywords</span>
-
-        </div>
-
       </div>
 
+      <!-- DECORATIVE SCAN EXAMPLE (visual only, not functional) -->
+      <div class="scan-mock">
+        <div class="scan-mock-header">
+          <span class="scan-mock-dot"></span><span class="scan-mock-dot"></span><span class="scan-mock-dot"></span>
+          <span class="scan-mock-title">RESUME SCAN · EXAMPLE</span>
+        </div>
+        <div class="scan-mock-paper">
+          <div class="scan-line"></div>
+          <div class="scan-mock-badge">95<small>/100</small></div>
 
-      <!-- =====================================================
-           RESULT
-      ====================================================== -->
+          <div class="scan-mock-name">Jordan Rivera</div>
+          <div class="scan-mock-contact">city · email · linkedin</div>
+          <div class="scan-mock-section">EXPERIENCE</div>
 
-      <div
-        id="resume-result"
-        class="detector-result"
-        hidden
-      ></div>
+          <div class="scan-mock-line">
+            <span>Led a team of 5 engineers, cutting deploy time 40%</span>
+            <span class="scan-mock-tag good">strong ✓</span>
+          </div>
+          <div class="scan-mock-line">
+            <span>Managed 10 client accounts, renewing 95% of contracts</span>
+            <span class="scan-mock-tag good">strong ✓</span>
+          </div>
+          <div class="scan-mock-line">
+            <span>Built an email toolkit, saving 5+ hours per week</span>
+            <span class="scan-mock-tag good">strong ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-mock-caption">
+        Powered by a machine learning model trained on real resumes — 78% accuracy across 32 job roles.
+      </div>
 
     </div>
+
+    <!-- RESULTS DASHBOARD (hidden until scored) -->
+    <div id="results-view" hidden>
+      <div class="results-topbar">
+        <strong>Your resume report</strong>
+        <div style="display:flex; gap:10px;">
+          <button type="button" id="download-btn" class="btn btn-nav">⬇ Download Report</button>
+          <button type="button" id="rescan-btn" class="btn btn-nav">↺ Score another resume</button>
+        </div>
+      </div>
+
+      <div class="report-summary-row" id="summary-row"></div>
+      <div class="report-detail-grid" id="detail-grid"></div>
+    </div>
+
+    <!-- PRINT-ONLY REPORT (invisible on screen, shown only when printing/saving as PDF) -->
+    <div id="print-report" class="print-only"></div>
 
   </div>
 </main>
 
-
-<!-- =========================================================
-     UPLOAD / PASTE TOGGLE + SUBMIT + RESULT RENDER
-========================================================== -->
-
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
 
-  const uploadToggle =
-    document.getElementById("upload-toggle");
-
-  const pasteToggle =
-    document.getElementById("paste-toggle");
-
-  const pasteMode =
-    document.getElementById("paste-mode");
-
-  const uploadMode =
-    document.getElementById("upload-mode");
-
-  const resumeInput =
-    document.getElementById("resume");
-
-  const resumeFileName =
-    document.getElementById("resume-file-name");
-
+  const uploadToggle = document.getElementById("upload-toggle");
+  const pasteToggle = document.getElementById("paste-toggle");
+  const pasteMode = document.getElementById("paste-mode");
+  const uploadMode = document.getElementById("upload-mode");
+  const resumeInput = document.getElementById("resume");
+  const resumeFileName = document.getElementById("resume-file-name");
+  const resumeTextArea = document.getElementById("resume_text");
+  const previewBox = document.getElementById("resume-preview");
+  const domainSelect = document.getElementById("domain_select");
 
   if (uploadToggle && pasteToggle && pasteMode && uploadMode) {
-
     uploadToggle.addEventListener("click", () => {
-      pasteMode.hidden = true;
-      uploadMode.hidden = false;
-      uploadToggle.hidden = true;
+      pasteMode.hidden = true; uploadMode.hidden = false; uploadToggle.hidden = true;
     });
-
     pasteToggle.addEventListener("click", () => {
-      uploadMode.hidden = true;
-      pasteMode.hidden = false;
-      uploadToggle.hidden = false;
+      uploadMode.hidden = true; pasteMode.hidden = false; uploadToggle.hidden = false;
     });
-
     if (resumeInput) {
-
       resumeInput.addEventListener("change", () => {
-
-        if (resumeInput.files.length > 0) {
-          resumeFileName.textContent =
-            "Selected: " + resumeInput.files[0].name;
-        } else {
-          resumeFileName.textContent =
-            "No file selected.";
-        }
-
+        resumeFileName.textContent = resumeInput.files.length > 0
+          ? "Selected: " + resumeInput.files[0].name
+          : "No file selected.";
       });
-
     }
-
   }
 
+  function renderPreview() {
+    const text = resumeTextArea.value;
+    if (!text.trim()) {
+      previewBox.innerHTML = '<div class="resume-preview-empty">Your resume text will appear here, split line by line.</div>';
+      return;
+    }
+    const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    previewBox.innerHTML = lines.map(l => `<div class="resume-preview-line">${escapeHtml(l)}</div>`).join("");
+  }
+  if (resumeTextArea) {
+    resumeTextArea.addEventListener("input", renderPreview);
+  }
 
-  const form =
-    document.getElementById("resume-form");
+  fetch("/api/domain-list")
+    .then(r => r.json())
+    .then(data => {
+      (data.domains || []).sort().forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d.replace(/-/g, " ");
+        domainSelect.appendChild(opt);
+      });
+    });
 
+  const form = document.getElementById("resume-form");
   if (!form) return;
 
+  const introHero = document.getElementById("intro-hero");
+  const inputSection = document.getElementById("input-section");
+  const resultsView = document.getElementById("results-view");
+  const summaryRow = document.getElementById("summary-row");
+  const detailGrid = document.getElementById("detail-grid");
+  const progress = document.getElementById("score-progress");
+  const fill = document.getElementById("resume-progress-fill");
+  const label = document.getElementById("resume-progress-label");
+  const button = document.getElementById("score-btn");
+  const rescanBtn = document.getElementById("rescan-btn");
+  const downloadBtn = document.getElementById("download-btn");
+  const printReport = document.getElementById("print-report");
 
-  const result =
-    document.getElementById("resume-result");
+  downloadBtn.addEventListener("click", () => {
+    window.print();
+  });
 
-  const progress =
-    document.getElementById("score-progress");
-
-  const fill =
-    document.getElementById("resume-progress-fill");
-
-  const label =
-    document.getElementById("resume-progress-label");
-
-  const button =
-    document.getElementById("score-btn");
-
+  rescanBtn.addEventListener("click", () => {
+    resultsView.hidden = true;
+    introHero.hidden = false;
+    inputSection.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   form.addEventListener("submit", async (e) => {
-
     e.preventDefault();
 
-
-    const textElement =
-      document.getElementById("resume_text");
-
-    const text =
-      textElement ? textElement.value.trim() : "";
-
-    const fileSelected =
-      resumeInput &&
-      resumeInput.files &&
-      resumeInput.files.length > 0;
-
+    const text = resumeTextArea.value.trim();
+    const fileSelected = resumeInput && resumeInput.files && resumeInput.files.length > 0;
 
     if (!text && !fileSelected) {
-
-      result.hidden = false;
-
-      result.innerHTML =
-        '<div class="notice">' +
-        'Paste your resume text or upload a PDF/DOCX file before scoring.' +
-        '</div>';
-
-      if (textElement) {
-        textElement.focus();
-      }
-
+      alert("Paste your resume text or upload a PDF/DOCX file before scoring.");
       return;
     }
 
-
     button.disabled = true;
     button.style.opacity = ".65";
-
     progress.hidden = false;
-    result.hidden = true;
 
-    fill.style.width = "0%";
-    label.textContent = "Preparing checks...";
-
-
-    const scanSteps = [
-      [25, "Reading resume content..."],
-      [50, "Checking verbs and impact..."],
-      [75, "Matching against job description..."],
-      [92, "Calculating score..."]
-    ];
-
+    const steps = [[25, "Reading resume..."], [50, "Checking bullets..."], [75, "Matching roles..."], [92, "Finishing up..."]];
 
     try {
-
-      for (const step of scanSteps) {
-        await wait(200);
+      for (const step of steps) {
+        await wait(180);
         fill.style.width = step[0] + "%";
         label.textContent = step[1];
       }
 
+      const scoreForm = new FormData(form);
+      const scoreResponse = await fetch("/api/screen-resume", { method: "POST", body: scoreForm });
+      const scoreData = await scoreResponse.json();
+      if (!scoreResponse.ok) throw new Error(scoreData.error || "Scoring failed.");
 
-      const payload = new FormData(form);
+      const autoForm = new FormData(form);
+      autoForm.delete("domain");
+      const autoResponse = await fetch("/api/screen-domain", { method: "POST", body: autoForm });
+      const autoData = await autoResponse.json();
+      if (!autoResponse.ok) throw new Error(autoData.error || "Role detection failed.");
 
-      const response =
-        await fetch("/api/screen-resume", {
-          method: "POST",
-          body: payload
-        });
-
-      let data;
-
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        throw new Error("The server returned an invalid response.");
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || "Scoring failed.");
+      let preferredData = null;
+      const chosenDomain = domainSelect.value;
+      if (chosenDomain) {
+        const preferredForm = new FormData(form);
+        preferredForm.set("domain", chosenDomain);
+        const preferredResponse = await fetch("/api/screen-domain", { method: "POST", body: preferredForm });
+        preferredData = await preferredResponse.json();
+        if (!preferredResponse.ok) throw new Error(preferredData.error || "Preferred role check failed.");
       }
 
       fill.style.width = "100%";
-      label.textContent = "Scoring complete.";
+      label.textContent = "Done.";
+      await wait(200);
 
-      await wait(250);
+      renderDashboard(scoreData, autoData, preferredData);
 
-      renderResumeResult(data);
+      introHero.hidden = true;
+      inputSection.hidden = true;
+      resultsView.hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (error) {
-
       console.error("JobShield resume scoring error:", error);
-
-      result.hidden = false;
-
-      result.innerHTML =
-        '<div class="notice">' +
-        escapeHtml(error.message || "The resume could not be scored.") +
-        "</div>";
-
+      alert(error.message || "The resume could not be scored.");
     } finally {
-
       button.disabled = false;
       button.style.opacity = "1";
-
+      progress.hidden = true;
     }
-
   });
 
-
-  function renderResumeResult(data) {
-
-    const score = Number(data.score ?? 0);
-
-    const lineFeedback = data.line_feedback || [];
-
-    const jdMatch = data.jd_match || null;
-
-    const verdictClass =
-      score >= 80 ? "safe" :
-      score >= 50 ? "medium" :
-      "risky";
-
-    const verdictLabel =
-      score >= 80 ? "Strong resume" :
-      score >= 50 ? "Needs work" :
-      "Weak resume";
-
-
-    const lineRows =
-      lineFeedback.length
-        ? lineFeedback.map((item) => {
-
-            const rowClass =
-              item.status === "strong" || item.status === "good"
-                ? "good"
-                : item.status === "needs work"
-                  ? "warn"
-                  : "neutral";
-
-            const flagText =
-              (item.flags || []).join(", ");
-
-            return `
-              <div class="metric">
-                <span>${escapeHtml(item.line)}</span>
-                <strong class="${rowClass}">${escapeHtml(flagText)}</strong>
-              </div>
-            `;
-
-          }).join("")
-        : '<div class="neutral">No bullets found to review.</div>';
-
-
-    let jdSection = "";
-
-    if (jdMatch) {
-
-      const matchedTags =
-        (jdMatch.matched_keywords || [])
-          .map((k) => `<span class="keyword-tag matched">${escapeHtml(k)}</span>`)
-          .join("");
-
-      const missingTags =
-        (jdMatch.missing_keywords || [])
-          .map((k) => `<span class="keyword-tag missing">${escapeHtml(k)}</span>`)
-          .join("");
-
-      jdSection = `
-        <div class="report-card">
-          <h3>Job description match — ${escapeHtml(String(jdMatch.relevancy_score))}%</h3>
-          <div style="margin-bottom:10px;">
-            ${matchedTags || '<span class="neutral">No keywords matched yet.</span>'}
-          </div>
-          <div style="opacity:.75; font-size:.85em; margin-bottom:6px;">Missing from your resume:</div>
-          <div>
-            ${missingTags || '<span class="neutral">Nothing missing — great match.</span>'}
-          </div>
-        </div>
-      `;
-
-    }
-
-
-    result.hidden = false;
-
-    result.innerHTML = `
-      <div class="result-hero">
-        <div>
-          <div class="result-score">
-            <span id="animated-resume-score">0</span>
-            <small>RESUME SCORE / 100</small>
-          </div>
-        </div>
-
-        <div>
-          <div class="verdict ${verdictClass}">${escapeHtml(verdictLabel)}</div>
-          <h2>Resume report</h2>
-          <p>${escapeHtml(data.summary || "Review the bullet feedback below.")}</p>
-        </div>
+  function scoreRing(pct, title, subtitle) {
+    const safePct = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+    return `
+      <div class="score-ring-card">
+        <div class="score-ring" style="--pct:${safePct}"><span>${safePct}</span></div>
+        <div class="score-ring-label">${escapeHtml(title)}${subtitle ? `<small>${escapeHtml(subtitle)}</small>` : ""}</div>
       </div>
+    `;
+  }
 
-      <div class="report-grid">
-        <div class="report-card">
-          <h3>Bullet-by-bullet feedback</h3>
-          ${lineRows}
-        </div>
+  function confidenceBlock(detection) {
+    if (!detection) return "";
+    const rows = detection.ranked_domains.slice(0, 4).map(d => `
+      <div class="confidence-row">
+        <span class="confidence-name">${escapeHtml(d.domain.replace(/-/g, " "))}</span>
+        <div class="confidence-bar"><div style="width:${d.score}%"></div></div>
+        <span class="confidence-pct">${d.score}%</span>
+      </div>
+    `).join("");
+    const statement = detection.confident
+      ? '<div class="confidence-statement good">✓ We\'re confident this is the right role.</div>'
+      : '<div class="confidence-statement warn">This is uncertain — check the alternatives below.</div>';
+    return `${statement}<div class="confidence-bars">${rows}</div>`;
+  }
 
-        ${jdSection}
+  function skillsColumns(skills) {
+    const presentTags = (skills.present_skills || []).map(s => `<span class="keyword-tag matched">${escapeHtml(s)}</span>`).join("");
+    const missingTags = (skills.missing_skills || []).map(s => `<span class="keyword-tag missing">${escapeHtml(s)}</span>`).join("");
+    return `
+      <div class="skills-columns">
+        <div><h4>Skills you have</h4><div>${presentTags || '<span class="neutral">None matched yet.</span>'}</div></div>
+        <div><h4>Skills you're missing</h4><div>${missingTags || '<span class="neutral">Nothing missing.</span>'}</div></div>
+      </div>
+    `;
+  }
+
+  function renderDashboard(scoreData, autoData, preferredData) {
+    const score = Number(scoreData.score ?? 0);
+    const verdictClass = score >= 80 ? "safe" : score >= 50 ? "medium" : "risky";
+    const verdictLabel = score >= 80 ? "Strong resume" : score >= 50 ? "Needs work" : "Weak resume";
+
+    let summaryHtml = scoreRing(score, "Resume Quality");
+    summaryHtml += scoreRing(autoData.skills ? autoData.skills.coverage : 0, (autoData.domain || "").replace(/-/g, " "), "Auto-detected");
+    if (preferredData) {
+      summaryHtml += scoreRing(preferredData.skills ? preferredData.skills.coverage : 0, (preferredData.domain || "").replace(/-/g, " "), "Your preferred role");
+    }
+    summaryRow.innerHTML = summaryHtml;
+
+    let detailHtml = `
+      <div class="report-card">
+        <h3>Resume Quality <span class="verdict ${verdictClass}">${escapeHtml(verdictLabel)}</span></h3>
+        <p>${escapeHtml(scoreData.summary || "")}</p>
+      </div>
+      <div class="report-card">
+        <h3>Auto-detected role: ${escapeHtml((autoData.domain || "").replace(/-/g, " "))}</h3>
+        ${confidenceBlock(autoData.detection)}
+        ${skillsColumns(autoData.skills || {})}
       </div>
     `;
 
-    animateResumeScore(score);
+    if (preferredData) {
+      detailHtml += `
+        <div class="report-card">
+          <h3>Your preferred role: ${escapeHtml((preferredData.domain || "").replace(/-/g, " "))}</h3>
+          ${skillsColumns(preferredData.skills || {})}
+        </div>
+      `;
+    }
 
-    result.scrollIntoView({ behavior: "smooth", block: "start" });
+    detailGrid.innerHTML = detailHtml;
 
+    buildPrintReport(scoreData, autoData, preferredData, score, verdictLabel);
   }
 
-
-  function animateResumeScore(targetScore) {
-
-    const scoreElement =
-      document.getElementById("animated-resume-score");
-
-    if (!scoreElement) return;
-
-    targetScore = Math.max(0, Math.min(100, Math.round(Number(targetScore) || 0)));
-
-    let currentScore = 0;
-    scoreElement.textContent = "0";
-
-    if (targetScore === 0) return;
-
-    const animation = setInterval(() => {
-      currentScore++;
-      scoreElement.textContent = String(currentScore);
-      if (currentScore >= targetScore) {
-        clearInterval(animation);
-        scoreElement.textContent = String(targetScore);
-      }
-    }, 30);
-
+  function printSkillList(title, items) {
+    if (!items || !items.length) return `<p><strong>${escapeHtml(title)}:</strong> None</p>`;
+    return `<p><strong>${escapeHtml(title)}:</strong> ${items.map(escapeHtml).join(", ")}</p>`;
   }
 
+  function buildPrintReport(scoreData, autoData, preferredData, score, verdictLabel) {
+    const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    const autoSkills = autoData.skills || {};
 
-  function wait(milliseconds) {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    let html = `
+      <h1>JobShield Resume Report</h1>
+      <p class="print-date">Generated ${escapeHtml(today)}</p>
+
+      <h2>Resume Quality — ${score}/100 (${escapeHtml(verdictLabel)})</h2>
+      <p>${escapeHtml(scoreData.summary || "")}</p>
+
+      <h2>Auto-Detected Role: ${escapeHtml((autoData.domain || "").replace(/-/g, " "))}</h2>
+      <p>Role Match Score: ${autoSkills.coverage ?? 0}/100 &nbsp;|&nbsp; Confidence: ${autoData.detection ? autoData.detection.best_score : "-"}%</p>
+      ${printSkillList("Skills you have", autoSkills.present_skills)}
+      ${printSkillList("Skills you're missing", autoSkills.missing_skills)}
+    `;
+
+    if (preferredData) {
+      const prefSkills = preferredData.skills || {};
+      html += `
+        <h2>Your Preferred Role: ${escapeHtml((preferredData.domain || "").replace(/-/g, " "))}</h2>
+        <p>Role Match Score: ${prefSkills.coverage ?? 0}/100</p>
+        ${printSkillList("Skills you have", prefSkills.present_skills)}
+        ${printSkillList("Skills you're missing", prefSkills.missing_skills)}
+      `;
+    }
+
+    html += `<p class="print-footer">Generated by JobShield — jobshield.example</p>`;
+
+    printReport.innerHTML = html;
   }
 
+  function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
   function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, (character) => {
-      const entities = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      };
-      return entities[character];
-    });
+    return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
   }
-
 });
-
 </script>
 
 {% endblock %}
