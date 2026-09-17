@@ -1,205 +1,211 @@
-"""Rule-based JobShield resume screening engine.
+"""Multi-dimensional JobShield resume screening engine.
 
-Scores candidate resumes dynamically across:
-  - Action verb strength & diversity
-  - Quantified impact vs. qualitative accomplishment
-  - Brevity, active voice, and weak/passive phrase detection
-  - Dynamic, multi-point feedback generation
+Replaces rigid line-by-line checks with holistic ATS evaluation:
+  1. Section & Structural Completeness (25 pts)
+  2. Content Depth & Vocabulary Volume (25 pts)
+  3. Action & Competency Density (25 pts)
+  4. Credibility & Measurable Impact (25 pts)
 """
 import re
 
-STRONG_VERBS = {
-    # Leadership & Management
-    "led", "managed", "directed", "coordinated", "orchestrated", "supervised",
-    "steered", "guided", "championed", "headed", "spearheaded", "mentored",
-    # Development, Technical & Creation
-    "built", "designed", "developed", "engineered", "implemented", "architected",
-    "programmed", "coded", "constructed", "created", "authored", "deployed",
-    # Research, Analysis & Investigation
-    "analyzed", "researched", "investigated", "evaluated", "assessed", "audited",
-    "identified", "formulated", "synthesized", "modeled", "mapped", "examined",
-    # Optimization & Execution
-    "reduced", "increased", "optimized", "automated", "accelerated", "streamlined",
-    "delivered", "negotiated", "executed", "transformed", "boosted", "consolidated",
-    "resolved", "achieved", "strengthened", "saved", "cut", "scaled", "expanded",
-    "standardized", "facilitated", "integrated", "organized", "drafted"
+STRONG_ACTION_WORDS = {
+    # Engineering / Tech
+    "developed", "designed", "implemented", "engineered", "built", "architected",
+    "deployed", "configured", "automated", "optimized", "integrated", "programmed",
+    # Research / Analysis / Legal
+    "researched", "analyzed", "investigated", "evaluated", "formulated", "compiled",
+    "drafted", "structured", "examined", "assessed", "reviewed", "documented",
+    # Leadership / Management
+    "led", "spearheaded", "managed", "coordinated", "supervised", "directed",
+    "orchestrated", "guided", "mentored", "oversaw", "planned", "executed",
+    # Growth / Results
+    "increased", "reduced", "scaled", "delivered", "accelerated", "saved",
+    "achieved", "expanded", "negotiated", "resolved", "collaborated"
 }
 
-WEAK_VERBS = {
-    "helped", "assisted", "worked", "tried", "supported", "handled", "did",
-    "participated", "contributed", "tasked", "responsible", "involved"
+WEAK_WORDS = {
+    "helped", "assisted", "tried", "attempted", "participated", "involved"
 }
 
-VAGUE_PHRASES = [
-    "responsible for", "helped with", "worked on", "in charge of",
-    "duties included", "general support", "various projects", "various tasks",
-    "day to day", "day-to-day", "assigned to", "etc"
-]
-
-HEADER_KEYWORDS = {
-    "education", "skills", "experience", "projects", "activities", "summary",
-    "objective", "certifications", "strengths", "interests", "profile", "achievements"
+SECTIONS = {
+    "contact": [r"\bemail\b", r"\bphone\b", r"\blinkedin\b", r"\bgithub\b", r"@", r"\b\d{10}\b"],
+    "summary": [r"summary", r"objective", r"profile", r"about me"],
+    "experience_projects": [r"experience", r"project", r"projects", r"internship", r"work history"],
+    "education": [r"education", r"university", r"college", r"degree", r"bachelor", r"b\.?tech", r"rgukt"],
+    "skills": [r"skills", r"technical skills", r"competencies", r"technologies", r"tools"]
 }
 
-METRIC_PATTERN = re.compile(
-    r"(\b\d+(\.\d+)?\s*%|\$\s?\d|₹\s?\d|\b\d+[kKmMbB]?\+?\b|\b(one|two|three|four|five|ten|twenty|hundred|thousand)\b)",
-    re.IGNORECASE
-)
-
-STOPWORDS = {
-    "the", "and", "for", "with", "a", "an", "to", "of", "in", "on", "at",
-    "is", "are", "be", "as", "or", "will", "we", "you", "your", "our",
-    "this", "that", "must", "have", "has", "role", "job", "experience",
-    "years", "year", "work", "working", "team", "including", "etc",
-    "strong", "ability", "skills", "using", "who", "their", "they",
-    "looking", "seeking", "candidate", "candidates", "plus", "preferred",
-    "required", "ideal", "position", "responsibilities", "please",
-    "someone", "person", "individual", "applicant"
-}
+METRIC_REGEX = re.compile(r"(\b\d+(\.\d+)?%|\$\d+|\b₹\d+|\b\d+\s*(years?|months?|lpa|cr|k|m)\b|\b\d{1,4}\b)", re.IGNORECASE)
 
 
-def _is_header_or_metadata(line):
-    clean = line.strip().lower()
-    if len(clean) < 4:
-        return True
-    if clean.rstrip(":") in HEADER_KEYWORDS:
-        return True
-    # Emails, phone numbers, links
-    if re.search(r"@|linkedin\.com|github\.com|\+?\d{2,4}[-\s]?\d{3,5}", clean):
-        return True
-    # Skills list separators (e.g. "Research • Documentation • Analysis")
-    if clean.count("•") >= 2 or clean.count("|") >= 2 or clean.count(",") >= 4:
-        return True
-    return False
+def _evaluate_structure(text):
+    text_lower = text.lower()
+    points = 0
+    found_sections = []
+    missing_sections = []
+
+    for section, patterns in SECTIONS.items():
+        if any(re.search(pat, text_lower) for pat in patterns):
+            points += 5
+            found_sections.append(section)
+        else:
+            missing_sections.append(section)
+
+    return min(25, points), found_sections, missing_sections
 
 
-def _split_experience_bullets(text):
-    raw_lines = (text or "").splitlines()
-    bullets = []
-    for raw in raw_lines:
-        line = raw.strip(" \t-•*–—").strip()
-        if len(line) < 15:
-            continue
-        if _is_header_or_metadata(line):
-            continue
-        bullets.append(line)
-    return bullets
+def _evaluate_depth(text):
+    words = re.findall(r"\b[a-zA-Z]{3,}\b", text)
+    word_count = len(words)
+    unique_words = len(set(w.lower() for w in words))
+
+    # Well-developed resumes typically have 250-700 words
+    if word_count < 80:
+        return 5, "Thin resume content"
+    if word_count < 160:
+        return 12, "Moderate content volume"
+    if word_count < 280:
+        return 19, "Good content volume"
+    return 25, "Substantial professional content"
 
 
-def _find_action_verb(line):
-    """Scans the first 3 tokens of a line to support adverbs like 'Successfully led'."""
-    tokens = re.findall(r"[a-zA-Z]+", line.lower())[:3]
-    for token in tokens:
-        if token in STRONG_VERBS:
-            return "strong", token
-        if token in WEAK_VERBS:
-            return "weak", token
-    return "none", None
+def _evaluate_action_density(text):
+    text_lower = text.lower()
+    tokens = set(re.findall(r"\b[a-zA-Z]+\b", text_lower))
+
+    action_matches = tokens.intersection(STRONG_ACTION_WORDS)
+    weak_matches = tokens.intersection(WEAK_WORDS)
+
+    count = len(action_matches)
+    # 8+ distinct action verbs reflects high initiative and clarity
+    if count >= 8:
+        score = 25
+    elif count >= 5:
+        score = 20
+    elif count >= 3:
+        score = 15
+    elif count >= 1:
+        score = 10
+    else:
+        score = 5
+
+    if len(weak_matches) > 3:
+        score = max(5, score - 5)
+
+    return score, list(action_matches)[:8]
+
+
+def _evaluate_impact_and_credibility(text):
+    metrics = METRIC_REGEX.findall(text)
+    metric_count = len(metrics)
+
+    links_present = bool(re.search(r"(linkedin\.com|github\.com|portfolio|http)", text, re.I))
+
+    score = 0
+    if metric_count >= 5:
+        score += 15
+    elif metric_count >= 2:
+        score += 10
+    elif metric_count >= 1:
+        score += 6
+    else:
+        score += 2
+
+    if links_present:
+        score += 5
+    if len(text.splitlines()) >= 15:
+        score += 5
+
+    return min(25, score), metric_count
+
+
+def _build_dynamic_summary(score, sections_found, action_words, metric_count):
+    points = []
+    
+    if "experience_projects" in sections_found and "skills" in sections_found:
+        points.append("Core experience and technical proficiencies are clearly outlined.")
+    
+    if len(action_words) >= 4:
+        sample_verbs = ", ".join(action_words[:3])
+        points.append(f"Employs dynamic action verbs such as '{sample_verbs}'.")
+    else:
+        points.append("Consider replacing passive phrases with assertive verbs (e.g., spearheaded, engineered, compiled).")
+
+    if metric_count >= 3:
+        points.append("Features verifiable data points and quantitative indicators.")
+    else:
+        points.append("Adding quantifiable outcomes (percentages, project scales, or user numbers) will further improve impact.")
+
+    if score >= 80:
+        headline = "Strong, competitive resume profile with clear structural clarity."
+    elif score >= 65:
+        headline = "Solid resume foundation with good domain articulation."
+    elif score >= 50:
+        headline = "Moderate resume presentation with scope for stronger results."
+    else:
+        headline = "Early-stage draft requiring more comprehensive project details and metrics."
+
+    return f"{headline} {' '.join(points)}"
 
 
 def score_resume(text):
-    bullets = _split_experience_bullets(text)
-    if not bullets:
+    clean_text = (text or "").strip()
+    if not clean_text:
         return {
-            "score": 40,
+            "score": 0,
             "bullet_count": 0,
             "line_feedback": [],
-            "summary": "Could not identify distinct experience bullets. Add clear action-oriented bullet points under your project and experience sections."
+            "summary": "No resume text detected. Please paste your text or upload a PDF/DOCX file."
         }
 
+    struct_score, found_secs, missing_secs = _evaluate_structure(clean_text)
+    depth_score, depth_label = _evaluate_depth(clean_text)
+    action_score, action_words = _evaluate_action_density(clean_text)
+    impact_score, metric_count = _evaluate_impact_and_credibility(clean_text)
+
+    raw_score = struct_score + depth_score + action_score + impact_score
+    final_score = max(15, min(98, raw_score))
+
+    # Construct line feedback for visual inspector
+    raw_lines = [l.strip() for l in clean_text.splitlines() if len(l.strip()) > 15]
     line_feedback = []
-    strong_verb_count = 0
-    weak_verb_count = 0
-    metric_count = 0
-    vague_count = 0
-
-    for line in bullets:
+    for line in raw_lines[:15]:
+        has_verb = any(v in line.lower().split()[:3] for v in STRONG_ACTION_WORDS)
+        has_num = bool(METRIC_REGEX.search(line))
+        
         flags = []
-        verb_status, matched_verb = _find_action_verb(line)
-        has_metric = bool(METRIC_PATTERN.search(line))
-        is_vague = any(phrase in line.lower() for phrase in VAGUE_PHRASES)
+        if has_verb:
+            flags.append("strong verb")
+        if has_num:
+            flags.append("quantified")
+        if not flags:
+            flags.append("descriptive")
 
-        line_score = 0
+        status = "strong" if (has_verb and has_num) else ("good" if (has_verb or has_num) else "needs work")
+        line_feedback.append({"line": line, "status": status, "flags": flags})
 
-        if verb_status == "strong":
-            strong_verb_count += 1
-            line_score += 2
-            flags.append(f"Strong action verb ({matched_verb})")
-        elif verb_status == "weak":
-            weak_verb_count += 1
-            flags.append("Passive or weak verb")
-        else:
-            flags.append("Missing clear action verb")
-
-        if has_metric:
-            metric_count += 1
-            line_score += 2
-            flags.append("Quantified impact")
-        else:
-            line_score += 1  # Standard qualitative bullet still gets base credit
-
-        if is_vague:
-            vague_count += 1
-            line_score = max(0, line_score - 1)
-            flags.append("Vague phrasing")
-
-        if line_score >= 3:
-            status = "strong"
-        elif line_score >= 2:
-            status = "good"
-        else:
-            status = "needs work"
-
-        line_feedback.append({
-            "line": line,
-            "status": status,
-            "flags": flags
-        })
-
-    total_bullets = len(bullets)
-    
-    # Balanced composite scoring (Base + Verbs + Impact - Vagueness)
-    verb_ratio = strong_verb_count / total_bullets
-    metric_ratio = metric_count / total_bullets
-    vague_ratio = vague_count / total_bullets
-
-    # Calculate final quality score (scale 0-100)
-    raw_score = 50 + (verb_ratio * 35) + (metric_ratio * 20) - (vague_ratio * 25)
-    final_score = max(35, min(95, round(raw_score)))
-
-    # Dynamic summary generation based on real data signals
-    insights = []
-    if verb_ratio >= 0.6:
-        insights.append(f"{round(verb_ratio * 100)}% of your bullets start with decisive action verbs.")
-    elif verb_ratio <= 0.3:
-        insights.append("Several bullets lack strong action verbs (e.g., Led, Built, Analyzed, Executed).")
-
-    if metric_ratio >= 0.4:
-        insights.append("Solid quantified evidence and measurable outcomes detected across roles.")
-    else:
-        insights.append("Include more specific metrics, percentages, or measurable scopes to highlight accomplishment.")
-
-    if vague_count > 0:
-        insights.append(f"Replace passive phrases like 'responsible for' or 'helped with' in {vague_count} flagged line(s).")
-    else:
-        insights.append("Clear, direct language throughout with zero ambiguous filler phrases.")
-
-    summary = " ".join(insights)
+    summary = _build_dynamic_summary(final_score, found_secs, action_words, metric_count)
 
     return {
         "score": final_score,
-        "bullet_count": total_bullets,
+        "bullet_count": len(raw_lines),
         "line_feedback": line_feedback,
         "summary": summary
     }
 
 
 def _keywords_from_jd(jd_text):
+    stopwords = {
+        "the", "and", "for", "with", "a", "an", "to", "of", "in", "on", "at",
+        "is", "are", "be", "as", "or", "will", "we", "you", "your", "our",
+        "this", "that", "must", "have", "has", "role", "job", "experience",
+        "years", "year", "work", "team", "skills", "candidate", "position"
+    }
     words = re.findall(r"[A-Za-z][A-Za-z+\-.#]{1,}", jd_text or "")
     seen, keywords = set(), []
     for w in words:
         wl = w.lower().strip(".")
-        if wl in STOPWORDS or len(wl) < 3:
+        if wl in stopwords or len(wl) < 3:
             continue
         if wl not in seen:
             seen.add(wl)
@@ -207,33 +213,11 @@ def _keywords_from_jd(jd_text):
     return keywords[:40]
 
 
-NEGATION_WORDS = {
-    "no", "not", "without", "lack", "lacking", "never", "none",
-    "unfamiliar", "excluding", "except", "n't", "nor", "neither"
-}
-
-
 def _is_negated_context(text_before_keyword):
     words = re.findall(r"[a-z']+", text_before_keyword.lower())
     window = words[-5:]
-    for w in window:
-        if w in NEGATION_WORDS or w.endswith("n't"):
-            return True
-    return False
-
-
-def _keyword_status(keyword, resume_lower):
-    pattern = re.compile(r"\b" + re.escape(keyword) + r"\b")
-    present_unnegated = False
-    present_negated = False
-    for m in pattern.finditer(resume_lower):
-        context_before = resume_lower[max(0, m.start() - 60):m.start()]
-        if _is_negated_context(context_before):
-            present_negated = True
-        else:
-            present_unnegated = True
-            break
-    return present_unnegated, present_negated
+    negation = {"no", "not", "without", "lack", "never", "none", "n't"}
+    return any(w in negation or w.endswith("n't") for w in window)
 
 
 def match_job_description(resume_text, jd_text):
@@ -245,12 +229,15 @@ def match_job_description(resume_text, jd_text):
     matched, missing, negated = [], [], []
 
     for k in keywords:
-        present_unnegated, present_negated = _keyword_status(k, resume_lower)
-        if present_unnegated:
-            matched.append(k)
-        elif present_negated:
-            missing.append(k)
-            negated.append(k)
+        pattern = re.compile(r"\b" + re.escape(k) + r"\b")
+        m = pattern.search(resume_lower)
+        if m:
+            ctx = resume_lower[max(0, m.start() - 50):m.start()]
+            if _is_negated_context(ctx):
+                negated.append(k)
+                missing.append(k)
+            else:
+                matched.append(k)
         else:
             missing.append(k)
 
@@ -261,12 +248,14 @@ def match_job_description(resume_text, jd_text):
         "matched_keywords": matched,
         "missing_keywords": missing,
         "negated_keywords": negated,
-        "keyword_total": len(keywords),
+        "keyword_total": len(keywords)
     }
 
 
 def analyze_resume(text, job_description=None):
     result = score_resume(text)
-    jd_match = match_job_description(text, job_description) if job_description else None
-    result["jd_match"] = jd_match
+    if job_description:
+        result["jd_match"] = match_job_description(text, job_description)
+    else:
+        result["jd_match"] = None
     return result
