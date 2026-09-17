@@ -1,13 +1,15 @@
+from datetime import datetime, timedelta, timezone
+import secrets
 from urllib.parse import urlparse
 
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_mail import Message
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from extensions import db, mail
 from forms import (
     LoginForm,
+    OTPVerifyForm,
     PasswordResetForm,
     PasswordResetRequestForm,
     SignupForm,
@@ -18,30 +20,6 @@ from models import User
 
 
 auth_bp = Blueprint("auth", __name__)
-
-
-def _serializer():
-    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt="jobshield-password-reset")
-
-
-def _make_reset_token(user):
-    # Include the current password hash fingerprint so a used reset token
-    # becomes invalid as soon as the password is changed.
-    password_fingerprint = (user.password_hash or "")[-32:]
-    return _serializer().dumps({"user_id": user.id, "password": password_fingerprint})
-
-
-def _get_reset_user(token):
-    try:
-        data = _serializer().loads(token, max_age=current_app.config["PASSWORD_RESET_EXPIRY"])
-        user = db.session.get(User, int(data["user_id"]))
-        if not user:
-            return None
-        if data.get("password", "") != (user.password_hash or "")[-32:]:
-            return None
-        return user
-    except (BadSignature, SignatureExpired, KeyError, TypeError, ValueError):
-        return None
 
 
 def _safe_next(default_endpoint="main.home"):
@@ -170,6 +148,10 @@ def google_callback():
     return redirect(url_for("main.home"))
 
 
+# ============================================================================
+# OTP PASSWORD RESET WORKFLOW (2-STEP)
+# ============================================================================
+
 @auth_bp.route("/password-reset", methods=["GET", "POST"])
 def password_reset_request():
     if current_user.is_authenticated:
@@ -177,71 +159,118 @@ def password_reset_request():
 
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data.strip().lower()).first()
-        if user:
-            token = _make_reset_token(user)
-            reset_url = url_for("auth.password_reset_from_key", token=token, _external=True)
+        email = form.email.data.strip().lower()
+        user = User.query.filter_by(email=email).first()
 
-            # Send the reset link through the SMTP account configured in .env.
-            # We deliberately keep the response generic so the page never reveals
-            # whether an email address belongs to a JobShield account.
+        if user:
+            otp_code = f"{secrets.randbelow(1_000_000):06d}"
+            expiry_time = datetime.now(timezone.utc) + timedelta(minutes=10)
+            user.set_reset_otp(otp_code, expiry_time)
+            db.session.commit()
+
+            session["reset_email"] = user.email
+            session["otp_verified"] = False
+
             if current_app.config.get("MAIL_USERNAME") and current_app.config.get("MAIL_PASSWORD"):
                 try:
                     msg = Message(
-                        subject="Reset your JobShield password",
+                        subject="Your JobShield Password Reset Code",
                         recipients=[user.email],
                         sender=current_app.config.get("MAIL_DEFAULT_SENDER") or current_app.config.get("MAIL_USERNAME"),
                     )
                     msg.body = (
-                        "We received a request to reset your JobShield password.\n\n"
-                        f"Reset your password using this link:\n{reset_url}\n\n"
-                        "This link expires in one hour. If you did not request this, you can ignore this email."
+                        f"Your JobShield verification code is: {otp_code}\n\n"
+                        "This code is valid for 10 minutes.\n"
+                        "If you did not request this, you can safely ignore this email."
                     )
                     msg.html = f"""
-                    <div style=\"font-family:Arial,sans-serif;line-height:1.6;color:#012624;max-width:600px;margin:auto\">
-                      <h2 style=\"margin-bottom:8px\">Reset your JobShield password</h2>
-                      <p>We received a request to reset your JobShield password.</p>
-                      <p><a href=\"{reset_url}\" style=\"display:inline-block;padding:12px 20px;background:#edfffe;color:#012624;text-decoration:none;border:1px solid #9ed9d5;border-radius:8px;font-weight:600\">Reset password</a></p>
-                      <p>This link expires in one hour. If you did not request this, you can ignore this email.</p>
+                    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#012624;max-width:550px;margin:auto;padding:24px;border:1px solid #e0f2f1;border-radius:12px;">
+                      <h2 style="margin-bottom:12px;color:#003734">Password Reset Code</h2>
+                      <p>Enter the 6-digit verification code below to proceed with resetting your password:</p>
+                      <div style="margin:24px 0;padding:16px;background:#edfffe;border:1px dashed #00827c;text-align:center;font-size:32px;font-weight:700;letter-spacing:6px;color:#012624;border-radius:8px">
+                        {otp_code}
+                      </div>
+                      <p style="font-size:13px;color:#707777;">This code expires in 10 minutes. If you did not make this request, no action is needed.</p>
                     </div>
                     """
                     mail.send(msg)
-                    current_app.logger.info("Password reset email sent to %s", user.email)
+                    current_app.logger.info("Password reset OTP sent to %s", user.email)
                 except Exception:
-                    current_app.logger.exception("Password reset email failed")
+                    current_app.logger.exception("Failed to send OTP email")
             else:
                 current_app.logger.warning(
-                    "Password reset requested for %s, but MAIL_USERNAME/MAIL_PASSWORD are not configured.",
+                    "MAIL credentials not configured. Development OTP for %s is %s",
                     user.email,
+                    otp_code,
                 )
-        flash("If an account exists for that email, a reset link has been sent.", "success")
-        return redirect(url_for("auth.password_reset_done"))
+
+        flash("If an account exists with that email, a 6-digit code has been sent.", "success")
+        return redirect(url_for("auth.password_reset_verify"))
 
     return render_template("password_reset.html", form=form, title="Reset Password")
 
 
-@auth_bp.route("/password-reset/done")
-def password_reset_done():
-    return render_template("password_reset_done.html", title="Reset Email Sent")
+@auth_bp.route("/password-reset/verify", methods=["GET", "POST"])
+def password_reset_verify():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.home"))
+
+    reset_email = session.get("reset_email")
+    if not reset_email:
+        flash("Please enter your email first.", "error")
+        return redirect(url_for("auth.password_reset_request"))
+
+    form = OTPVerifyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=reset_email).first()
+        entered_otp = form.otp.data.strip()
+
+        if not user or not user.verify_reset_otp(entered_otp):
+            flash("Invalid or expired code. Please verify and try again.", "error")
+            return render_template("password_reset_verify.html", form=form, email=reset_email, title="Enter Verification Code")
+
+        # Mark OTP as verified in session to unlock Step 2
+        session["otp_verified"] = True
+        flash("Code verified successfully. Now create your new password.", "success")
+        return redirect(url_for("auth.password_reset_set_password"))
+
+    return render_template("password_reset_verify.html", form=form, email=reset_email, title="Enter Verification Code")
 
 
-@auth_bp.route("/password-reset/<token>", methods=["GET", "POST"])
-def password_reset_from_key(token):
-    user = _get_reset_user(token)
-    if not user:
-        flash("That password reset link is invalid or expired.", "error")
+@auth_bp.route("/password-reset/set-password", methods=["GET", "POST"])
+def password_reset_set_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.home"))
+
+    reset_email = session.get("reset_email")
+    otp_verified = session.get("otp_verified")
+
+    # Gatekeep: Must have successfully passed OTP verification
+    if not reset_email or not otp_verified:
+        flash("Please verify your code first.", "error")
         return redirect(url_for("auth.password_reset_request"))
 
     form = PasswordResetForm()
     if form.validate_on_submit():
+        user = User.query.filter_by(email=reset_email).first()
+        if not user:
+            flash("Account error. Please try again.", "error")
+            return redirect(url_for("auth.password_reset_request"))
+
         user.set_password(form.password1.data)
+        user.clear_reset_otp()
         db.session.commit()
-        flash("Your password has been reset. You can now log in.", "success")
-        return redirect(url_for("auth.password_reset_from_key_done"))
+
+        # Clean session
+        session.pop("reset_email", None)
+        session.pop("otp_verified", None)
+
+        flash("Your password has been reset successfully. You can now log in.", "success")
+        return redirect(url_for("auth.password_reset_complete"))
 
     return render_template("password_reset_from_key.html", form=form, title="Set New Password")
 
 
 @auth_bp.route("/password-reset/complete")
-def password_reset_from_key_done():
+def password_reset_complete():
     return render_template("password_reset_from_key_done.html", title="Password Updated")

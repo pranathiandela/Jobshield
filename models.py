@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -15,7 +15,11 @@ class User(UserMixin, db.Model):
     google_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
     needs_username = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    # Fields for OTP-based password reset
+    reset_otp_hash = db.Column(db.String(255), nullable=True)
+    reset_otp_expiry = db.Column(db.DateTime, nullable=True)
 
     scans = db.relationship(
         "Scan",
@@ -41,6 +45,26 @@ class User(UserMixin, db.Model):
             password
         )
 
+    def set_reset_otp(self, otp_code, expiry_dt):
+        self.reset_otp_hash = generate_password_hash(otp_code)
+        # Store as naive UTC datetime for clean SQLite storage
+        if expiry_dt.tzinfo is not None:
+            expiry_dt = expiry_dt.astimezone(timezone.utc).replace(tzinfo=None)
+        self.reset_otp_expiry = expiry_dt
+
+    def verify_reset_otp(self, otp_code):
+        if not self.reset_otp_hash or not self.reset_otp_expiry:
+            return False
+        # Compare current UTC against stored UTC
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        if now_utc > self.reset_otp_expiry:
+            return False
+        return check_password_hash(self.reset_otp_hash, otp_code)
+
+    def clear_reset_otp(self):
+        self.reset_otp_hash = None
+        self.reset_otp_expiry = None
+
 
 class UserProfile(db.Model):
     __tablename__ = "user_profiles"
@@ -55,14 +79,12 @@ class UserProfile(db.Model):
         index=True
     )
 
-    # "upload" or "character"
     avatar_type = db.Column(
         db.String(20),
         nullable=False,
         default="character"
     )
 
-    # Uploaded filename or emoji character
     avatar_value = db.Column(
         db.String(255),
         nullable=True
@@ -70,14 +92,14 @@ class UserProfile(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
         nullable=False
     )
 
     updated_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False
     )
 
@@ -96,7 +118,7 @@ class Scan(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
         index=True
     )
@@ -131,12 +153,11 @@ class Scan(db.Model):
 
     def get_result(self):
         import json
-
         try:
             return json.loads(self.result_json)
         except (TypeError, ValueError):
             return {}
-        
+
 
 @login_manager.user_loader
 def load_user(user_id):
