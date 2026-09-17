@@ -1,5 +1,361 @@
-{% extends 'base.html' %}{% block content %}
-<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">About &amp; Help</div><h1>Built to make job searches safer.</h1><p>JobShield is a college project focused on identifying suspicious job-posting patterns and helping applicants pause before sharing money or sensitive information.</p></div>
-<div class="cards"><div class="card"><h3>What we check</h3><p>Payment requests, unusual communication channels, unrealistic compensation, suspicious recruiter language, and other red flags.</p></div><div class="card"><h3>What the score means</h3><p>Low means fewer detected red flags, Medium means caution is recommended, and High means several strong warning signals were found.</p></div><div class="card"><h3>Need help?</h3><p>Start with Detector for a listing or Resume Screening for your CV. The project can later be connected to a trained ML model and external verification services.</p></div></div>
-</div></main>
+{% extends "base.html" %}
+
+{% block title %}About & Help | JobShield AI{% endblock %}
+
+{% block content %}
+<main class="page about-help-page">
+  <div class="wrap">
+
+    <!-- HERO -->
+    <section class="page-head">
+      <div class="eyebrow">About &amp; Help</div>
+
+      <h1 class="about-title-animate">
+        Understand how JobShield helps you search more safely.
+      </h1>
+
+      <p>
+        Learn about JobShield AI and discover how its detection and screening
+        features can help you evaluate job opportunities more carefully.
+      </p>
+    </section>
+
+    <!-- TABS -->
+    <div class="about-help-tabs" role="tablist" aria-label="About and Help">
+
+      <button
+        type="button"
+        class="about-help-tab active"
+        id="about-tab"
+        role="tab"
+        aria-selected="true"
+        aria-controls="about-panel">
+        About
+      </button>
+
+      <button
+        type="button"
+        class="about-help-tab"
+        id="help-tab"
+        role="tab"
+        aria-selected="false"
+        aria-controls="help-panel">
+        Help / FAQ
+      </button>
+
+    </div>
+
+    <!-- ABOUT PANEL -->
+    <section
+      id="about-panel"
+      class="about-help-panel active"
+      role="tabpanel"
+      aria-labelledby="about-tab">
+
+      <div class="section-heading">
+        <h2><span class="about-section-number">01</span> Who We Are &amp; Our Purpose</h2>
+        <p>
+          JobShield AI is a college project focused on helping job seekers
+          identify suspicious job opportunities before they share sensitive
+          information, make payments, or proceed without verification.
+        </p>
+      </div>
+
+      <div class="cards about-cards">
+
+        <div class="card">
+          <h3>Who we are</h3>
+          <p>
+            JobShield combines automated job analysis, suspicious-signal
+            detection, and machine-learning assessment into one platform
+            designed around safer job searching.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Our Mission</h3>
+          <p>
+            To help job seekers recognize potential warning signs and make
+            safer, more informed career decisions.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Our Vision</h3>
+          <p>
+            To contribute to a more transparent hiring ecosystem where people
+            can evaluate job opportunities with greater confidence.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="section-heading about-subheading">
+        <h2><span class="about-section-number">02</span> Our Principles</h2>
+        <p>What JobShield stands for.</p>
+      </div>
+
+      <div class="cards about-cards">
+
+        <div class="card">
+          <h3>Integrity</h3>
+          <p>
+            Present detection results clearly without pretending that
+            automated analysis can replace independent verification.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Transparency</h3>
+          <p>
+            Show users the signals and information behind a detection result
+            so they can understand why caution may be recommended.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Innovation</h3>
+          <p>
+            Combine practical rule-based checks with machine-learning
+            techniques to strengthen automated screening.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>User First</h3>
+          <p>
+            Keep the experience focused on helping users make better
+            decisions during their job search.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="section-heading about-subheading">
+        <h2><span class="about-section-number">03</span> What JobShield Provides</h2>
+        <p>
+          Multiple features working together to support safer job searching
+          and better applications.
+        </p>
+      </div>
+
+      <div class="cards about-cards">
+
+        <div class="card">
+          <h3>🔎 Job Detection</h3>
+          <p>
+            Paste a job description or upload a PDF, DOCX, or TXT job file.
+            JobShield checks the available information for suspicious
+            patterns and warning signals.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>🤖 AI / ML Assessment</h3>
+          <p>
+            A trained machine-learning model provides an additional screening
+            signal based on patterns learned from labelled job-posting data.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>📊 Risk Analysis</h3>
+          <p>
+            Detection results include a risk score, risk level, suspicious
+            signals, and suggested next steps.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>📄 Resume Screening</h3>
+          <p>
+            Resume Screening identifies the likely professional domain,
+            compares available skills with job requirements, and highlights
+            relevant or missing skills.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>🗂️ History &amp; Dashboard</h3>
+          <p>
+            Completed checks can be reviewed through the application's
+            Dashboard and History features.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>📁 Job File Support</h3>
+          <p>
+            Detection supports text-based PDF, DOCX, and TXT job files,
+            allowing users to analyze job postings without manually copying
+            all of the text.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="section-heading about-subheading">
+        <h2><span class="about-section-number">04</span> How JobShield Works</h2>
+        <p>From a job posting to useful information for the user.</p>
+      </div>
+
+      <div class="cards about-cards">
+
+        <div class="card">
+          <h3>01 · Provide the Job</h3>
+          <p>
+            Enter the available job details and paste the description or
+            upload a supported job file.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>02 · Analyze</h3>
+          <p>
+            JobShield processes the available information using detection
+            checks and a machine-learning signal.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>03 · Review</h3>
+          <p>
+            Examine the risk level, score, suspicious signals, and AI/ML
+            assessment.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>04 · Verify</h3>
+          <p>
+            Independently verify the employer, recruiter, website, and
+            opportunity before taking important action.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="card about-safety-note">
+        <div class="eyebrow">Important</div>
+        <h2>Use JobShield as a screening assistant.</h2>
+        <p>
+          JobShield does not guarantee that an opportunity is genuine or
+          fraudulent. Before sharing sensitive information, paying money,
+          or accepting an offer, independently verify the employer,
+          recruiter, company website, contact information, and job details.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- HELP PANEL -->
+    <section
+      id="help-panel"
+      class="about-help-panel"
+      role="tabpanel"
+      aria-labelledby="help-tab"
+      hidden>
+
+      <div class="section-heading">
+        <div class="eyebrow">Help / FAQ</div>
+        <h2>Need help using JobShield?</h2>
+        <p>
+          Find quick answers about the project's main features.
+        </p>
+      </div>
+
+      <div class="cards about-faq">
+
+        <div class="card">
+          <h3><span class="about-section-number">01</span> How do I check a job?</h3>
+          <p>
+            Open Detector, enter the available job details, then either paste
+            the job description or upload a supported PDF, DOCX, or TXT file
+            and start the analysis.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3><span class="about-section-number">02</span> What does the risk score mean?</h3>
+          <p>
+            The risk score summarizes the signals detected during analysis.
+            A higher-risk result means more warning signals were identified
+            and should be reviewed carefully.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>What is the AI / ML assessment?</h3>
+          <p>
+            It is an additional machine-learning screening signal produced
+            by a model trained on labelled job-posting data. It should be
+            considered together with the rule-based findings.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3><span class="about-section-number">04</span> Does a high-risk result prove that a job is fake?</h3>
+          <p>
+            No. Automated detection is a screening aid, not absolute proof.
+            A suspicious result should encourage additional verification
+            before you proceed.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3><span class="about-section-number">05</span> Can I upload a job instead of pasting it?</h3>
+          <p>
+            Yes. Detection supports text-based PDF, DOCX, and TXT files.
+            Files larger than the supported upload limit or files without
+            readable text may not be accepted.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3><span class="about-section-number">06</span> How does Resume Screening help?</h3>
+          <p>
+            Resume Screening evaluates the resume's likely domain and
+            compares available skills with job requirements to provide
+            useful matching and missing-skill feedback.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<script>
+  (() => {
+    const aboutTab = document.getElementById("about-tab");
+    const helpTab = document.getElementById("help-tab");
+    const aboutPanel = document.getElementById("about-panel");
+    const helpPanel = document.getElementById("help-panel");
+
+    function showPanel(panel, activeTab, inactiveTab) {
+      panel.hidden = false;
+      panel.classList.add("active");
+
+      const otherPanel = panel === aboutPanel ? helpPanel : aboutPanel;
+      otherPanel.hidden = true;
+      otherPanel.classList.remove("active");
+
+      activeTab.classList.add("active");
+      inactiveTab.classList.remove("active");
+
+      activeTab.setAttribute("aria-selected", "true");
+      inactiveTab.setAttribute("aria-selected", "false");
+    }
+
+    aboutTab.addEventListener("click", () => {
+      showPanel(aboutPanel, aboutTab, helpTab);
+    });
+
+    helpTab.addEventListener("click", () => {
+      showPanel(helpPanel, helpTab, aboutTab);
+    });
+  })();
+</script>
 {% endblock %}
