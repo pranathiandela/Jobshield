@@ -1,194 +1,929 @@
 {
-  "ACCOUNTANT": [
-    "accounting", "reconciliation", "ledger", "payroll", "taxation", "auditing",
-    "bookkeeping", "invoicing", "depreciation", "compliance", "accruals", "balance",
-    "quickbooks", "sage", "gaap", "ifrs", "budgeting", "payable", "receivable",
-    "variance", "amortization", "assets", "liabilities", "cashflow", "equity", "financial"
-  ],
-  "ADVOCATE": [
-    "litigation", "arbitration", "advocacy", "contracts", "jurisprudence", "compliance",
-    "intellectual", "statutory", "affidavit", "pleadings", "tribunal", "testimony",
-    "counsel", "statutes", "verdict", "injunction", "deposition", "briefs",
-    "settlement", "constitution", "constitutional", "paralegal", "subpoena", "ordinance",
-    "mediation", "legal", "law", "criminal", "civil", "corporate", "proceedings"
-  ],
-  "AGRICULTURE": [
-    "agronomy", "horticulture", "irrigation", "cultivation", "harvesting", "soil",
-    "fertilizer", "pesticides", "livestock", "botany", "crop", "pasture",
-    "forestry", "drainage", "tillage", "husbandry", "greenhouse", "seed",
-    "conservation", "microbiology", "permaculture", "pathology", "yield", "entomology", "farming"
-  ],
-  "APPAREL": [
-    "textiles", "tailoring", "merchandising", "fabrics", "draping", "garments",
-    "apparel", "styling", "weaving", "patternmaking", "embroidery", "knitting",
-    "sizing", "couture", "silhouette", "finishing", "stitching", "fitting",
-    "wardrobe", "sampling", "dyeing", "catalog", "trends", "sewing"
-  ],
-  "ARTS": [
-    "curation", "sculpture", "painting", "illustration", "exhibition", "composition",
-    "typography", "calligraphy", "printmaking", "lighting", "dramaturgy", "ceramics",
-    "aesthetics", "cinematography", "portraiture", "drawing", "acting", "theater",
-    "sketching", "animation", "choreography", "galleries", "conceptual", "murals"
-  ],
-  "AUTOMOBILE": [
-    "powertrain", "diagnostics", "chassis", "transmission", "suspension", "calipers",
-    "torque", "drivetrain", "brake", "telematics", "ignition", "engine",
-    "hybrid", "pneumatics", "hydraulics", "servicing", "exhaust", "battery",
-    "lubrication", "alternator", "overhaul", "odometer", "clutch", "radiator", "automotive"
-  ],
-  "AVIATION": [
-    "aerodynamics", "avionics", "airframe", "navigation", "flight", "propulsion",
-    "airworthiness", "altimeter", "radar", "throttle", "fuselage", "turbines",
-    "meteorology", "cockpit", "checklist", "waypoint", "dispatch", "telemetry",
-    "maneuvers", "inspections", "ballast", "deicing", "clearance", "airline"
-  ],
-  "BANKING": [
-    "credit", "underwriting", "deposits", "clearing", "mortgage", "derivatives",
-    "forex", "treasury", "liquidity", "teller", "disbursement", "interest",
-    "collateral", "aml", "kyc", "equities", "solvency", "investments",
-    "capital", "lending", "bonds", "overdraft", "settlements", "portfolio", "banking"
-  ],
-  "BPO": [
-    "inbound", "outbound", "telephony", "retention", "escalations", "ticketing",
-    "csat", "telecalling", "transcription", "sla", "crm", "benchmarks",
-    "resolution", "turnaround", "surveys", "dispatch", "telemarketing", "monitoring",
-    "coaching", "client", "operations", "helpdesk", "scheduling", "workflow"
-  ],
-  "BUSINESS-DEVELOPMENT": [
-    "prospecting", "negotiation", "pitches", "partnerships", "pipeline", "acquisitions",
-    "leads", "funnel", "retention", "consultative", "expansion", "networking",
-    "proposals", "strategy", "closing", "b2b", "outreach", "contracts",
-    "salesforce", "revenue", "stakeholders", "upselling", "forecasting", "entrepreneurship"
-  ],
-  "CHEF": [
-    "sauteing", "baking", "braising", "carving", "seasoning", "pastry",
-    "butchery", "plating", "sanitation", "garnishing", "fermentation", "confectionery",
-    "marinating", "recipes", "menus", "culinary", "inventory", "poaching",
-    "charcuterie", "roasting", "grilling", "catering", "prep", "kitchen"
-  ],
-  "CLOUD-DEVOPS": [
-    "kubernetes", "docker", "terraform", "ansible", "aws", "azure",
-    "gcp", "ci", "cd", "jenkins", "prometheus", "grafana",
-    "helm", "linux", "cloudformation", "bash", "serverless", "microservices",
-    "clusters", "ingress", "iam", "containers", "observability", "provisioning", "gitops"
-  ],
-  "CONSTRUCTION": [
-    "carpentry", "masonry", "scaffolding", "blueprints", "excavation", "surveying",
-    "plumbing", "concrete", "demolition", "drywall", "framing", "foundations",
-    "rebar", "hvac", "roofing", "grading", "formwork", "rigging",
-    "insulation", "procurement", "estimates", "permits", "building"
-  ],
-  "CONSULTANT": [
-    "advisory", "benchmarking", "governance", "optimization", "transformation", "stakeholders",
-    "deliverables", "restructuring", "feasibility", "workshops", "frameworks", "change",
-    "strategy", "valuation", "diagnostics", "procurement", "reporting", "implementation",
-    "synergies", "analytics", "auditing", "metrics", "roadmaps", "consulting"
-  ],
-  "CYBERSECURITY": [
-    "firewalls", "cryptography", "malware", "wireshark", "siem", "kali",
-    "pentesting", "burpsuite", "phishing", "encryption", "vulnerabilities", "soc",
-    "hardening", "threats", "ids", "ips", "metasploit", "auditing",
-    "mitre", "remediation", "forensics", "endpoint", "incident", "tls", "security"
-  ],
-  "DATA-SCIENCE-ML": [
-    "python", "pandas", "numpy", "scikit", "tensorflow", "pytorch",
-    "keras", "sql", "regression", "classification", "clustering", "nlp",
-    "xgboost", "matplotlib", "seaborn", "tableau", "spark", "hadoop",
-    "statistics", "hyperparameter", "neural", "transformers", "embeddings", "databricks", "machine"
-  ],
-  "DESIGNER": [
-    "vector", "wireframes", "prototypes", "branding", "illustration", "typography",
-    "indesign", "illustrator", "photoshop", "layout", "infographics", "posters",
-    "storyboarding", "palettes", "logos", "renderings", "sketching", "composition",
-    "color", "retouching", "printmaking", "lettering", "graphics", "creative"
-  ],
-  "DIGITAL-MEDIA": [
-    "copywriting", "seo", "sem", "adwords", "analytics", "campaigns",
-    "affiliates", "influencers", "storytelling", "newsletters", "broadcasting", "podcasting",
-    "engagement", "retargeting", "impressions", "conversions", "branding", "ctr",
-    "reach", "roas", "audiences", "monetization", "creatives", "social"
-  ],
-  "ENGINEERING": [
-    "thermodynamics", "autocad", "solidworks", "matlab", "circuits", "kinematics",
-    "microcontrollers", "schematics", "electronics", "instrumentation", "robotics", "machining",
-    "tolerances", "stress", "pneumatics", "hydraulics", "mechatronics", "sensors",
-    "prototyping", "transducers", "actuators", "oscilloscope", "embedded", "engineering"
-  ],
-  "FINANCE": [
-    "valuation", "forecasting", "budgeting", "portfolio", "treasury", "modeling",
-    "equities", "bonds", "variance", "derivatives", "ebitda", "capital",
-    "investments", "audit", "compliance", "liquidity", "hedging", "underwriting",
-    "dividend", "reconciliation", "sox", "nav", "returns", "financial"
-  ],
-  "FITNESS": [
-    "kinesiology", "aerobics", "calisthenics", "ergonomics", "hypertrophy", "cardio",
-    "nutrition", "conditioning", "mobility", "pilates", "biomechanics", "crossfit",
-    "rehabilitation", "endurance", "stretching", "core", "resistance", "wellness",
-    "bodyweight", "posture", "hydration", "agility", "interval", "trainer"
-  ],
-  "HEALTHCARE": [
-    "clinical", "triage", "pharmacology", "pathology", "vitals", "oncology",
-    "pediatrics", "radiology", "phlebotomy", "diagnostics", "inpatient", "outpatient",
-    "catheterization", "immunization", "dosages", "surgical", "anesthesia", "icu",
-    "charting", "rehabilitation", "biopsy", "transfusion", "cardiology", "sterilization", "patient"
-  ],
-  "HR": [
-    "recruitment", "onboarding", "payroll", "benefits", "retention", "compliance",
-    "grievances", "workplace", "offboarding", "headhunting", "appraisals", "attrition",
-    "staffing", "handbooks", "shrm", "workday", "talent", "compensation",
-    "interviews", "relations", "diversity", "pip", "sourcing", "engagement", "hiring"
-  ],
-  "INFORMATION-TECHNOLOGY": [
-    "networking", "troubleshooting", "hardware", "sysadmin", "helpdesk", "ticketing",
-    "virtualization", "backups", "routers", "switches", "windows", "linux",
-    "subnets", "powershell", "firewall", "antivirus", "peripherals", "migration",
-    "patches", "modems", "vpn", "server", "support"
-  ],
-  "MOBILE-DEVELOPMENT": [
-    "swift", "kotlin", "flutter", "dart", "xcode", "swiftui",
-    "coredata", "room", "gradle", "cocoapods", "jetpack", "retrofit",
-    "mvvm", "viewmodel", "apk", "ipa", "geolocation", "bluetooth",
-    "layout", "deeplinking", "activities", "android", "ios"
-  ],
-  "NETWORK-ENGINEERING": [
-    "bgp", "ospf", "mpls", "subnets", "vlans", "cisco",
-    "juniper", "wireshark", "switches", "routers", "tcp", "udp",
-    "ipsec", "radius", "tacacs", "nat", "firewalls", "telephony",
-    "trunking", "dhcp", "dns", "lan", "wan", "routing"
-  ],
-  "PUBLIC-RELATIONS": [
-    "press", "spokesperson", "briefings", "pitches", "media", "journalism",
-    "crises", "branding", "reputation", "outreach", "broadcasts", "conferences",
-    "releases", "advocacy", "sponsorships", "keynotes", "interviews", "receptions",
-    "statements", "communications", "narratives", "stakeholders", "events", "campaigns"
-  ],
-  "QA-TESTING": [
-    "selenium", "cypress", "junit", "testng", "postman", "playwright",
-    "manual", "automation", "regression", "blackbox", "whitebox", "jmeter",
-    "testrail", "locators", "assertions", "smoke", "defects", "bugzilla",
-    "sanity", "appium", "cucumber", "api", "mocks", "stubs", "testing"
-  ],
-  "SALES": [
-    "quotations", "closing", "crm", "objections", "invoicing", "territory",
-    "pipeline", "upselling", "negotiations", "prospecting", "leads", "distributors",
-    "merchandising", "rebates", "quotas", "commissions", "b2c", "retail",
-    "demos", "margins", "consultative", "retention", "selling"
-  ],
-  "SOFTWARE-DEVELOPMENT": [
-    "java", "golang", "rust", "algorithms", "structures", "backend",
-    "frontend", "apis", "git", "sql", "nosql", "redis",
-    "concurrency", "multithreading", "django", "spring", "react", "angular",
-    "node", "express", "graphql", "websockets", "c++", "c#"
-  ],
-  "TEACHER": [
-    "pedagogy", "curriculum", "classroom", "grading", "instruction", "tutoring",
-    "assessments", "lecturing", "worksheets", "rubrics", "kindergarten", "mentoring",
-    "literacy", "numeracy", "chalkboard", "examinations", "syllabus", "counseling",
-    "proctoring", "activities", "workshops", "teaching"
-  ],
-  "UX-UI-DESIGN": [
-    "figma", "sketch", "wireframing", "prototyping", "heuristics", "usability",
-    "personas", "affordances", "microinteractions", "typography", "grids", "mockups",
-    "accessibility", "wcag", "components", "responsive", "invision", "storyboarding", "ui", "ux"
-  ]
+  "Artificial Intelligence & Deep Learning": {
+    "aliases": ["ai", "deep learning", "neural networks", "genai", "generative ai"],
+    "core": [
+      "tensorflow", "pytorch", "keras", "deep learning", "neural network",
+      "cnn", "rnn", "lstm", "backpropagation", "reinforcement learning",
+      "generative ai", "genai", "diffusion models", "autoencoders", "gans",
+      "gpu training", "cuda", "model evaluation", "weights and biases", "tensorrt"
+    ],
+    "supporting": [
+      "python", "algorithms", "linear algebra", "calculus", "probability",
+      "kaggle", "optimization", "research", "math"
+    ]
+  },
+  "Natural Language Processing & LLMs": {
+    "aliases": ["nlp", "llm", "large language models", "prompt engineering", "transformers"],
+    "core": [
+      "nlp", "natural language processing", "transformers", "bert", "llm",
+      "large language models", "huggingface", "prompt engineering", "fine-tuning",
+      "rag", "retrieval augmented generation", "embeddings", "vector database",
+      "langchain", "llama", "whisper", "rlhf", "lora", "qlora", "spacy",
+      "tokenization", "semantic search"
+    ],
+    "supporting": [
+      "python", "pytorch", "text processing", "classification", "clustering",
+      "model training", "api"
+    ]
+  },
+  "Computer Vision & Perception Systems": {
+    "aliases": ["computer vision", "cv", "image processing", "object detection"],
+    "core": [
+      "opencv", "computer vision", "yolo", "object detection", "image segmentation",
+      "semantic segmentation", "optical flow", "point cloud", "lidar processing",
+      "image classification", "facial recognition", "depth estimation", "edge computing cv"
+    ],
+    "supporting": [
+      "python", "c++", "pytorch", "camera calibration", "gpu", "image processing"
+    ]
+  },
+  "Data Science & Statistical Modeling": {
+    "aliases": ["data science", "statistics", "data scientist", "statistical modeling"],
+    "core": [
+      "pandas", "numpy", "scipy", "statistics", "statistical modeling", "hypothesis testing",
+      "regression analysis", "econometrics", "exploratory data analysis", "eda",
+      "clustering", "classification", "time series", "arima", "prophet", "forecasting",
+      "feature engineering", "statsmodels", "ab testing", "a/b testing", "data mining",
+      "p-value", "monte carlo", "bayesian", "anova"
+    ],
+    "supporting": [
+      "python", "r", "sql", "excel", "jupyter", "visualization", "matplotlib",
+      "seaborn", "quantitative", "insights"
+    ]
+  },
+  "Data Engineering & Pipelines": {
+    "aliases": ["data engineering", "data pipelines", "etl developer", "airflow"],
+    "core": [
+      "spark", "pyspark", "apache spark", "airflow", "apache airflow", "dbt",
+      "data pipeline", "pipeline orchestration", "elt", "dag", "glue",
+      "athena", "batch processing", "stream processing", "delta lake", "lakehouse"
+    ],
+    "supporting": [
+      "sql", "python", "data warehousing", "postgres", "nosql", "parquet",
+      "avro", "schema"
+    ]
+  },
+  "Big Data & Distributed Analytics": {
+    "aliases": ["big data", "hadoop", "snowflake", "databricks", "kafka"],
+    "core": [
+      "hadoop", "kafka", "apache kafka", "snowflake", "databricks", "bigquery",
+      "redshift", "hive", "apache flink", "presto", "trino", "sqoop", "hbase",
+      "cassandra", "scylla", "partitioning", "iceberg"
+    ],
+    "supporting": [
+      "sql", "python", "scala", "java", "distributed systems", "clusters",
+      "data warehousing"
+    ]
+  },
+  "Business Intelligence & Reporting": {
+    "aliases": ["bi", "business intelligence", "tableau", "power bi", "reporting analyst"],
+    "core": [
+      "tableau", "powerbi", "power bi", "looker", "dax", "power query", "kpi dashboards",
+      "data visualization", "business analytics", "executive reporting", "drill down",
+      "scorecards", "ad-hoc reporting", "metabase", "qlik", "microstrategy",
+      "looker studio", "ssrs", "ssis", "star schema", "cube"
+    ],
+    "supporting": [
+      "sql", "excel", "spreadsheets", "pivot tables", "vlookup", "business intelligence",
+      "dashboards", "metrics", "reporting", "kpis"
+    ]
+  },
+  "Backend & Microservices Engineering": {
+    "aliases": ["backend", "backend developer", "api developer", "microservices"],
+    "core": [
+      "django", "fastapi", "flask", "spring boot", "springboot", "nodejs",
+      "express.js", "expressjs", "golang", "rust", "microservices", "restful api",
+      "graphql", "grpc", "rabbitmq", "celery", "multithreading", "concurrency",
+      "system design", "distributed systems", "event-driven", "sqlalchemy", "orm",
+      "reverse proxy", "nginx", "load balancing", "horizontal scaling", "sharding"
+    ],
+    "supporting": [
+      "python", "java", "c++", "c#", "git", "api", "sql", "linux", "backend",
+      "redis", "postgresql", "mysql", "mongodb"
+    ]
+  },
+  "Frontend & Single Page Apps": {
+    "aliases": ["frontend", "frontend developer", "react developer", "web developer", "ui developer"],
+    "core": [
+      "react", "react.js", "angular", "vue", "vue.js", "next.js", "nextjs", "nuxt",
+      "svelte", "typescript", "tailwind css", "tailwindcss", "bootstrap", "sass",
+      "webpack", "vite", "redux", "zustand", "dom manipulation", "responsive web design",
+      "web vitals", "csr", "ssr", "shadcn", "material ui", "chakra ui", "spa"
+    ],
+    "supporting": [
+      "javascript", "frontend", "web", "npm", "yarn", "ui", "storybook",
+      "json", "rest", "accessibility", "flexbox"
+    ]
+  },
+  "Full Stack Web Development": {
+    "aliases": ["full stack", "fullstack", "mern", "web development"],
+    "core": [
+      "full stack", "mern", "mean stack", "lamp stack", "jamstack", "rest api integration",
+      "client-server architecture", "web application development", "monorepo",
+      "api endpoint design", "frontend and backend integration"
+    ],
+    "supporting": [
+      "javascript", "typescript", "html5", "css3", "sql", "git", "node",
+      "react", "database", "orm"
+    ]
+  },
+  "iOS Mobile Development": {
+    "aliases": ["ios", "ios developer", "swift", "apple developer"],
+    "core": [
+      "ios development", "swift", "swiftui", "xcode", "cocoapods", "ipa",
+      "app store connect", "uikit", "coredata", "alamofire", "testflight",
+      "apple developer", "combine framework"
+    ],
+    "supporting": [
+      "mobile", "api integration", "sqlite", "push notifications", "sdk",
+      "git", "json"
+    ]
+  },
+  "Android Mobile Development": {
+    "aliases": ["android", "android developer", "kotlin", "mobile app developer"],
+    "core": [
+      "android sdk", "kotlin", "jetpack compose", "android studio", "gradle",
+      "apk", "play console", "mobile ui", "coroutine", "room database",
+      "retrofit", "dagger hilt", "android architecture components"
+    ],
+    "supporting": [
+      "mobile", "api integration", "sqlite", "push notifications", "sdk",
+      "git", "java"
+    ]
+  },
+  "Cross-Platform Mobile Engineering": {
+    "aliases": ["flutter", "react native", "cross platform", "mobile engineer"],
+    "core": [
+      "flutter", "dart", "react native", "expo", "cross-platform", "hybrid app",
+      "capacitor", "ionic", "bloc pattern", "flutter widgets"
+    ],
+    "supporting": [
+      "mobile", "mobile app", "javascript", "typescript", "api", "ui design",
+      "state management"
+    ]
+  },
+  "DevOps & CI/CD Engineering": {
+    "aliases": ["devops", "ci/cd", "platform engineer", "kubernetes", "infrastructure as code"],
+    "core": [
+      "kubernetes", "k8s", "docker containers", "terraform", "ansible", "jenkins",
+      "argocd", "helm charts", "ci/cd pipelines", "gitlab ci", "github actions",
+      "cloudformation", "infrastructure as code", "iac"
+    ],
+    "supporting": [
+      "linux", "bash", "shell scripting", "git", "cloud", "virtualization",
+      "networking", "ssl"
+    ]
+  },
+  "Cloud Architecture & Systems": {
+    "aliases": ["cloud", "cloud architect", "aws", "azure", "gcp"],
+    "core": [
+      "aws architecture", "azure cloud", "google cloud platform", "gcp",
+      "serverless", "lambda", "cloud run", "ec2", "s3 bucket", "vpc",
+      "cloud migration", "multi-cloud", "well-architected framework"
+    ],
+    "supporting": [
+      "cloud", "networking", "load balancing", "sysadmin", "iam", "security",
+      "cost optimization"
+    ]
+  },
+  "Site Reliability Engineering (SRE)": {
+    "aliases": ["sre", "site reliability", "observability", "monitoring"],
+    "core": [
+      "site reliability engineering", "sre", "prometheus", "grafana", "istio",
+      "observability", "datadog", "new relic", "splunk", "pagerduty", "slo",
+      "sli", "error budgets", "incident management", "chaos engineering"
+    ],
+    "supporting": [
+      "linux", "bash", "monitoring", "troubleshooting", "distributed systems",
+      "automation"
+    ]
+  },
+  "Cybersecurity & Ethical Hacking": {
+    "aliases": ["cybersecurity", "ethical hacking", "penetration testing", "pentest", "infosec"],
+    "core": [
+      "penetration testing", "pentesting", "wireshark", "metasploit", "burp suite",
+      "vulnerability assessment", "owasp top 10", "threat hunting", "ethical hacking",
+      "cve", "zero-day", "kali linux", "exploit development", "privilege escalation"
+    ],
+    "supporting": [
+      "security", "networking", "tcp/ip", "dns", "linux", "bash", "firewall",
+      "access control"
+    ]
+  },
+  "SOC Analysis & Incident Response": {
+    "aliases": ["soc", "soc analyst", "incident response", "siem", "threat analyst"],
+    "core": [
+      "siem", "soc analyst", "ids/ips", "cryptography", "malware analysis",
+      "incident response", "digital forensics", "endpoint detection", "edr",
+      "mitre att&ck", "qradar", "sentinel", "nessus", "log analysis", "soc tier"
+    ],
+    "supporting": [
+      "security", "networking", "compliance", "audit", "identity management",
+      "iam", "vpn"
+    ]
+  },
+  "Embedded Systems & Microcontrollers": {
+    "aliases": ["embedded systems", "microcontroller", "stm32", "arduino", "iot"],
+    "core": [
+      "microcontroller", "stm32", "arduino", "raspberry pi", "device drivers",
+      "i2c", "spi", "uart", "can bus", "arm cortex", "iot protocols", "mqtt",
+      "ble", "jtag", "oscilloscope", "schematics review"
+    ],
+    "supporting": [
+      "c", "c++", "hardware", "assembly", "sensors", "electronics", "low-level",
+      "serial communication"
+    ]
+  },
+  "Firmware & Hardware Integration": {
+    "aliases": ["firmware", "hardware engineer", "rtos", "fpga", "pcb design"],
+    "core": [
+      "rtos", "freertos", "firmware development", "embedded c", "pcb design",
+      "altium", "kicad", "fpga", "vhdl", "verilog", "board bring-up",
+      "low-level programming", "bootloader"
+    ],
+    "supporting": [
+      "hardware", "debugging", "circuit design", "soldering", "logic analyzer",
+      "embedded systems"
+    ]
+  },
+  "Game Development & Physics Engines": {
+    "aliases": ["game development", "unity", "unreal engine", "game programmer"],
+    "core": [
+      "unity", "unity3d", "unreal engine", "ue4", "ue5", "gameplay programming",
+      "shaders", "hlsl", "glsl", "physx", "animation state machine", "game mechanics",
+      "directx", "vulkan", "opengl", "godot"
+    ],
+    "supporting": [
+      "c#", "c++", "game design", "graphics", "linear algebra", "physics",
+      "rendering", "level design"
+    ]
+  },
+  "Blockchain & Smart Contracts": {
+    "aliases": ["blockchain", "web3", "smart contracts", "solidity", "crypto"],
+    "core": [
+      "solidity", "ethereum", "smart contracts", "web3.js", "ethers.js", "hardhat",
+      "truffle", "evm", "defi", "nft", "erc20", "erc721", "dapp", "solana",
+      "rust web3", "consensus algorithms", "gas optimization"
+    ],
+    "supporting": [
+      "cryptography", "distributed ledgers", "peer-to-peer", "security audit",
+      "javascript", "tokens"
+    ]
+  },
+  "QA Automation & SDET": {
+    "aliases": ["qa automation", "sdet", "test automation", "selenium"],
+    "core": [
+      "selenium", "cypress", "playwright", "appium", "test automation",
+      "test suite", "junit", "testng", "pytest", "cucumber", "bdd", "tdd",
+      "load testing", "jmeter", "postman api testing", "k6", "locust"
+    ],
+    "supporting": [
+      "qa", "testing", "jira", "quality assurance", "api validation",
+      "automation", "git"
+    ]
+  },
+  "Manual QA & Usability Testing": {
+    "aliases": ["manual testing", "qa tester", "quality assurance", "test cases"],
+    "core": [
+      "manual testing", "test plan", "test cases design", "bug lifecycle",
+      "regression testing", "black box testing", "white box testing",
+      "defect reporting", "smoke testing", "sanity testing", "uat"
+    ],
+    "supporting": [
+      "qa", "jira", "defects", "verification", "validation", "troubleshooting",
+      "documentation"
+    ]
+  },
+  "Product Management (Technical & B2B)": {
+    "aliases": ["product management", "product manager", "pm", "scrum product owner"],
+    "core": [
+      "product roadmap", "user stories", "product requirements", "prd", "backlog grooming",
+      "sprint planning", "feature prioritization", "user persona", "customer discovery",
+      "minimum viable product", "mvp", "product analytics", "churn reduction", "okr setting"
+    ],
+    "supporting": [
+      "jira", "confluence", "scrum", "kanban", "stakeholder management",
+      "cross-functional", "market research", "a/b testing", "kpis"
+    ]
+  },
+  "UI/UX & Interaction Design": {
+    "aliases": ["ui/ux", "product designer", "ui designer", "figma"],
+    "core": [
+      "figma", "sketch", "adobe xd", "wireframing", "high-fidelity prototypes",
+      "design systems", "user flows", "interaction design", "visual design",
+      "typography", "micro-interactions", "figjam"
+    ],
+    "supporting": [
+      "ui", "ux", "prototyping", "responsive design", "accessibility",
+      "creative", "interface"
+    ]
+  },
+  "User Research & Usability": {
+    "aliases": ["user research", "ux researcher", "usability", "human centered design"],
+    "core": [
+      "user research", "usability testing", "user journey mapping", "heuristic evaluation",
+      "affinity diagrams", "information architecture", "user interviews",
+      "card sorting", "qualitative research", "quantitative user research"
+    ],
+    "supporting": [
+      "ux", "design critique", "feedback", "analytics", "personas",
+      "accessibility", "wcag"
+    ]
+  },
+  "Motion Graphics & 3D Animation": {
+    "aliases": ["motion graphics", "animation", "3d animation", "after effects", "vfx"],
+    "core": [
+      "blender 3d", "cinema 4d", "after effects", "autodesk maya", "3d rigging",
+      "character animation", "compositing", "motion design", "vfx pipeline",
+      "3d modeling", "texturing"
+    ],
+    "supporting": [
+      "animation", "rendering", "creative direction", "visual effects",
+      "storyboarding"
+    ]
+  },
+  "Video Production & Post-Processing": {
+    "aliases": ["video editor", "video production", "davinci resolve", "premiere pro"],
+    "core": [
+      "nuke", "premiere pro", "davinci resolve", "color grading", "video editing",
+      "audio mixing", "sound design", "video codecs", "post-production workflow"
+    ],
+    "supporting": [
+      "creative", "multimedia", "storytelling", "camera operation", "audio"
+    ]
+  },
+  "Clinical Nursing & Acute Care": {
+    "aliases": ["nursing", "registered nurse", "rn", "patient care", "acute care"],
+    "core": [
+      "vital signs monitoring", "phlebotomy", "iv therapy", "acute care",
+      "cpr certified", "bls certification", "medication administration",
+      "wound dressing", "inpatient care", "nursing care plans", "catheterization"
+    ],
+    "supporting": [
+      "patient", "hospital", "clinical", "medical", "treatment", "caregiver",
+      "healthcare", "infection control"
+    ]
+  },
+  "Critical Care & Emergency Medicine": {
+    "aliases": ["critical care", "emergency medicine", "icu", "er nurse", "trauma"],
+    "core": [
+      "patient triage", "icu nursing", "acls certification", "emergency room",
+      "trauma response", "epic systems", "cerner emr", "telemetry monitoring",
+      "rapid response", "intubation assistance", "critical care"
+    ],
+    "supporting": [
+      "hospital", "emergency", "physician orders", "hipaa", "patient care",
+      "clinical"
+    ]
+  },
+  "Pharmacy & Pharmacotherapy": {
+    "aliases": ["pharmacy", "pharmacist", "pharmacology", "dispensing"],
+    "core": [
+      "pharmacotherapy", "drug compounding", "prescription dispensing",
+      "pharmacokinetics", "toxicology", "formulary management", "drug interaction analysis",
+      "pharmacy retail", "sterile compounding", "narcotics inventory", "pharmacovigilance"
+    ],
+    "supporting": [
+      "medication", "dosage", "prescriptions", "fda regulations", "patient consultation",
+      "healthcare", "compliance"
+    ]
+  },
+  "Clinical Research & Regulatory Trials": {
+    "aliases": ["clinical research", "clinical trials", "cra", "gcp compliance"],
+    "core": [
+      "good clinical practice", "gcp compliance", "clinical trial protocol",
+      "irb submission", "cra monitoring", "clinical data management",
+      "cdisc standards", "sdtm mapping", "adverse event reporting",
+      "informed consent process", "site initiation visit"
+    ],
+    "supporting": [
+      "clinical research", "trials", "fda regulations", "biostatistics",
+      "documentation", "hipaa"
+    ]
+  },
+  "Pathology & Diagnostic Laboratory": {
+    "aliases": ["pathology", "medical lab", "laboratory technician", "diagnostics"],
+    "core": [
+      "histopathology", "hematology analyzer", "microbiology culture",
+      "specimen processing", "elisa assay", "pcr amplification", "flow cytometry",
+      "blood banking", "clia regulations", "pipetting techniques", "biochemical analysis"
+    ],
+    "supporting": [
+      "laboratory", "pathology", "diagnostics", "quality control", "sterilization",
+      "specimens"
+    ]
+  },
+  "Health Informatics & Telehealth": {
+    "aliases": ["health informatics", "emr", "ehr", "telehealth", "medical records"],
+    "core": [
+      "electronic medical records", "emr", "ehr", "epic certified", "cerner",
+      "health informatics", "telemedicine platform", "hl7", "fhir standards",
+      "medical billing", "icd-10"
+    ],
+    "supporting": [
+      "healthcare data", "hipaa compliance", "patient portal", "database",
+      "data privacy"
+    ]
+  },
+  "Investment Banking & M&A Advisory": {
+    "aliases": ["investment banking", "m&a", "mergers and acquisitions", "ib analyst"],
+    "core": [
+      "leveraged buyout", "lbo model", "mergers and acquisitions", "m&a advisory",
+      "valuation multiples", "equity research", "pitchbook preparation",
+      "bloomberg terminal", "factset", "due diligence finance"
+    ],
+    "supporting": [
+      "excel", "finance", "financial modeling", "ebitda", "projections",
+      "valuation", "banking"
+    ]
+  },
+  "Financial Modeling & Valuation": {
+    "aliases": ["financial modeling", "valuation", "corporate finance", "dcf"],
+    "core": [
+      "discounted cash flow", "dcf modeling", "financial statement analysis",
+      "capital markets", "fairness opinions", "corporate valuation", "scenario modeling",
+      "sensitivity analysis", "wacc calculation"
+    ],
+    "supporting": [
+      "excel", "finance", "forecasting", "budgeting", "financial analysis"
+    ]
+  },
+  "Accounting, Audit & Assurance": {
+    "aliases": ["accounting", "auditing", "cpa", "statutory audit", "gaap"],
+    "core": [
+      "general ledger reconciliation", "balance sheet preparation", "income statement",
+      "gaap standards", "ifrs standards", "journal entries", "accounts payable",
+      "accounts receivable", "statutory audit", "sarbanes-oxley", "sox compliance"
+    ],
+    "supporting": [
+      "accounting", "audit", "compliance", "payroll", "invoicing", "excel",
+      "financial records"
+    ]
+  },
+  "Corporate Taxation & Compliance": {
+    "aliases": ["tax", "taxation", "tax accounting", "corporate tax"],
+    "core": [
+      "corporate taxation", "tax filings", "tax compliance", "quickbooks",
+      "tally erp", "depreciation schedules", "vat reporting", "transfer pricing",
+      "tax provision"
+    ],
+    "supporting": [
+      "tax", "accounting", "statutory regulations", "financial reporting",
+      "ledger"
+    ]
+  },
+  "Quantitative Finance & Algorithmic Trading": {
+    "aliases": ["quant", "quantitative finance", "algorithmic trading", "hft"],
+    "core": [
+      "algorithmic trading", "derivatives pricing", "black-scholes model",
+      "stochastic calculus", "monte carlo simulation", "risk parity",
+      "factor modeling", "order book dynamics", "high frequency trading", "hft",
+      "backtesting trading", "greeks calculation"
+    ],
+    "supporting": [
+      "python", "c++", "risk modeling", "statistics", "portfolio optimization",
+      "financial engineering"
+    ]
+  },
+  "Commercial Banking & Underwriting": {
+    "aliases": ["banking", "banker", "commercial lending", "underwriting", "credit analyst"],
+    "core": [
+      "credit underwriting", "loan syndication", "commercial lending", "dscr",
+      "debt service coverage", "kyc/aml", "anti-money laundering", "basel iii",
+      "credit risk assessment"
+    ],
+    "supporting": [
+      "banking", "credit analysis", "compliance", "due diligence", "risk"
+    ]
+  },
+  "Civil & Structural Engineering": {
+    "aliases": ["civil engineering", "structural engineering", "etabs", "bim", "civil engineer"],
+    "core": [
+      "autocad civil", "revit architecture", "bim modeling", "staad pro",
+      "etabs modeling", "structural concrete design", "steel frame design",
+      "foundation engineering", "geotechnical investigation", "quantity takeoff",
+      "bill of quantities", "boq"
+    ],
+    "supporting": [
+      "construction", "engineering", "cad", "blueprints", "site supervision",
+      "safety standards"
+    ]
+  },
+  "Transportation & Water Resources Engineering": {
+    "aliases": ["transportation engineering", "water resources", "hydrology", "civil 3d"],
+    "core": [
+      "civil 3d", "stormwater management", "traffic engineering", "grading plans",
+      "drainage network", "hydrology modeling", "hec-ras", "highway design",
+      "water distribution"
+    ],
+    "supporting": [
+      "civil engineering", "surveying", "permitting", "environmental compliance",
+      "cad"
+    ]
+  },
+  "Mechanical Design & Manufacturing (CAD/CAM)": {
+    "aliases": ["mechanical engineering", "solidworks", "cad/cam", "mechanical designer"],
+    "core": [
+      "solidworks", "catia", "creo parametric", "geometric dimensioning",
+      "gd&t", "cnc machining", "injection molding", "additive manufacturing",
+      "tooling design", "design for manufacturing", "dfm"
+    ],
+    "supporting": [
+      "manufacturing", "mechanical", "prototyping", "machining", "fabrication",
+      "tolerances"
+    ]
+  },
+  "Thermal & Fluids Engineering": {
+    "aliases": ["thermal engineering", "cfd", "fluids", "fea", "thermodynamics"],
+    "core": [
+      "ansys mechanical", "finite element analysis", "fea simulation",
+      "computational fluid dynamics", "cfd analysis", "thermodynamics",
+      "hvac design", "heat transfer analysis", "fluid mechanics"
+    ],
+    "supporting": [
+      "simulation", "modeling", "mechanical engineering", "analysis",
+      "materials testing"
+    ]
+  },
+  "Electrical Systems & Power Distribution": {
+    "aliases": ["electrical engineering", "power systems", "plc", "substation", "switchgear"],
+    "core": [
+      "switchgear design", "power distribution systems", "plc programming",
+      "scada systems", "substation engineering", "circuit breaker sizing",
+      "pcb layout", "altium designer", "etap power analysis", "high voltage engineering"
+    ],
+    "supporting": [
+      "electrical", "schematics", "wiring", "electrical code", "troubleshooting",
+      "generators"
+    ]
+  },
+  "Legal Advisory & Litigation": {
+    "aliases": ["legal", "lawyer", "attorney", "litigation", "counsel"],
+    "core": [
+      "litigation filings", "arbitration proceedings", "jurisprudence",
+      "contract drafting", "case law analysis", "affidavit drafting",
+      "subpoena handling", "legal due diligence", "westlaw", "lexisnexis"
+    ],
+    "supporting": [
+      "legal", "compliance", "contracts", "agreements", "negotiation",
+      "dispute resolution"
+    ]
+  },
+  "Corporate Governance & Regulatory Compliance": {
+    "aliases": ["compliance", "regulatory compliance", "corporate governance", "gdpr"],
+    "core": [
+      "intellectual property rights", "patent prosecution", "trademark registration",
+      "corporate governance policies", "gdpr compliance", "regulatory filings",
+      "statutory compliance", "ethics officer"
+    ],
+    "supporting": [
+      "compliance", "policy", "corporate legal", "data protection",
+      "audits"
+    ]
+  },
+  "Technical Talent Acquisition & Sourcing": {
+    "aliases": ["recruiter", "talent acquisition", "technical recruiter", "sourcing"],
+    "core": [
+      "talent acquisition lifecycle", "applicant tracking system", "ats tools",
+      "candidate sourcing", "headhunting", "talent pipeline", "boolean search",
+      "technical recruiting", "salary negotiation"
+    ],
+    "supporting": [
+      "hiring", "interviews", "recruitment", "staffing", "talent"
+    ]
+  },
+  "People Operations & HR Management": {
+    "aliases": ["hr", "human resources", "people operations", "hr manager"],
+    "core": [
+      "employee onboarding", "employee relations", "performance appraisal",
+      "hris systems", "workday hcm", "bamboohr", "compensation and benefits",
+      "labor law compliance", "succession planning"
+    ],
+    "supporting": [
+      "human resources", "hr", "culture", "employee engagement",
+      "retention strategies"
+    ]
+  },
+  "Supply Chain Planning & Procurement": {
+    "aliases": ["supply chain", "procurement", "purchasing", "vendor management"],
+    "core": [
+      "supply chain planning", "inventory forecasting", "procurement negotiations",
+      "vendor management lifecycle", "demand fulfillment", "sap mm", "lean logistics",
+      "purchase order management", "safety stock optimization"
+    ],
+    "supporting": [
+      "supply chain", "cost optimization", "erp systems", "inventory",
+      "operations"
+    ]
+  },
+  "Warehouse Logistics & Freight Forwarding": {
+    "aliases": ["logistics", "warehouse", "freight forwarding", "3pl", "distribution"],
+    "core": [
+      "warehouse management system", "wms", "freight forwarding", "customs clearance",
+      "fleet management", "third party logistics", "3pl", "distribution center",
+      "shipping and receiving"
+    ],
+    "supporting": [
+      "logistics", "distribution", "shipment tracking", "operations",
+      "transportation"
+    ]
+  },
+  "Instructional Design & EdTech": {
+    "aliases": ["instructional design", "edtech", "curriculum development", "e-learning"],
+    "core": [
+      "curriculum development", "instructional design", "addie model",
+      "pedagogical strategies", "classroom management", "differentiated instruction",
+      "formative assessment", "iep design", "learning management system",
+      "canvas lms", "blackboard learn", "moodle lms"
+    ],
+    "supporting": [
+      "teaching", "education", "training", "academic", "mentoring",
+      "learning objectives"
+    ]
+  },
+  "Actuarial Science & Risk Analytics": {
+    "aliases": ["actuary", "actuarial", "risk analytics", "pension actuary"],
+    "core": [
+      "actuarial modeling", "loss reserving", "life contingencies", "stochastic modeling",
+      "ratemaking", "credibility theory", "actuarial present value", "prophet actuarial",
+      "axis actuarial", "solvency ii", "mortality tables", "catastrophe modeling",
+      "reinsurance pricing", "ifrs 17", "ruin theory"
+    ],
+    "supporting": [
+      "statistics", "probability", "r", "python", "excel", "financial mathematics",
+      "risk analysis", "forecasting", "underwriting"
+    ]
+  },
+  "Atmospheric, Space & Planetary Sciences": {
+    "aliases": ["meteorology", "astronomy", "space science", "atmospheric science"],
+    "core": [
+      "numerical weather prediction", "atmospheric modeling", "wrf model", "satellite meteorology",
+      "doppler radar analysis", "astrophotometry", "spectroscopic analysis", "orbital trajectories",
+      "planetary geology", "space weather monitoring", "astronomical data reduction", "remote sensing atmospheric",
+      "climatological data analysis"
+    ],
+    "supporting": [
+      "physics", "python", "matlab", "data analysis", "mathematical modeling",
+      "scientific computing", "climate science", "geophysics"
+    ]
+  },
+  "Anthropology, Archeology & Cultural Heritage": {
+    "aliases": ["anthropology", "archeology", "curator", "museum conservation", "historian"],
+    "core": [
+      "archaeological excavation", "stratigraphy analysis", "artifact conservation", "radiocarbon dating",
+      "museum curation", "archival preservation", "provenance research", "paleoanthropology",
+      "ethnographic fieldwork", "cultural resource management", "crm compliance", "exhibition design",
+      "osteological analysis", "cataloging museum collections"
+    ],
+    "supporting": [
+      "history", "research", "fieldwork", "cultural preservation", "documentation",
+      "gis mapping", "qualitative analysis", "grant writing"
+    ]
+  },
+  "Architecture & Landscape Architecture": {
+    "aliases": ["architecture", "architect", "landscape architecture", "urban architecture"],
+    "core": [
+      "architectural design", "revit architecture", "rhino 3d", "building envelope design",
+      "schematic design", "design development", "construction documentation", "leed accreditation",
+      "landscape urbanism", "planting design", "grading and drainage architecture", "site planning",
+      "rendering v-ray", "zoning code compliance", "specification writing csi"
+    ],
+    "supporting": [
+      "autocad", "3d modeling", "sketchup", "blueprints", "bim",
+      "building codes", "project design", "site inspection"
+    ]
+  },
+  "Aviation Flight Operations & Air Traffic Management": {
+    "aliases": ["aviation", "pilot", "air traffic control", "flight operations"],
+    "core": [
+      "air traffic control", "instrument flight rules", "ifr", "visual flight rules",
+      "vfr", "flight planning", "crew resource management", "crm aviation",
+      "atc radar operations", "flight navigation systems", "aircraft performance calculations",
+      "faa regulations part 121", "standard terminal arrival routes", "runway safety management", "airfield operations"
+    ],
+    "supporting": [
+      "aviation safety", "flight operations", "meteorology", "navigation",
+      "cockpit systems", "emergency procedures", "radio communications"
+    ]
+  },
+  "Audiology, Speech Pathology & Hearing Sciences": {
+    "aliases": ["audiology", "speech pathology", "slp", "hearing specialist"],
+    "core": [
+      "audiometric testing", "tympanometry", "otoacoustic emissions", "speech sound disorders",
+      "dysphagia management", "videofluoroscopic swallowing study", "cochlear implant mapping",
+      "hearing aid fitting", "aphasia rehabilitation", "voice therapy", "augmentative communication aac",
+      "language intervention", "vestibular assessment"
+    ],
+    "supporting": [
+      "clinical documentation", "patient evaluation", "rehabilitation", "pediatric care",
+      "healthcare", "treatment planning", "hipaa"
+    ]
+  },
+  "Automotive Engineering & Vehicle Systems": {
+    "aliases": ["automotive engineering", "powertrain", "chassis engineering", "vehicle dynamics"],
+    "core": [
+      "vehicle dynamics", "automotive powertrain", "can bus communication", "adas algorithms",
+      "chassis design", "internal combustion engine modeling", "battery management system automotive",
+      "crashworthiness simulation", "automotive matlab simulink", "iso 26262", "ecu calibration",
+      "hardware in the loop hitl", "fuel cell systems"
+    ],
+    "supporting": [
+      "mechanical engineering", "solidworks", "catia", "fea analysis", "manufacturing",
+      "prototyping", "embedded systems", "testing"
+    ]
+  },
+  "Biofuels, Bioprocess & Clean Energy Production": {
+    "aliases": ["biofuels", "biomass", "bioprocess", "geothermal energy"],
+    "core": [
+      "fermentation bioprocess", "anaerobic digestion", "biodiesel transesterification",
+      "biomass gasification", "cellulosic ethanol extraction", "bioreactor scale-up",
+      "feedstock optimization", "syngas cleaning", "geothermal plant operations",
+      "bioprocess simulation", "life cycle carbon intensity"
+    ],
+    "supporting": [
+      "chemical engineering", "process engineering", "renewable energy", "biochemistry",
+      "plant operations", "haccp", "safety protocols"
+    ]
+  },
+  "Emergency Management & Disaster Response": {
+    "aliases": ["emergency management", "paramedic", "disaster response", "crisis management"],
+    "core": [
+      "emergency operations center", "incident command system", "ics", "national incident management nims",
+      "disaster recovery planning", "hazard mitigation", "mass casualty triage", "advanced life support als",
+      "emergency medical dispatch", "continuity of operations coop", "evacuation planning", "crisis communication"
+    ],
+    "supporting": [
+      "public safety", "first aid", "cpr", "emergency response", "risk assessment",
+      "inter-agency coordination", "training exercises"
+    ]
+  },
+  "Environmental Policy, Climate & Conservation": {
+    "aliases": ["environmental policy", "climate change", "conservation", "forestry"],
+    "core": [
+      "climate adaptation policy", "greenhouse gas accounting", "carbon offset verification",
+      "environmental impact statements", "nepa compliance", "forest management inventory",
+      "silviculture", "wildlife corridor planning", "watershed restoration", "ecosystem services valuation",
+      "endangered species assessment", "wetland delineation"
+    ],
+    "supporting": [
+      "gis mapping", "sustainability", "conservation science", "environmental science",
+      "policy analysis", "field research", "ecological modeling"
+    ]
+  },
+  "Fire Protection & Safety Engineering": {
+    "aliases": ["fire protection", "safety engineering", "fire safety", "ehs"],
+    "core": [
+      "fire sprinkler system design", "hydraulic fire calculations", "fire alarm system design",
+      "smoke control modeling", "nfpa codes", "fire hazard analysis", "life safety code review",
+      "fire dynamics simulator fds", "explosion protection", "industrial hygiene assessment",
+      "occupational safety audits", "osha compliance auditing"
+    ],
+    "supporting": [
+      "safety standards", "autocad", "building codes", "risk assessment",
+      "incident investigation", "engineering design", "inspection"
+    ]
+  },
+  "Criminal Justice, Forensics & Criminology": {
+    "aliases": ["forensics", "crime scene", "criminology", "investigations"],
+    "core": [
+      "crime scene investigation", "latent fingerprint examination", "forensic ballistics",
+      "chain of custody protocols", "bloodstain pattern analysis", "forensic serology",
+      "forensic toxicology extraction", "evidentiary documentation", "courtroom testimony",
+      "forensic photography", "death investigation medicolegal", "autopsy assistance"
+    ],
+    "supporting": [
+      "criminal law", "laboratory analysis", "investigative reports", "microscopy",
+      "evidence handling", "scientific documentation", "quality control"
+    ]
+  },
+  "Intelligence, National Security & Geopolitical Analysis": {
+    "aliases": ["intelligence analyst", "national security", "geopolitical analysis", "defense analyst"],
+    "core": [
+      "all-source intelligence analysis", "geopolitical risk assessment", "open source intelligence",
+      "osint", "threat actor profiling", "order of battle analysis", "intelligence briefing preparation",
+      "counterintelligence indicators", "imagery intelligence imint", "signals intelligence sigint basics",
+      "security clearance compliance", "strategic forecasting"
+    ],
+    "supporting": [
+      "critical thinking", "report writing", "research", "qualitative analysis",
+      "foreign affairs", "data synthesis", "risk mitigation"
+    ]
+  },
+  "Fraud Examination & Financial Forensics": {
+    "aliases": ["fraud examiner", "forensic accounting", "financial fraud", "anti-fraud"],
+    "core": [
+      "forensic accounting investigation", "fraud risk assessment", "asset tracing",
+      "money laundering detection", "whistleblower interview techniques", "electronic evidence recovery finance",
+      "benfords law analysis", "bribery and corruption investigation", "reconstruction of financial records",
+      "expert witness reports fraud", "cfe methodologies"
+    ],
+    "supporting": [
+      "accounting", "auditing", "excel", "data analysis", "compliance",
+      "financial records", "investigative interviewing"
+    ]
+  },
+  "Public Relations, Brand Communications & Media Strategy": {
+    "aliases": ["public relations", "pr", "media relations", "communications"],
+    "core": [
+      "media relations", "press release writing", "crisis communication planning",
+      "spokesperson management", "earned media placement", "media monitoring coverage",
+      "brand reputation management", "press conference coordination", "op-ed drafting",
+      "influencer outreach strategy", "media pitch development"
+    ],
+    "supporting": [
+      "communications", "writing", "storytelling", "marketing", "content creation",
+      "event planning", "stakeholder engagement"
+    ]
+  },
+  "Broadcast Journalism, Technical Writing & Media Production": {
+    "aliases": ["journalism", "technical writer", "broadcast production", "media production"],
+    "core": [
+      "investigative journalism", "ap style editing", "technical documentation writing",
+      "api documentation writing", "broadcast news writing", "on-air reporting",
+      "dita xml", "madcap flare", "studio camera operation", "live switch broadcast",
+      "rundown software enps", "audio post-production mixing"
+    ],
+    "supporting": [
+      "editing", "writing", "video editing", "interviewing", "sound design",
+      "content management", "storyboarding", "fact-checking"
+    ]
+  },
+  "Dentistry, Orthodontics & Oral Surgery": {
+    "aliases": ["dentistry", "dentist", "orthodontics", "oral surgery", "dental"],
+    "core": [
+      "dental radiography", "cavity preparation", "endodontic therapy", "periodontal scaling",
+      "orthodontic cephalometrics", "dental crown fabrication", "tooth extraction",
+      "prosthodontic impression", "local anesthesia dental", "intraoral scanning",
+      "orthodontic wire adjustments", "dental implant placement"
+    ],
+    "supporting": [
+      "patient care", "infection control", "sterilization", "healthcare",
+      "dental software", "clinical treatment planning", "hipaa"
+    ]
+  },
+  "Optometry & Ophthalmic Medical Sciences": {
+    "aliases": ["optometry", "ophthalmology", "vision science", "eye care"],
+    "core": [
+      "refraction testing", "slit lamp biomicroscopy", "tonometry eye pressure",
+      "fundus photography", "optical coherence tomography", "oct", "visual field perimeter testing",
+      "contact lens fitting specialty", "corneal topography", "binocular vision assessment",
+      "glaucoma screening evaluation", "pediatric vision assessment"
+    ],
+    "supporting": [
+      "patient evaluation", "healthcare", "clinical documentation", "diagnostic equipment",
+      "optics", "prescription interpretation", "hipaa"
+    ]
+  },
+  "Occupational Therapy & Ergonomics": {
+    "aliases": ["occupational therapy", "ergonomics", "human factors", "ot"],
+    "core": [
+      "activities of daily living adl", "sensory integration therapy", "splinting and orthotic fabrication",
+      "ergonomic workplace evaluation", "human-machine interface evaluation", "cognitive rehabilitation therapy",
+      "assistive technology assessment", "work hardening programs", "functional capacity evaluation",
+      "upper extremity rehabilitation", "task analysis ergonomics"
+    ],
+    "supporting": [
+      "patient assessment", "rehabilitation", "treatment plans", "biomechanics",
+      "clinical documentation", "safety standards", "hipaa"
+    ]
+  },
+  "Veterinary Medicine & Animal Health Sciences": {
+    "aliases": ["veterinary", "vet", "animal health", "veterinary medicine"],
+    "core": [
+      "veterinary surgery", "small animal medicine", "equine health management",
+      "veterinary anesthesia monitoring", "animal clinical pathology", "zoonotic disease control",
+      "veterinary ultrasonography", "companion animal vaccination", "veterinary pharmacology",
+      "veterinary dental prophylaxis", "herd health management"
+    ],
+    "supporting": [
+      "animal care", "diagnostics", "radiography", "biology", "laboratory testing",
+      "patient handling", "client communication"
+    ]
+  },
+  "Nuclear Engineering & Radiation Physics": {
+    "aliases": ["nuclear engineering", "radiation physics", "nuclear power", "dosimetry"],
+    "core": [
+      "reactor physics", "thermal hydraulics nuclear", "mcnp simulation", "radiation dosimetry",
+      "linear accelerator calibration", "treatment planning radiation", "monte carlo radiation transport",
+      "nuclear waste management", "radiation shielding design", "nuclear criticality safety",
+      "reactor control rod calibration", "radiopharmaceutical handling"
+    ],
+    "supporting": [
+      "physics", "mathematical modeling", "safety regulations", "nrc compliance",
+      "data acquisition", "engineering analysis", "quality assurance"
+    ]
+  },
+  "Robotics, Mechatronics & Automation Control": {
+    "aliases": ["robotics", "mechatronics", "automation control", "plc robotics"],
+    "core": [
+      "robot operating system", "ros", "ros2", "kinematics and dynamics", "motion planning algorithms",
+      "slam navigation", "servo drive tuning", "industrial robot programming fanuc",
+      "industrial robot programming kuka", "plc automation logic", "machine vision integration",
+      "actuator selection mechatronics", "sensor fusion imu"
+    ],
+    "supporting": [
+      "c++", "python", "solidworks", "embedded systems", "microcontrollers",
+      "circuit design", "control theory", "manufacturing"
+    ]
+  }
 }

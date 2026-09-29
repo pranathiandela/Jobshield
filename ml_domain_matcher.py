@@ -1,200 +1,193 @@
-"""Runtime resume domain detection + hybrid skill matching.
-
-Loads the pre-trained classifier (resume_classifier.joblib) and the
-data-driven skill keywords (domain_keywords.json). Combines ML probabilities
-with authentic domain keyword density to prevent false detections.
-"""
+"""Calibrated Multi-Domain Hybrid Prediction Engine with Tiered Skill Multipliers, Aliases, and Realistic Benchmark Scoring."""
 import json
+import math
+import os
 import re
-from collections import defaultdict
-import joblib
 
-from resume_analyzer import _is_negated_context
-from stemmer import stems_match
-
-MODEL_PATH = "resume_classifier.joblib"
-KEYWORDS_PATH = "domain_keywords.json"
-
-_model = None
-_domain_keywords = None
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+KEYWORDS_FILE = os.path.join(CURRENT_DIR, "domain_keywords.json")
 
 
-def _load():
-    global _model, _domain_keywords
-    if _model is None:
-        _model = joblib.load(MODEL_PATH)
-    if _domain_keywords is None:
-        with open(KEYWORDS_PATH, "r", encoding="utf-8") as f:
-            _domain_keywords = json.load(f)
-    return _model, _domain_keywords
+def load_domain_keywords():
+    """Loads domain keywords safely from the JSON file."""
+    if not os.path.exists(KEYWORDS_FILE):
+        return {}
+    with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def get_domain_names():
-    _, keywords = _load()
-    return list(keywords.keys())
+    """Returns a sorted list of all domain titles for dropdown population."""
+    data = load_domain_keywords()
+    return sorted(list(data.keys()))
 
 
-CONFIDENCE_THRESHOLD = 35
-
-
-def _get_keyword_density(resume_lower, resume_tokens, domain_keywords):
-    """Counts how many distinct keywords each domain naturally hits in the resume."""
-    scores = defaultdict(int)
-    for domain, skills in domain_keywords.items():
-        hit_count = 0
-        for skill in skills:
-            skill_clean = skill.lower().strip()
-            # Direct symbol comparison
-            if skill_clean in {"c++", "c#"}:
-                pattern = re.compile(r"(?<![a-zA-Z0-9])" + re.escape(skill_clean) + r"(?![a-zA-Z0-9])")
-                if pattern.search(resume_lower):
-                    hit_count += 1
-                continue
-            # Token comparison
-            for token, start_pos in resume_tokens:
-                if stems_match(token, skill_clean):
-                    ctx = resume_lower[max(0, start_pos - 50):start_pos]
-                    if not _is_negated_context(ctx):
-                        hit_count += 1
-                        break
-        scores[domain] = hit_count
-    return scores
-
-
-def predict_domain(resume_text):
-    """Predicts domain probabilities using a hybrid of ML + Keyword Density."""
-    model, domain_keywords = _load()
-
-    if not (resume_text or "").strip():
+def resolve_domain_alias(query, domain_data):
+    """Matches a loose query or alias directly to an exact domain name."""
+    if not query:
         return None
+    q = query.strip().lower()
 
-    resume_lower = resume_text.lower()
-    resume_tokens = [(m.group(0), m.start()) for m in re.finditer(r"[a-zA-Z0-9+#]+", resume_lower)]
+    # 1. Exact match
+    for domain in domain_data:
+        if domain.lower() == q:
+            return domain
 
-    # 1. Base ML model probabilities
-    probabilities = model.predict_proba([resume_text])[0]
-    classes = model.classes_
-    ml_dict = {cls: float(prob) for cls, prob in zip(classes, probabilities)}
+    # 2. Alias match
+    for domain, content in domain_data.items():
+        aliases = [a.lower() for a in content.get("aliases", [])]
+        if q in aliases:
+            return domain
 
-    # 2. Keyword density counts
-    density_dict = _get_keyword_density(resume_lower, resume_tokens, domain_keywords)
-    max_hits = max(density_dict.values()) if density_dict else 1
-    if max_hits == 0:
-        max_hits = 1
+    # 3. Substring match
+    for domain in domain_data:
+        if q in domain.lower() or domain.lower() in q:
+            return domain
 
-    # 3. Hybrid scoring: 55% ML model, 45% keyword density
-    combined_scores = []
-    for domain in classes:
-        ml_weight = ml_dict.get(domain, 0.0)
-        density_weight = density_dict.get(domain, 0) / max_hits
-        # Boost domains that have strong evidence (multiple keywords)
-        final_score = (ml_weight * 0.55) + (density_weight * 0.45)
-        combined_scores.append((domain, final_score))
-
-    # Normalize scores to sum to 100%
-    total_val = sum(score for _, score in combined_scores) or 1.0
-    ranked = sorted(combined_scores, key=lambda p: p[1], reverse=True)
-    ranked_domains = [
-        {"domain": name, "score": max(1, round((score / total_val) * 100))}
-        for name, score in ranked
-    ]
-
-    best = ranked_domains[0]
-    runner_up = ranked_domains[1] if len(ranked_domains) > 1 else None
-    gap = best["score"] - (runner_up["score"] if runner_up else 0)
-
-    # Stricter confidence criteria: must be solid score & clear lead
-    confident = best["score"] >= CONFIDENCE_THRESHOLD and gap >= 10
-
-    return {
-        "best_domain": best["domain"],
-        "best_score": best["score"],
-        "confident": confident,
-        "ranked_domains": ranked_domains,
-    }
+    return None
 
 
-def _skill_status(skill, resume_lower, resume_tokens):
-    """Accurate single-word/symbol skill match with negation awareness."""
-    skill_clean = skill.lower().strip()
-
-    if skill_clean in {"c++", "c#"}:
-        pattern = re.compile(r"(?<![a-zA-Z0-9])" + re.escape(skill_clean) + r"(?![a-zA-Z0-9])")
-        match = pattern.search(resume_lower)
-        if match:
-            context_before = resume_lower[max(0, match.start() - 50):match.start()]
-            return (False, True) if _is_negated_context(context_before) else (True, False)
-        return False, False
-
-    for token, start_pos in resume_tokens:
-        if stems_match(token, skill_clean):
-            context_before = resume_lower[max(0, start_pos - 50):start_pos]
-            if _is_negated_context(context_before):
-                return False, True
-            return True, False
-
-    return False, False
+def _find_keyword_matches(skill_list, text_lower):
+    """Matches words or compound phrases using regex word boundaries."""
+    matches = []
+    for skill in skill_list:
+        clean_skill = skill.lower().strip()
+        pattern = r"(?<![a-zA-Z0-9])" + re.escape(clean_skill) + r"(?![a-zA-Z0-9])"
+        if re.search(pattern, text_lower):
+            matches.append(skill)
+    return matches
 
 
-def calculate_calibrated_coverage(matched_count, total_count):
-    """Realistic career scoring: 6-9 matched core skills indicates solid expertise."""
-    if matched_count == 0 or total_count == 0:
-        return 0
-    # Scaled benchmark: 6 skills = 75%, 8 skills = 90%, 9+ skills = 95-100%
-    benchmark_target = 8
-    ratio = min(1.0, matched_count / benchmark_target)
-    return max(15, round(ratio * 95))
+def predict_domain_hybrid(resume_text):
+    """
+    Evaluates candidate text across all configured domains.
+    Returns:
+      top_domain: str
+      confidence: float (0.0 to 1.0)
+      matched_details: dict of matched core/supporting items and calibrated scores
+    """
+    domain_data = load_domain_keywords()
+    if not domain_data or not (resume_text or "").strip():
+        return "General / Unclassified", 0.0, {}
 
+    text_lower = resume_text.lower()
+    scores = {}
+    matched_details = {}
 
-def missing_skills_for_domain(resume_text, domain):
-    _, domain_keywords = _load()
-    skills = domain_keywords.get(domain, [])
-    if not skills:
-        return None
+    for domain, skill_tiers in domain_data.items():
+        core_list = skill_tiers.get("core", [])
+        supporting_list = skill_tiers.get("supporting", [])
 
-    resume_lower = (resume_text or "").lower()
-    resume_tokens = [(m.group(0), m.start()) for m in re.finditer(r"[a-zA-Z0-9+#]+", resume_lower)]
+        core_matches = _find_keyword_matches(core_list, text_lower)
+        supporting_matches = _find_keyword_matches(supporting_list, text_lower)
 
-    present, missing, negated = [], [], []
+        # Core skills count 3x heavier than supporting skills
+        raw_core_points = len(core_matches) * 3.0
+        raw_supp_points = len(supporting_matches) * 1.0
+        raw_score = raw_core_points + raw_supp_points
 
-    for skill in skills:
-        present_unnegated, present_negated = _skill_status(skill, resume_lower, resume_tokens)
-        if present_unnegated:
-            present.append(skill)
-        elif present_negated:
-            missing.append(skill)
-            negated.append(skill)
-        else:
-            missing.append(skill)
+        # Vocabulary depth normalization
+        core_pool_size = max(len(core_list), 1)
+        normalization_factor = 1.0 + math.log10(max(core_pool_size, 10) / 10.0)
+        calibrated_score = round(raw_score / normalization_factor, 2)
 
-    coverage = calculate_calibrated_coverage(len(present), len(skills))
+        scores[domain] = calibrated_score
+        matched_details[domain] = {
+            "core_matches": core_matches,
+            "supporting_matches": supporting_matches,
+            "raw_core_points": raw_core_points,
+            "raw_supporting_points": raw_supp_points,
+            "score": calibrated_score,
+        }
 
-    return {
-        "domain": domain,
-        "coverage": coverage,
-        "present_skills": present,
-        "missing_skills": missing,
-        "negated_skills": negated,
-        "skill_total": len(skills),
-    }
+    # Rank domains by calibrated score descending
+    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    top_domain, top_score = ranked[0]
+
+    if top_score == 0:
+        return "General / Unclassified", 0.0, matched_details
+
+    # Confidence: Margin relative to top 3 contenders
+    top_three_sum = sum(score for _, score in ranked[:3])
+    confidence = round(top_score / top_three_sum, 2) if top_three_sum > 0 else 1.0
+
+    return top_domain, confidence, matched_details
 
 
 def screen_for_domain(resume_text, chosen_domain=None):
-    _, domain_keywords = _load()
-    detection = predict_domain(resume_text)
-    if not detection:
+    """
+    Evaluates domain match using a weighted benchmark scoring model
+    rather than dividing by the total dictionary size.
+    """
+    domain_data = load_domain_keywords()
+    if not domain_data:
         return None
 
-    if chosen_domain and chosen_domain in domain_keywords:
-        domain = chosen_domain
-    else:
-        domain = detection["best_domain"]
+    top_domain, confidence, matched_details = predict_domain_hybrid(resume_text)
 
-    skill_report = missing_skills_for_domain(resume_text, domain)
+    # Resolve alias or user selection
+    resolved_target = resolve_domain_alias(chosen_domain, domain_data)
+    target_domain = resolved_target if resolved_target else top_domain
+
+    if target_domain not in matched_details:
+        target_domain = list(domain_data.keys())[0]
+
+    domain_info = matched_details.get(target_domain, {})
+    present_core = domain_info.get("core_matches", [])
+    present_supporting = domain_info.get("supporting_matches", [])
+    present_all = sorted(list(set(present_core + present_supporting)))
+
+    all_domain_skills = domain_data.get(target_domain, {}).get("core", []) + domain_data.get(target_domain, {}).get("supporting", [])
+    missing = sorted([s for s in all_domain_skills if s not in present_all])
+
+    # ------------------------------------------------------------------
+    # CALIBRATED BENCHMARK SCORING (Fixes denominator inflation)
+    # ------------------------------------------------------------------
+    # Weighted earned points: Core = 3x, Supporting = 1x
+    earned_points = (len(present_core) * 3.0) + (len(present_supporting) * 1.0)
+
+    # A competitive resume is expected to have ~4-5 core skills and ~2-3 supporting skills (Benchmark ~ 15.0 pts)
+    BENCHMARK_TARGET = 15.0
+
+    if earned_points == 0:
+        coverage = 0
+    elif earned_points >= BENCHMARK_TARGET:
+        # Scale between 85% and 100% for candidates meeting or exceeding benchmark
+        surplus_ratio = min(1.0, (earned_points - BENCHMARK_TARGET) / 10.0)
+        coverage = round(85 + (surplus_ratio * 15))
+    else:
+        # Scale smoothly between 10% and 84% based on progress toward benchmark
+        progress = earned_points / BENCHMARK_TARGET
+        coverage = round(progress * 84)
+
+    # ------------------------------------------------------------------
+    # Build ranked domain list for the UI confidence bars
+    # ------------------------------------------------------------------
+    ranked_domains = []
+    top_scores = sorted(
+        [(dom, details.get("score", 0)) for dom, details in matched_details.items()],
+        key=lambda x: x[1],
+        reverse=True
+    )
+    max_score = top_scores[0][1] if top_scores and top_scores[0][1] > 0 else 1.0
+
+    for dom, sc in top_scores[:4]:
+        rel_pct = int(min(100, round((sc / max_score) * 100))) if max_score > 0 else 0
+        ranked_domains.append({
+            "domain": dom,
+            "score": rel_pct
+        })
 
     return {
-        "domain": domain,
-        "auto_detected": chosen_domain is None,
-        "detection": detection,
-        "skills": skill_report,
+        "domain": target_domain,
+        "detection": {
+            "best_score": int(confidence * 100),
+            "confident": confidence >= 0.35,
+            "ranked_domains": ranked_domains
+        },
+        "skills": {
+            "coverage": coverage,
+            "present_skills": present_all,
+            "missing_skills": missing[:18]
+        }
     }
