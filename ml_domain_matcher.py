@@ -1,193 +1,327 @@
-"""Calibrated Multi-Domain Hybrid Prediction Engine with Tiered Skill Multipliers, Aliases, and Realistic Benchmark Scoring."""
-import json
-import math
-import os
-import re
+"""JobShield Universal Enterprise Domain Matching & Taxonomy Resolver.
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-KEYWORDS_FILE = os.path.join(CURRENT_DIR, "domain_keywords.json")
+Key Features:
+  1. Bidirectional Acronym & Synonym Resolution (100+ standard mappings).
+  2. Non-linear asymptotic scoring curve: eliminates artificial 100% spikes.
+     Strong candidates land realistically between 68% and 86%.
+  3. Weighted core breadth ratio + persona anchor boost.
+"""
+import json
+import re
+import math
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+DOMAIN_FILE = BASE_DIR / "domain_keywords.json"
+
+_DOMAINS_CACHE = None
+
+GLOBAL_ACRONYM_MAP = {
+    # Medical & Clinical
+    "eeg": ["electroencephalogram", "electroencephalography"],
+    "emg": ["electromyogram", "electromyography"],
+    "ecg": ["ekg", "electrocardiogram", "electrocardiography"],
+    "ncs": ["nerve conduction study", "nerve conduction studies"],
+    "pcr": ["polymerase chain reaction"],
+    "mri": ["magnetic resonance imaging"],
+    "ct": ["computed tomography", "cat scan"],
+    "cpr": ["cardiopulmonary resuscitation"],
+    "bls": ["basic life support"],
+    "acls": ["advanced cardiovascular life support", "advanced cardiac life support"],
+    "pals": ["pediatric advanced life support"],
+    "nicu": ["neonatal intensive care unit"],
+    "picu": ["pediatric intensive care unit"],
+    "icu": ["intensive care unit"],
+    "er": ["emergency room", "emergency department"],
+    "ehr": ["emr", "electronic health record", "electronic medical record"],
+    "abpn": ["american board of psychiatry and neurology"],
+    "faan": ["fellow of the american academy of neurology"],
+    "facc": ["fellow of the american college of cardiology"],
+    "facs": ["fellow of the american college of surgeons"],
+    "dvt": ["deep vein thrombosis"],
+    "cad": ["coronary artery disease"],
+    "tpa": ["tissue plasminogen activator", "thrombolytic"],
+
+    # Engineering (Mechanical, Civil, Electrical, Chemical, Robotics)
+    "cad": ["computer aided design", "autocad"],
+    "cam": ["computer aided manufacturing"],
+    "cae": ["computer aided engineering"],
+    "fea": ["finite element analysis"],
+    "cfd": ["computational fluid dynamics"],
+    "gd&t": ["geometric dimensioning and tolerancing", "gdt"],
+    "cnc": ["computer numerical control"],
+    "dfm": ["design for manufacturability", "design for manufacturing"],
+    "dfmea": ["design failure mode and effects analysis"],
+    "hvac": ["heating ventilation and air conditioning"],
+    "plc": ["programmable logic controller"],
+    "scada": ["supervisory control and data acquisition"],
+    "pcb": ["printed circuit board"],
+    "fpga": ["field programmable gate array"],
+    "p&id": ["piping and instrumentation diagram"],
+    "hazop": ["hazard and operability study"],
+    "bim": ["building information modeling"],
+    "boq": ["bill of quantities"],
+    "ros": ["robot operating system"],
+    "slam": ["simultaneous localization and mapping"],
+    "imu": ["inertial measurement unit"],
+
+    # Software, Cloud & DevOps
+    "k8s": ["kubernetes"],
+    "ci/cd": ["continuous integration continuous deployment", "cicd"],
+    "iac": ["infrastructure as code"],
+    "api": ["apis", "application programming interface", "rest api"],
+    "sdk": ["software development kit"],
+    "db": ["database"],
+    "rdbms": ["relational database"],
+    "nosql": ["not only sql"],
+    "orm": ["object relational mapping"],
+    "sre": ["site reliability engineering"],
+    "pr": ["pull request"],
+    "tdd": ["test driven development"],
+    "bdd": ["behavior driven development"],
+    "spa": ["single page application"],
+    "ssr": ["server side rendering"],
+    "csr": ["client side rendering"],
+    "ui": ["user interface"],
+    "ux": ["user experience"],
+
+    # Data Science, AI & ML
+    "ai": ["artificial intelligence"],
+    "ml": ["machine learning"],
+    "dl": ["deep learning"],
+    "nlp": ["natural language processing"],
+    "llm": ["large language model", "large language models"],
+    "cv": ["computer vision"],
+    "rag": ["retrieval augmented generation"],
+    "genai": ["generative ai", "generative artificial intelligence"],
+    "rl": ["reinforcement learning"],
+    "rlhf": ["reinforcement learning from human feedback"],
+    "eda": ["exploratory data analysis"],
+    "bi": ["business intelligence"],
+    "etl": ["extract transform load"],
+    "elt": ["extract load transform"],
+
+    # Scientific Research & Lab Techniques
+    "sem": ["scanning electron microscopy"],
+    "tem": ["transmission electron microscopy"],
+    "xrd": ["x-ray diffraction"],
+    "afm": ["atomic force microscopy"],
+    "nmr": ["nuclear magnetic resonance"],
+    "hplc": ["high performance liquid chromatography"],
+    "gc-ms": ["gas chromatography mass spectrometry"],
+    "gis": ["geographic information system", "geographic information systems"],
+
+    # Education, Finance & Business
+    "iep": ["individualized education program"],
+    "bip": ["behavioral intervention plan"],
+    "aba": ["applied behavior analysis"],
+    "stem": ["science technology engineering math"],
+    "lms": ["learning management system"],
+    "cpa": ["certified public accountant"],
+    "dcf": ["discounted cash flow"],
+    "lbo": ["leveraged buyout"],
+    "m&a": ["mergers and acquisitions"],
+    "wacc": ["weighted average cost of capital"],
+    "gaap": ["generally accepted accounting principles"],
+    "ifrs": ["international financial reporting standards"],
+    "sox": ["sarbanes oxley"],
+    "ats": ["applicant tracking system"],
+    "hris": ["human resources information system"]
+}
+
+CROSS_DOMAIN_DILUTERS = {
+    "patient", "clinical", "hospital", "medical", "treatment", "care", "healthcare",
+    "system", "systems", "design", "analysis", "data", "management", "tools",
+    "software", "engineering", "research", "project", "operations", "compliance"
+}
 
 
 def load_domain_keywords():
-    """Loads domain keywords safely from the JSON file."""
-    if not os.path.exists(KEYWORDS_FILE):
-        return {}
-    with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    global _DOMAINS_CACHE
+    if _DOMAINS_CACHE is not None:
+        return _DOMAINS_CACHE
+    try:
+        with open(DOMAIN_FILE, "r", encoding="utf-8") as f:
+            _DOMAINS_CACHE = json.load(f)
+    except Exception as e:
+        print(f"Error loading {DOMAIN_FILE}: {e}")
+        _DOMAINS_CACHE = {}
+    return _DOMAINS_CACHE
 
 
 def get_domain_names():
-    """Returns a sorted list of all domain titles for dropdown population."""
-    data = load_domain_keywords()
-    return sorted(list(data.keys()))
+    domains = load_domain_keywords()
+    return list(domains.keys())
 
 
-def resolve_domain_alias(query, domain_data):
-    """Matches a loose query or alias directly to an exact domain name."""
-    if not query:
-        return None
-    q = query.strip().lower()
-
-    # 1. Exact match
-    for domain in domain_data:
-        if domain.lower() == q:
-            return domain
-
-    # 2. Alias match
-    for domain, content in domain_data.items():
-        aliases = [a.lower() for a in content.get("aliases", [])]
-        if q in aliases:
-            return domain
-
-    # 3. Substring match
-    for domain in domain_data:
-        if q in domain.lower() or domain.lower() in q:
-            return domain
-
-    return None
+def _normalize(text):
+    return (text or "").lower()
 
 
-def _find_keyword_matches(skill_list, text_lower):
-    """Matches words or compound phrases using regex word boundaries."""
-    matches = []
-    for skill in skill_list:
-        clean_skill = skill.lower().strip()
-        pattern = r"(?<![a-zA-Z0-9])" + re.escape(clean_skill) + r"(?![a-zA-Z0-9])"
+def _extract_header_lines(text, max_lines=12):
+    lines = [l.strip().lower() for l in (text or "").splitlines() if len(l.strip()) > 3]
+    return " \n ".join(lines[:max_lines])
+
+
+def _get_expanded_forms(term):
+    term_clean = term.strip().lower()
+    variants = {term_clean}
+    if term_clean in GLOBAL_ACRONYM_MAP:
+        variants.update(GLOBAL_ACRONYM_MAP[term_clean])
+    for short_form, expansions in GLOBAL_ACRONYM_MAP.items():
+        if term_clean in expansions:
+            variants.add(short_form)
+            variants.update(expansions)
+    return variants
+
+
+def _flexible_keyword_match(term, text_lower):
+    for variant in _get_expanded_forms(term):
+        escaped = re.escape(variant)
+        if " " in variant or "-" in variant:
+            pattern = r"\b" + escaped + r"(?:s|es)?\b"
+        else:
+            pattern = r"\b" + escaped + r"(?:s|es|ed|ing)?\b"
         if re.search(pattern, text_lower):
-            matches.append(skill)
-    return matches
+            return True
+    return False
 
 
-def predict_domain_hybrid(resume_text):
-    """
-    Evaluates candidate text across all configured domains.
-    Returns:
-      top_domain: str
-      confidence: float (0.0 to 1.0)
-      matched_details: dict of matched core/supporting items and calibrated scores
-    """
-    domain_data = load_domain_keywords()
-    if not domain_data or not (resume_text or "").strip():
-        return "General / Unclassified", 0.0, {}
+def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
+    aliases = domain_data.get("aliases", [])
+    core_skills = domain_data.get("core", [])
+    supporting_skills = domain_data.get("supporting", [])
 
-    text_lower = resume_text.lower()
-    scores = {}
-    matched_details = {}
+    # 1. Title / Persona Anchor Check
+    title_anchor_hits = 0
+    body_alias_hits = 0
+    for alias in aliases:
+        if _flexible_keyword_match(alias, header_text_lower):
+            title_anchor_hits += 1
+        elif _flexible_keyword_match(alias, full_text_lower):
+            body_alias_hits += 1
 
-    for domain, skill_tiers in domain_data.items():
-        core_list = skill_tiers.get("core", [])
-        supporting_list = skill_tiers.get("supporting", [])
+    # 2. Core Skills Match
+    matched_core = []
+    missing_core = []
+    for skill in core_skills:
+        if _flexible_keyword_match(skill, full_text_lower):
+            matched_core.append(skill)
+        else:
+            missing_core.append(skill)
 
-        core_matches = _find_keyword_matches(core_list, text_lower)
-        supporting_matches = _find_keyword_matches(supporting_list, text_lower)
+    # 3. Supporting Skills Match
+    matched_supporting = []
+    for skill in supporting_skills:
+        if _flexible_keyword_match(skill, full_text_lower):
+            matched_supporting.append(skill)
 
-        # Core skills count 3x heavier than supporting skills
-        raw_core_points = len(core_matches) * 3.0
-        raw_supp_points = len(supporting_matches) * 1.0
-        raw_score = raw_core_points + raw_supp_points
+    # 4. Realistic Scoring Curve (Diminishing Returns)
+    # Total available skills in this taxonomy
+    total_core = max(len(core_skills), 1)
+    core_ratio = len(matched_core) / total_core
+    supp_ratio = len(matched_supporting) / max(len(supporting_skills), 1)
 
-        # Vocabulary depth normalization
-        core_pool_size = max(len(core_list), 1)
-        normalization_factor = 1.0 + math.log10(max(core_pool_size, 10) / 10.0)
-        calibrated_score = round(raw_score / normalization_factor, 2)
+    # Base competency points from breadth (max 65 pts)
+    # Demonstrating ~50% of an entire field's core competencies is already senior-level
+    breadth_score = min(65.0, (core_ratio * 75.0) + (supp_ratio * 20.0))
 
-        scores[domain] = calibrated_score
-        matched_details[domain] = {
-            "core_matches": core_matches,
-            "supporting_matches": supporting_matches,
-            "raw_core_points": raw_core_points,
-            "raw_supporting_points": raw_supp_points,
-            "score": calibrated_score,
-        }
+    # Seniority & Persona Anchor Boost (max 22 pts)
+    anchor_bonus = 0.0
+    if title_anchor_hits > 0:
+        anchor_bonus = 18.0 + min(4.0, (title_anchor_hits - 1) * 2.0)
+    elif body_alias_hits > 0:
+        anchor_bonus = 8.0 + min(4.0, (body_alias_hits - 1) * 2.0)
 
-    # Rank domains by calibrated score descending
-    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
-    top_domain, top_score = ranked[0]
+    # Raw combined score
+    combined = breadth_score + anchor_bonus
 
-    if top_score == 0:
-        return "General / Unclassified", 0.0, matched_details
+    # Asymptotic ceiling: only profiles matching nearly all core and supporting tools reach 90-95%
+    # Mathematical soft cap ensures nobody hits 100% on a standard resume
+    if combined > 70:
+        excess = combined - 70
+        calibrated_score = 70 + (25 * (1 - math.exp(-excess / 25)))
+    else:
+        calibrated_score = combined
 
-    # Confidence: Margin relative to top 3 contenders
-    top_three_sum = sum(score for _, score in ranked[:3])
-    confidence = round(top_score / top_three_sum, 2) if top_three_sum > 0 else 1.0
+    final_score = max(10, min(95, round(calibrated_score)))
 
-    return top_domain, confidence, matched_details
+    # Raw points preserved for rank comparisons
+    raw_points = (title_anchor_hits * 14.0) + (body_alias_hits * 6.0)
+    for c in matched_core:
+        raw_points += (1.0 if c.lower() in CROSS_DOMAIN_DILUTERS else 3.0)
+    for s in matched_supporting:
+        raw_points += (0.3 if s.lower() in CROSS_DOMAIN_DILUTERS else 1.0)
+
+    return {
+        "domain": domain_name,
+        "score": final_score,
+        "raw_points": raw_points,
+        "title_anchor_hits": title_anchor_hits,
+        "present_skills": matched_core + matched_supporting,
+        "missing_skills": missing_core[:10]
+    }
+
+
+def detect_best_domain(resume_text):
+    domains = load_domain_keywords()
+    if not domains:
+        return {"domain": "General Professional", "score": 50, "confident": False, "ranked_domains": []}
+
+    full_lower = _normalize(resume_text)
+    header_lower = _extract_header_lines(resume_text)
+
+    ranked = []
+    for name, data in domains.items():
+        result = _score_domain(name, data, full_lower, header_lower)
+        ranked.append(result)
+
+    ranked.sort(key=lambda x: (x["raw_points"], x["score"]), reverse=True)
+
+    best = ranked[0]
+    second = ranked[1] if len(ranked) > 1 else None
+
+    confident = False
+    if best["score"] >= 35:
+        if second is None or (best["raw_points"] >= second["raw_points"] * 1.20):
+            confident = True
+
+    return {
+        "best_domain": best["domain"],
+        "best_score": best["score"],
+        "confident": confident,
+        "ranked_domains": [
+            {"domain": r["domain"], "score": r["score"]} for r in ranked[:5]
+        ],
+        "best_details": best
+    }
 
 
 def screen_for_domain(resume_text, chosen_domain=None):
-    """
-    Evaluates domain match using a weighted benchmark scoring model
-    rather than dividing by the total dictionary size.
-    """
-    domain_data = load_domain_keywords()
-    if not domain_data:
-        return None
+    domains = load_domain_keywords()
+    detection = detect_best_domain(resume_text)
 
-    top_domain, confidence, matched_details = predict_domain_hybrid(resume_text)
+    full_lower = _normalize(resume_text)
+    header_lower = _extract_header_lines(resume_text)
 
-    # Resolve alias or user selection
-    resolved_target = resolve_domain_alias(chosen_domain, domain_data)
-    target_domain = resolved_target if resolved_target else top_domain
+    active_domain = chosen_domain if chosen_domain and chosen_domain in domains else detection["best_domain"]
 
-    if target_domain not in matched_details:
-        target_domain = list(domain_data.keys())[0]
-
-    domain_info = matched_details.get(target_domain, {})
-    present_core = domain_info.get("core_matches", [])
-    present_supporting = domain_info.get("supporting_matches", [])
-    present_all = sorted(list(set(present_core + present_supporting)))
-
-    all_domain_skills = domain_data.get(target_domain, {}).get("core", []) + domain_data.get(target_domain, {}).get("supporting", [])
-    missing = sorted([s for s in all_domain_skills if s not in present_all])
-
-    # ------------------------------------------------------------------
-    # CALIBRATED BENCHMARK SCORING (Fixes denominator inflation)
-    # ------------------------------------------------------------------
-    # Weighted earned points: Core = 3x, Supporting = 1x
-    earned_points = (len(present_core) * 3.0) + (len(present_supporting) * 1.0)
-
-    # A competitive resume is expected to have ~4-5 core skills and ~2-3 supporting skills (Benchmark ~ 15.0 pts)
-    BENCHMARK_TARGET = 15.0
-
-    if earned_points == 0:
-        coverage = 0
-    elif earned_points >= BENCHMARK_TARGET:
-        # Scale between 85% and 100% for candidates meeting or exceeding benchmark
-        surplus_ratio = min(1.0, (earned_points - BENCHMARK_TARGET) / 10.0)
-        coverage = round(85 + (surplus_ratio * 15))
+    if active_domain in domains:
+        domain_data = domains[active_domain]
+        skills_eval = _score_domain(active_domain, domain_data, full_lower, header_lower)
     else:
-        # Scale smoothly between 10% and 84% based on progress toward benchmark
-        progress = earned_points / BENCHMARK_TARGET
-        coverage = round(progress * 84)
-
-    # ------------------------------------------------------------------
-    # Build ranked domain list for the UI confidence bars
-    # ------------------------------------------------------------------
-    ranked_domains = []
-    top_scores = sorted(
-        [(dom, details.get("score", 0)) for dom, details in matched_details.items()],
-        key=lambda x: x[1],
-        reverse=True
-    )
-    max_score = top_scores[0][1] if top_scores and top_scores[0][1] > 0 else 1.0
-
-    for dom, sc in top_scores[:4]:
-        rel_pct = int(min(100, round((sc / max_score) * 100))) if max_score > 0 else 0
-        ranked_domains.append({
-            "domain": dom,
-            "score": rel_pct
-        })
+        skills_eval = detection["best_details"]
 
     return {
-        "domain": target_domain,
-        "detection": {
-            "best_score": int(confidence * 100),
-            "confident": confidence >= 0.35,
-            "ranked_domains": ranked_domains
-        },
+        "domain": active_domain,
         "skills": {
-            "coverage": coverage,
-            "present_skills": present_all,
-            "missing_skills": missing[:18]
+            "coverage": skills_eval["score"],
+            "present_skills": skills_eval["present_skills"],
+            "missing_skills": skills_eval["missing_skills"]
+        },
+        "detection": {
+            "confident": detection["confident"],
+            "best_score": detection["best_score"],
+            "ranked_domains": detection["ranked_domains"]
         }
     }

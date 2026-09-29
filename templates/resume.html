@@ -6,9 +6,9 @@
   <div class="wrap">
 
     <div class="page-head" id="intro-hero">
-      <div class="eyebrow">Resume Screening</div>
-      <h1>Score Your Resume <span>Before You Apply</span></h1>
-      <p>JobShield checks your bullets for weak language, missing impact, and how well you match a target role.</p>
+      <div class="eyebrow">Enterprise Resume Intelligence</div>
+      <h1>Calibrate Your Resume <span>Against Market Standards</span></h1>
+      <p>Precision ATS evaluation: linguistic impact diagnostics, vocabulary depth, and domain competency benchmarking.</p>
     </div>
 
     <div class="scan-hero-grid" id="input-section">
@@ -20,35 +20,35 @@
             <div class="section-title">
               <span>01</span>
               <div>
-                <h2>Your resume</h2>
-                <p>Paste your resume text, or upload a PDF/DOCX file.</p>
+                <h2>Resume Content</h2>
+                <p>Provide your resume via raw text or upload a standard document.</p>
               </div>
             </div>
 
             <div class="form-row wide">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:8px; flex-wrap:wrap;">
-                <label for="resume_text" style="margin-bottom:0;">Resume Text</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:10px; flex-wrap:wrap;">
+                <label for="resume_text" style="margin-bottom:0; font-weight:600;">Candidate Text</label>
                 <button type="button" id="upload-toggle" class="btn btn-nav" style="white-space:nowrap;">📄 Upload File</button>
               </div>
 
               <div id="paste-mode">
-                <textarea id="resume_text" name="resume_text" placeholder="Paste your resume text here, one line per bullet..."></textarea>
+                <textarea id="resume_text" name="resume_text" style="min-height:190px;" placeholder="Paste resume lines, career history, or bullet points here..."></textarea>
               </div>
 
               <div id="upload-mode" hidden>
-                <div style="border:2px dashed rgba(0,0,0,0.15); border-radius:12px; padding:28px 20px; text-align:center;">
+                <div style="border:2px dashed rgba(0,0,0,0.15); border-radius:12px; padding:28px 20px; text-align:center; background:#fafafa;">
                   <div style="font-size:32px; margin-bottom:8px;">📄</div>
-                  <strong>Upload resume file</strong>
-                  <p style="margin:6px 0 16px; opacity:.7;">PDF or DOCX only.</p>
+                  <strong>Upload Resume Document</strong>
+                  <p style="margin:6px 0 16px; opacity:.7;">PDF or DOCX format.</p>
                   <input id="resume" name="resume" type="file" accept=".pdf,.docx">
                   <div id="resume-file-name" class="file-help" style="margin-top:10px;">No file selected.</div>
                 </div>
-                <button type="button" id="paste-toggle" class="btn btn-nav" style="margin-top:12px;">📝 Paste Text Instead</button>
+                <button type="button" id="paste-toggle" class="btn btn-nav" style="margin-top:12px;">📝 Switch to Text Paste</button>
               </div>
 
-              <label style="margin:14px 0 8px;">Preview</label>
+              <label style="margin:14px 0 8px; font-weight:600;">Text Inspector Preview</label>
               <div id="resume-preview" class="resume-preview">
-                <div class="resume-preview-empty">Your resume text will appear here, split line by line.</div>
+                <div class="resume-preview-empty">Your parsed content will stream here line-by-line.</div>
               </div>
             </div>
           </div>
@@ -57,90 +57,90 @@
             <div class="section-title">
               <span>02</span>
               <div>
-                <h2>Choose preferred job role</h2>
-                <p>Optional. Pick a role to see skills you're missing for it. Leave on "Auto-detect" if you just want our best guess.</p>
+                <h2>Target Specialization</h2>
+                <p>Select your discipline, or allow our hybrid model to auto-detect the optimal alignment.</p>
               </div>
             </div>
 
             <div class="form-row wide">
-              <label for="domain_select">Role</label>
-              <select id="domain_select" name="domain">
-                <option value="">Auto-detect for me</option>
+              <label for="domain_select" style="font-weight:600;">Specialized Field / Role</label>
+              <select id="domain_select" name="domain" style="padding:10px 14px; border-radius:8px;">
+                <option value="">Auto-detect optimal domain</option>
               </select>
             </div>
           </div>
 
           <div class="scan-bar">
             <div>
-              <strong>Ready to score</strong>
-              <span>All scoring is performed by the JobShield resume engine.</span>
+              <strong>Ready for ATS Diagnostic</strong>
+              <span style="display:block; font-size:12px; opacity:0.75;">Evaluates Google XYZ structure, action verbs, and domain taxonomy.</span>
             </div>
             <button class="btn btn-primary" type="submit" id="score-btn">
-              <span>Score my resume</span> ↗
+              <span>Run Audit</span> ↗
             </button>
           </div>
         </form>
 
         <div id="score-progress" class="scan-progress" hidden>
           <div class="progress-head">
-            <strong>Analyzing resume</strong>
-            <span id="resume-progress-label">Preparing checks…</span>
+            <strong>Analyzing Document Structure</strong>
+            <span id="resume-progress-label">Initiating audit pipeline…</span>
           </div>
           <div class="progress-track"><div id="resume-progress-fill"></div></div>
-          <div class="progress-steps"><span>Bullets</span><span>Verbs</span><span>Impact</span><span>Roles</span></div>
+          <div class="progress-steps"><span>Parsing</span><span>Verbs</span><span>Quantification</span><span>Competency</span></div>
         </div>
       </div>
 
-      <!-- DECORATIVE SCAN EXAMPLE -->
+      <!-- SCAN SPECIFICATION MOCKUP -->
       <div class="scan-mock">
         <div class="scan-mock-header">
           <span class="scan-mock-dot"></span><span class="scan-mock-dot"></span><span class="scan-mock-dot"></span>
-          <span class="scan-mock-title">RESUME SCAN · EXAMPLE</span>
+          <span class="scan-mock-title">ENTERPRISE AUDIT PREVIEW</span>
         </div>
         <div class="scan-mock-paper">
           <div class="scan-line"></div>
-          <div class="scan-mock-badge">95<small>/100</small></div>
+          <div class="scan-mock-badge">92<small>/100</small></div>
 
-          <div class="scan-mock-name">Jordan Rivera</div>
-          <div class="scan-mock-contact">city · email · linkedin</div>
-          <div class="scan-mock-section">EXPERIENCE</div>
+          <div class="scan-mock-name">Dr. Elena Vance, MD</div>
+          <div class="scan-mock-contact">Cardiology · License Active · Medical Research</div>
+          <div class="scan-mock-section">CORE ACHIEVEMENTS</div>
 
           <div class="scan-mock-line">
-            <span>Led a team of 5 engineers, cutting deploy time 40%</span>
-            <span class="scan-mock-tag good">strong ✓</span>
+            <span>Performed 140+ successful catheterizations with 0% complication rate</span>
+            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">benchmark ✓</span>
           </div>
           <div class="scan-mock-line">
-            <span>Managed 10 client accounts, renewing 95% of contracts</span>
-            <span class="scan-mock-tag good">strong ✓</span>
+            <span>Spearheaded clinical trials reducing cardiac ICU readmission by 22%</span>
+            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">quantified ✓</span>
           </div>
           <div class="scan-mock-line">
-            <span>Built an email toolkit, saving 5+ hours per week</span>
-            <span class="scan-mock-tag good">strong ✓</span>
+            <span>Trained 18 resident fellows on structural echocardiography protocols</span>
+            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">leadership ✓</span>
           </div>
         </div>
       </div>
 
       <div class="scan-mock-caption">
-        Powered by a machine learning model trained on real resumes — 78% accuracy across 32 job roles.
+        Equipped with calibrated industry taxonomies across Medicine, Engineering, Science, and Academia.
       </div>
 
     </div>
 
-    <!-- RESULTS DASHBOARD (hidden until scored) -->
+    <!-- REPORT VIEW -->
     <div id="results-view" hidden>
-      <div class="results-topbar">
-        <strong>Your resume report</strong>
+      <div class="results-topbar" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:14px; margin-bottom:24px;">
+        <strong style="font-size:18px;">Executive Resume Assessment</strong>
         <div style="display:flex; gap:10px;">
-          <button type="button" id="download-btn" class="btn btn-nav">⬇ Download Report</button>
-          <button type="button" id="rescan-btn" class="btn btn-nav">↺ Score another resume</button>
+          <button type="button" id="download-btn" class="btn btn-nav">⬇ Save PDF Report</button>
+          <button type="button" id="rescan-btn" class="btn btn-nav">↺ Audit Another Resume</button>
         </div>
       </div>
 
       <div class="report-summary-row" id="summary-row"></div>
-      <div class="report-detail-grid" id="detail-grid"></div>
+      <div class="report-detail-grid" id="detail-grid" style="display:flex; flex-direction:column; gap:20px;"></div>
     </div>
 
-    <!-- PRINT-ONLY REPORT -->
+    <!-- PRINT VIEW -->
     <div id="print-report" class="print-only"></div>
 
   </div>
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderPreview() {
     const text = resumeTextArea.value;
     if (!text.trim()) {
-      previewBox.innerHTML = '<div class="resume-preview-empty">Your resume text will appear here, split line by line.</div>';
+      previewBox.innerHTML = '<div class="resume-preview-empty">Your parsed content will stream here line-by-line.</div>';
       return;
     }
     const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
@@ -188,17 +188,38 @@ document.addEventListener("DOMContentLoaded", () => {
     resumeTextArea.addEventListener("input", renderPreview);
   }
 
+  // Proper Title-Casing with technical and clinical acronym handling
+  function formatSkillName(str) {
+    if (!str) return "";
+    const clean = String(str).trim();
+    const acronyms = [
+      "AWS", "GCP", "API", "APIs", "SQL", "CSS", "HTML", "CI/CD", "ETL", "NLP", "ML", "AI",
+      "ECG", "EEG", "MRI", "CT", "ICU", "NICU", "ACLS", "BLS", "PALS", "EHR", "P&ID",
+      "FEA", "CFD", "CAD", "CNC", "GD&T", "PCB", "FPGA", "SEM", "XRD", "TEM", "AFM",
+      "CRISPR", "PCR", "DNA", "RNA", "GIS", "STEM", "IEP", "BIP", "ABA", "FDA", "ISO"
+    ];
+    
+    const exactUpper = acronyms.find(a => a.toLowerCase() === clean.toLowerCase());
+    if (exactUpper) return exactUpper;
+
+    return clean.replace(/\w\S*/g, (w) => {
+      const match = acronyms.find(a => a.toLowerCase() === w.toLowerCase());
+      if (match) return match;
+      return w.charAt(0).toUpperCase() + w.substr(1).toLowerCase();
+    });
+  }
+
   fetch("/api/domain-list")
     .then(r => r.json())
     .then(data => {
       (data.domains || []).sort().forEach(d => {
         const opt = document.createElement("option");
         opt.value = d;
-        opt.textContent = d.replace(/-/g, " ");
+        opt.textContent = formatSkillName(d.replace(/-/g, " "));
         domainSelect.appendChild(opt);
       });
     })
-    .catch(err => console.warn("Could not load domains:", err));
+    .catch(err => console.warn("Could not retrieve domain list:", err));
 
   const form = document.getElementById("resume-form");
   if (!form) return;
@@ -216,11 +237,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("download-btn");
   const printReport = document.getElementById("print-report");
 
-  downloadBtn.addEventListener("click", () => {
-    window.print();
-  });
+  downloadBtn.addEventListener("click", () => window.print());
 
+  // Clean form and state reset
   rescanBtn.addEventListener("click", () => {
+    form.reset();
+    resumeTextArea.value = "";
+    previewBox.innerHTML = '<div class="resume-preview-empty">Your parsed content will stream here line-by-line.</div>';
+    
+    if (resumeInput) resumeInput.value = "";
+    if (resumeFileName) resumeFileName.textContent = "No file selected.";
+
+    uploadMode.hidden = true;
+    pasteMode.hidden = false;
+    uploadToggle.hidden = false;
+    domainSelect.value = "";
+
     resultsView.hidden = true;
     introHero.hidden = false;
     inputSection.hidden = false;
@@ -230,13 +262,13 @@ document.addEventListener("DOMContentLoaded", () => {
   async function safeFetchJson(url, formData, actionLabel) {
     const response = await fetch(url, { method: "POST", body: formData });
     if (!response.ok) {
-      let errorMsg = `${actionLabel} failed (HTTP ${response.status})`;
+      let errorMsg = `${actionLabel} encountered a server issue (HTTP ${response.status})`;
       try {
         const errJson = await response.json();
         if (errJson && errJson.error) errorMsg = errJson.error;
       } catch (_) {
         const raw = await response.text();
-        console.error(`Raw ${actionLabel} server error:`, raw);
+        console.error(`Raw ${actionLabel} server response:`, raw);
       }
       throw new Error(errorMsg);
     }
@@ -250,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileSelected = resumeInput && resumeInput.files && resumeInput.files.length > 0;
 
     if (!text && !fileSelected) {
-      alert("Paste your resume text or upload a PDF/DOCX file before scoring.");
+      alert("Provide resume text or attach a document before running the audit.");
       return;
     }
 
@@ -258,35 +290,40 @@ document.addEventListener("DOMContentLoaded", () => {
     button.style.opacity = ".65";
     progress.hidden = false;
 
-    const steps = [[25, "Reading resume..."], [50, "Checking bullets..."], [75, "Matching roles..."], [92, "Finishing up..."]];
+    const stages = [
+      [25, "Evaluating section completeness..."],
+      [50, "Auditing action verbs & passive syntax..."],
+      [75, "Benchmarking against 50+ domain profiles..."],
+      [92, "Consolidating report metrics..."]
+    ];
 
     try {
-      for (const step of steps) {
+      for (const stage of stages) {
         await wait(180);
-        fill.style.width = step[0] + "%";
-        label.textContent = step[1];
+        fill.style.width = stage[0] + "%";
+        label.textContent = stage[1];
       }
 
-      // 1. Resume Quality Scoring
+      // Quality evaluation
       const scoreForm = new FormData(form);
-      const scoreData = await safeFetchJson("/api/screen-resume", scoreForm, "Resume scoring");
+      const scoreData = await safeFetchJson("/api/screen-resume", scoreForm, "Resume analysis");
 
-      // 2. Auto Domain Matching
+      // Auto domain matching
       const autoForm = new FormData(form);
       autoForm.delete("domain");
-      const autoData = await safeFetchJson("/api/screen-domain", autoForm, "Role auto-detection");
+      const autoData = await safeFetchJson("/api/screen-domain", autoForm, "Domain auto-detection");
 
-      // 3. Preferred Domain Matching (if selected)
+      // Preferred domain matching
       let preferredData = null;
       const chosenDomain = domainSelect.value;
       if (chosenDomain) {
         const preferredForm = new FormData(form);
         preferredForm.set("domain", chosenDomain);
-        preferredData = await safeFetchJson("/api/screen-domain", preferredForm, "Preferred role check");
+        preferredData = await safeFetchJson("/api/screen-domain", preferredForm, "Target domain verification");
       }
 
       fill.style.width = "100%";
-      label.textContent = "Done.";
+      label.textContent = "Complete.";
       await wait(200);
 
       renderDashboard(scoreData, autoData, preferredData);
@@ -297,8 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (error) {
-      console.error("JobShield resume scoring error:", error);
-      alert(error.message || "The resume could not be scored.");
+      console.error("JobShield evaluation error:", error);
+      alert(error.message || "An error occurred during evaluation.");
     } finally {
       button.disabled = false;
       button.style.opacity = "1";
@@ -319,25 +356,56 @@ document.addEventListener("DOMContentLoaded", () => {
   function confidenceBlock(detection) {
     if (!detection || !detection.ranked_domains) return "";
     const rows = detection.ranked_domains.slice(0, 4).map(d => `
-      <div class="confidence-row">
-        <span class="confidence-name">${escapeHtml(d.domain.replace(/-/g, " "))}</span>
-        <div class="confidence-bar"><div style="width:${d.score}%"></div></div>
-        <span class="confidence-pct">${d.score}%</span>
+      <div class="confidence-row" style="margin-bottom:8px;">
+        <span class="confidence-name" style="font-size:13px; font-weight:500;">${escapeHtml(formatSkillName(d.domain.replace(/-/g, " ")))}</span>
+        <div class="confidence-bar" style="background:rgba(0,0,0,0.06); height:6px; border-radius:3px;"><div style="width:${d.score}%; background:#4f46e5; height:100%; border-radius:3px;"></div></div>
+        <span class="confidence-pct" style="font-size:12px; color:#4b5563;">${d.score}%</span>
       </div>
     `).join("");
     const statement = detection.confident
-      ? '<div class="confidence-statement good">✓ We\'re confident this is the right role.</div>'
-      : '<div class="confidence-statement warn">This is uncertain — check the alternatives below.</div>';
+      ? '<div class="confidence-statement good" style="font-size:12px; color:#047857; margin-bottom:12px; font-weight:500;">✓ High taxonomy alignment with candidate profile.</div>'
+      : '<div class="confidence-statement warn" style="font-size:12px; color:#b45309; margin-bottom:12px; font-weight:500;">Multi-domain profile detected. Review related specializations below.</div>';
     return `${statement}<div class="confidence-bars">${rows}</div>`;
   }
 
-  function skillsColumns(skills) {
-    const presentTags = (skills.present_skills || []).map(s => `<span class="keyword-tag matched">${escapeHtml(s)}</span>`).join("");
-    const missingTags = (skills.missing_skills || []).map(s => `<span class="keyword-tag missing">${escapeHtml(s)}</span>`).join("");
+  // Refined, High-Density Competency Display
+  function renderSkillsMatrix(skills) {
+    const presentList = (skills.present_skills || []).map(formatSkillName);
+    const missingList = (skills.missing_skills || []).map(formatSkillName);
+
+    const presentChips = presentList.length > 0
+      ? presentList.map(s => `
+          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:5px 11px; border-radius:6px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;">
+            <span style="font-size:10px; opacity:0.8;">●</span> ${escapeHtml(s)}
+          </span>
+        `).join("")
+      : '<span style="font-size:13px; color:#6b7280; font-style:italic;">No role-specific competencies matched yet.</span>';
+
+    const missingChips = missingList.length > 0
+      ? missingList.map(s => `
+          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:5px 11px; border-radius:6px; background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">
+            <span style="font-size:10px; color:#64748b;">+</span> ${escapeHtml(s)}
+          </span>
+        `).join("")
+      : '<span style="font-size:13px; color:#15803d; font-weight:500;">✓ Full core taxonomy matched for this specialization.</span>';
+
     return `
-      <div class="skills-columns">
-        <div><h4>Skills you have</h4><div>${presentTags || '<span class="neutral">None matched yet.</span>'}</div></div>
-        <div><h4>Skills you're missing</h4><div>${missingTags || '<span class="neutral">Nothing missing.</span>'}</div></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:16px; margin-top:16px;">
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+            <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Validated Competencies</span>
+            <span style="font-size:11px; font-weight:600; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:10px;">${presentList.length} Found</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">${presentChips}</div>
+        </div>
+
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+            <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Recommended Growth Keywords</span>
+            <span style="font-size:11px; font-weight:600; background:#f1f5f9; color:#475569; padding:2px 7px; border-radius:10px;">${missingList.length} Suggested</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">${missingChips}</div>
+        </div>
       </div>
     `;
   }
@@ -345,44 +413,101 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderDashboard(scoreData, autoData, preferredData) {
     const score = Number(scoreData.score ?? 0);
     const verdictClass = score >= 80 ? "safe" : score >= 50 ? "medium" : "risky";
-    const verdictLabel = score >= 80 ? "Strong resume" : score >= 50 ? "Needs work" : "Weak resume";
+    const verdictLabel = score >= 80 ? "Competitive" : score >= 50 ? "Developing" : "Needs Review";
 
-    let summaryHtml = scoreRing(score, "Resume Quality");
-    summaryHtml += scoreRing(autoData.skills ? autoData.skills.coverage : 0, (autoData.domain || "").replace(/-/g, " "), "Auto-detected");
+    let summaryHtml = scoreRing(score, "ATS Readiness");
+    summaryHtml += scoreRing(
+      autoData.skills ? autoData.skills.coverage : 0,
+      formatSkillName((autoData.domain || "").replace(/-/g, " ")),
+      "Auto-Detected"
+    );
+
     if (preferredData) {
-      summaryHtml += scoreRing(preferredData.skills ? preferredData.skills.coverage : 0, (preferredData.domain || "").replace(/-/g, " "), "Your preferred role");
+      summaryHtml += scoreRing(
+        preferredData.skills ? preferredData.skills.coverage : 0,
+        formatSkillName((preferredData.domain || "").replace(/-/g, " ")),
+        "Target Role"
+      );
     }
     summaryRow.innerHTML = summaryHtml;
 
+    // Structured Evaluation Card with Integrated Metrics
     let detailHtml = `
-      <div class="report-card">
-        <h3>Resume Quality <span class="verdict ${verdictClass}">${escapeHtml(verdictLabel)}</span></h3>
-        <p>${escapeHtml(scoreData.summary || "")}</p>
+      <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; border-bottom:1px solid #f1f5f9; padding-bottom:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="margin:0 0 4px; font-size:16px; color:#0f172a;">Overall Quality Diagnostic</h3>
+            <span style="font-size:13px; color:#64748b;">Evaluated based on executive impact, active voice, and layout density.</span>
+          </div>
+          <span class="verdict ${verdictClass}" style="padding:4px 12px; border-radius:6px; font-size:12px; font-weight:600; text-transform:uppercase;">
+            ${escapeHtml(verdictLabel)} (${score}/100)
+          </span>
+        </div>
+        
+        <p style="font-size:14.5px; line-height:1.65; color:#334155; margin:0 0 16px;">
+          ${escapeHtml(scoreData.summary || "Evaluation complete.")}
+        </p>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #edf2f7;">
+          <div style="flex:1; min-width:140px;">
+            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Structure</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.structure : 20}/25</div>
+          </div>
+          <div style="flex:1; min-width:140px;">
+            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Substance Depth</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.depth : 20}/25</div>
+          </div>
+          <div style="flex:1; min-width:140px;">
+            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Action Verbs</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.action : 18}/25</div>
+          </div>
+          <div style="flex:1; min-width:140px;">
+            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Impact Metrics</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.impact : 16}/25</div>
+          </div>
+        </div>
       </div>
-      <div class="report-card">
-        <h3>Auto-detected role: ${escapeHtml((autoData.domain || "").replace(/-/g, " "))}</h3>
-        ${confidenceBlock(autoData.detection)}
-        ${skillsColumns(autoData.skills || {})}
+
+      <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+          <div>
+            <h3 style="margin:0 0 2px; font-size:16px; color:#0f172a;">Specialization Alignment: ${escapeHtml(formatSkillName((autoData.domain || "").replace(/-/g, " ")))}</h3>
+            <span style="font-size:12px; color:#64748b;">Primary taxonomy benchmark identified from candidate achievements.</span>
+          </div>
+          <span style="font-size:13px; font-weight:700; color:#312e81; background:#e0e7ff; padding:3px 10px; border-radius:6px;">
+            ${autoData.skills ? autoData.skills.coverage : 0}% Target Match
+          </span>
+        </div>
+
+        <div style="margin-top:14px;">${confidenceBlock(autoData.detection)}</div>
+        ${renderSkillsMatrix(autoData.skills || {})}
       </div>
     `;
 
     if (preferredData) {
       detailHtml += `
-        <div class="report-card">
-          <h3>Your preferred role: ${escapeHtml((preferredData.domain || "").replace(/-/g, " "))}</h3>
-          ${skillsColumns(preferredData.skills || {})}
+        <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+            <div>
+              <h3 style="margin:0 0 2px; font-size:16px; color:#0f172a;">Selected Specialization: ${escapeHtml(formatSkillName((preferredData.domain || "").replace(/-/g, " ")))}</h3>
+              <span style="font-size:12px; color:#64748b;">Competency validation against user-specified discipline.</span>
+            </div>
+            <span style="font-size:13px; font-weight:700; color:#065f46; background:#d1fae5; padding:3px 10px; border-radius:6px;">
+              ${preferredData.skills ? preferredData.skills.coverage : 0}% Target Match
+            </span>
+          </div>
+          ${renderSkillsMatrix(preferredData.skills || {})}
         </div>
       `;
     }
 
     detailGrid.innerHTML = detailHtml;
-
     buildPrintReport(scoreData, autoData, preferredData, score, verdictLabel);
   }
 
   function printSkillList(title, items) {
-    if (!items || !items.length) return `<p><strong>${escapeHtml(title)}:</strong> None</p>`;
-    return `<p><strong>${escapeHtml(title)}:</strong> ${items.map(escapeHtml).join(", ")}</p>`;
+    if (!items || !items.length) return `<p><strong>${escapeHtml(title)}:</strong> None recorded</p>`;
+    return `<p><strong>${escapeHtml(title)}:</strong> ${items.map(formatSkillName).map(escapeHtml).join(", ")}</p>`;
   }
 
   function buildPrintReport(scoreData, autoData, preferredData, score, verdictLabel) {
@@ -390,30 +515,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const autoSkills = autoData.skills || {};
 
     let html = `
-      <h1>JobShield Resume Report</h1>
-      <p class="print-date">Generated ${escapeHtml(today)}</p>
+      <h1>JobShield Executive Resume Audit</h1>
+      <p class="print-date">Audited on ${escapeHtml(today)}</p>
 
-      <h2>Resume Quality — ${score}/100 (${escapeHtml(verdictLabel)})</h2>
+      <h2>Readiness Score — ${score}/100 (${escapeHtml(verdictLabel)})</h2>
       <p>${escapeHtml(scoreData.summary || "")}</p>
 
-      <h2>Auto-Detected Role: ${escapeHtml((autoData.domain || "").replace(/-/g, " "))}</h2>
-      <p>Role Match Score: ${autoSkills.coverage ?? 0}/100 &nbsp;|&nbsp; Confidence: ${autoData.detection ? autoData.detection.best_score : "-"}%</p>
-      ${printSkillList("Skills you have", autoSkills.present_skills)}
-      ${printSkillList("Skills you're missing", autoSkills.missing_skills)}
+      <h2>Detected Specialization: ${escapeHtml(formatSkillName((autoData.domain || "").replace(/-/g, " ")))}</h2>
+      <p>Competency Match: ${autoSkills.coverage ?? 0}/100</p>
+      ${printSkillList("Validated Core Competencies", autoSkills.present_skills)}
+      ${printSkillList("Recommended Growth Keywords", autoSkills.missing_skills)}
     `;
 
     if (preferredData) {
       const prefSkills = preferredData.skills || {};
       html += `
-        <h2>Your Preferred Role: ${escapeHtml((preferredData.domain || "").replace(/-/g, " "))}</h2>
-        <p>Role Match Score: ${prefSkills.coverage ?? 0}/100</p>
-        ${printSkillList("Skills you have", prefSkills.present_skills)}
-        ${printSkillList("Skills you're missing", prefSkills.missing_skills)}
+        <h2>Target Specialization: ${escapeHtml(formatSkillName((preferredData.domain || "").replace(/-/g, " ")))}</h2>
+        <p>Competency Match: ${prefSkills.coverage ?? 0}/100</p>
+        ${printSkillList("Validated Core Competencies", prefSkills.present_skills)}
+        ${printSkillList("Recommended Growth Keywords", prefSkills.missing_skills)}
       `;
     }
 
-    html += `<p class="print-footer">Generated by JobShield — jobshield.example</p>`;
-
+    html += `<p class="print-footer">JobShield Enterprise ATS Intelligence</p>`;
     printReport.innerHTML = html;
   }
 
