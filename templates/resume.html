@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <!-- DECORATIVE SCAN EXAMPLE (visual only, not functional) -->
+      <!-- DECORATIVE SCAN EXAMPLE -->
       <div class="scan-mock">
         <div class="scan-mock-header">
           <span class="scan-mock-dot"></span><span class="scan-mock-dot"></span><span class="scan-mock-dot"></span>
@@ -140,7 +140,7 @@
       <div class="report-detail-grid" id="detail-grid"></div>
     </div>
 
-    <!-- PRINT-ONLY REPORT (invisible on screen, shown only when printing/saving as PDF) -->
+    <!-- PRINT-ONLY REPORT -->
     <div id="print-report" class="print-only"></div>
 
   </div>
@@ -197,7 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
         opt.textContent = d.replace(/-/g, " ");
         domainSelect.appendChild(opt);
       });
-    });
+    })
+    .catch(err => console.warn("Could not load domains:", err));
 
   const form = document.getElementById("resume-form");
   if (!form) return;
@@ -226,6 +227,22 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
+  async function safeFetchJson(url, formData, actionLabel) {
+    const response = await fetch(url, { method: "POST", body: formData });
+    if (!response.ok) {
+      let errorMsg = `${actionLabel} failed (HTTP ${response.status})`;
+      try {
+        const errJson = await response.json();
+        if (errJson && errJson.error) errorMsg = errJson.error;
+      } catch (_) {
+        const raw = await response.text();
+        console.error(`Raw ${actionLabel} server error:`, raw);
+      }
+      throw new Error(errorMsg);
+    }
+    return await response.json();
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -250,25 +267,22 @@ document.addEventListener("DOMContentLoaded", () => {
         label.textContent = step[1];
       }
 
+      // 1. Resume Quality Scoring
       const scoreForm = new FormData(form);
-      const scoreResponse = await fetch("/api/screen-resume", { method: "POST", body: scoreForm });
-      const scoreData = await scoreResponse.json();
-      if (!scoreResponse.ok) throw new Error(scoreData.error || "Scoring failed.");
+      const scoreData = await safeFetchJson("/api/screen-resume", scoreForm, "Resume scoring");
 
+      // 2. Auto Domain Matching
       const autoForm = new FormData(form);
       autoForm.delete("domain");
-      const autoResponse = await fetch("/api/screen-domain", { method: "POST", body: autoForm });
-      const autoData = await autoResponse.json();
-      if (!autoResponse.ok) throw new Error(autoData.error || "Role detection failed.");
+      const autoData = await safeFetchJson("/api/screen-domain", autoForm, "Role auto-detection");
 
+      // 3. Preferred Domain Matching (if selected)
       let preferredData = null;
       const chosenDomain = domainSelect.value;
       if (chosenDomain) {
         const preferredForm = new FormData(form);
         preferredForm.set("domain", chosenDomain);
-        const preferredResponse = await fetch("/api/screen-domain", { method: "POST", body: preferredForm });
-        preferredData = await preferredResponse.json();
-        if (!preferredResponse.ok) throw new Error(preferredData.error || "Preferred role check failed.");
+        preferredData = await safeFetchJson("/api/screen-domain", preferredForm, "Preferred role check");
       }
 
       fill.style.width = "100%";
@@ -303,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function confidenceBlock(detection) {
-    if (!detection) return "";
+    if (!detection || !detection.ranked_domains) return "";
     const rows = detection.ranked_domains.slice(0, 4).map(d => `
       <div class="confidence-row">
         <span class="confidence-name">${escapeHtml(d.domain.replace(/-/g, " "))}</span>
