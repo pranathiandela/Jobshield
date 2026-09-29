@@ -11,3 +11,7 @@ instance/
 *.db
 detection_ml/DataSet.csv
 detection_ml/cleaned_dataset.csv
+
+instance/*.db
+*.db
+*.sqlite3
