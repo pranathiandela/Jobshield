@@ -1,6 +1,8 @@
 """JobShield Universal Enterprise Domain Matching & Taxonomy Resolver.
 
 Architecture:
+  - Input Quality & Validity Gate (rejects gibberish, spam, and sub-35-word inputs)
+  - Zero-Signal Safe Fallbacks (returns Unclassified when no real domain skills exist)
   - Bidirectional Acronym & Synonym Knowledge Layer (Precomputed O(1) lookups)
   - Morphological Stemming (with length-safe boundary guards)
   - Inverse Dilution Penalties for Cross-Domain Stopwords
@@ -165,6 +167,32 @@ def get_domain_names():
     return list(domains.keys())
 
 
+def is_valid_resume_content(text):
+    """
+    Enforces a strict validity pre-check to prevent tester gibberish or
+    random inputs from producing hallucinated job classifications.
+    """
+    clean = (text or "").strip()
+    words = clean.split()
+
+    # Rule 1: Minimum word count threshold
+    if len(words) < 35:
+        return False, "Input is insufficient for an ATS evaluation. Minimum 35 words required."
+
+    # Rule 2: Lexical diversity check (intercepts repeated spam or single-word spam)
+    unique_words = set(w.lower() for w in words)
+    diversity_ratio = len(unique_words) / max(len(words), 1)
+    if diversity_ratio < 0.30:
+        return False, "Input has high repetition or lacks professional syntax."
+
+    # Rule 3: Character length sanity check
+    avg_word_len = sum(len(w) for w in words) / max(len(words), 1)
+    if avg_word_len < 2.5 or avg_word_len > 18.0:
+        return False, "Input appears to be randomized text."
+
+    return True, None
+
+
 def _normalize(text):
     return (text or "").lower()
 
@@ -248,7 +276,7 @@ def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
     else:
         calibrated_score = combined
 
-    final_score = max(10, min(95, round(calibrated_score)))
+    final_score = max(0, min(95, round(calibrated_score)))
 
     # Raw points calculation for ranking domains against each other
     raw_points = (title_anchor_hits * 16.0) + (body_alias_hits * 6.0)
@@ -256,6 +284,11 @@ def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
         raw_points += (1.0 if c.lower() in CROSS_DOMAIN_DILUTERS else 3.0)
     for s in matched_supporting:
         raw_points += (0.2 if s.lower() in CROSS_DOMAIN_DILUTERS else 1.0)
+
+    # Zero-out if no actual skills were matched
+    if len(matched_core) == 0 and len(matched_supporting) == 0 and title_anchor_hits == 0:
+        final_score = 0
+        raw_points = 0.0
 
     return {
         "domain": domain_name,
@@ -272,6 +305,25 @@ def detect_best_domain(resume_text):
     if not domains:
         return {"domain": "General Professional", "score": 50, "confident": False, "ranked_domains": []}
 
+    # 1. Enforce quality gate pre-check
+    valid, message = is_valid_resume_content(resume_text)
+    if not valid:
+        return {
+            "best_domain": "Unclassified / Insufficient Resume Content",
+            "best_score": 0,
+            "confident": False,
+            "error": message,
+            "ranked_domains": [],
+            "best_details": {
+                "domain": "Unclassified / Insufficient Resume Content",
+                "score": 0,
+                "raw_points": 0,
+                "title_anchor_hits": 0,
+                "present_skills": [],
+                "missing_skills": []
+            }
+        }
+
     full_lower = _normalize(resume_text)
     header_lower = _extract_header_lines(resume_text)
 
@@ -280,11 +332,21 @@ def detect_best_domain(resume_text):
         result = _score_domain(name, data, full_lower, header_lower)
         ranked.append(result)
 
-    # Sort descending by raw points
+    # Sort descending by raw points, then score
     ranked.sort(key=lambda x: (x["raw_points"], x["score"]), reverse=True)
 
     best = ranked[0]
     second = ranked[1] if len(ranked) > 1 else None
+
+    # Zero-signal guard: If top candidate matches zero points or zero skills, do not guess
+    if best["raw_points"] <= 0 or len(best["present_skills"]) == 0:
+        return {
+            "best_domain": "Unclassified / No Matching Skills Detected",
+            "best_score": 0,
+            "confident": False,
+            "ranked_domains": [],
+            "best_details": best
+        }
 
     confident = False
     if best["score"] >= 35:
@@ -296,7 +358,7 @@ def detect_best_domain(resume_text):
         "best_score": best["score"],
         "confident": confident,
         "ranked_domains": [
-            {"domain": r["domain"], "score": r["score"]} for r in ranked[:5]
+            {"domain": r["domain"], "score": r["score"]} for r in ranked[:5] if r["score"] > 0
         ],
         "best_details": best
     }
@@ -305,6 +367,23 @@ def detect_best_domain(resume_text):
 def screen_for_domain(resume_text, chosen_domain=None):
     domains = load_domain_keywords()
     detection = detect_best_domain(resume_text)
+
+    # If the resume failed validity, return early
+    if "error" in detection or detection["best_score"] == 0:
+        return {
+            "domain": detection["best_domain"],
+            "skills": {
+                "coverage": 0,
+                "present_skills": [],
+                "missing_skills": []
+            },
+            "detection": {
+                "confident": False,
+                "best_score": 0,
+                "ranked_domains": []
+            },
+            "error": detection.get("error")
+        }
 
     full_lower = _normalize(resume_text)
     header_lower = _extract_header_lines(resume_text)
