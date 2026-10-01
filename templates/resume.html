@@ -3,6 +3,86 @@
 {% block content %}
 
 <style>
+/* Modern Executive Typography & Layout Variables */
+.scan-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .scan-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sticky Right Column Simulation Container */
+.sticky-preview-rail {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 10;
+}
+
+/* Typography Refinements for Simulation Card */
+.resume-mock-container {
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.resume-mock-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.resume-mock-headline {
+  font-size: 11px;
+  color: #64748b;
+  margin: 3px 0 8px;
+  font-weight: 500;
+}
+
+.resume-section-divider {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #4f46e5;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+}
+
+.resume-mock-summary {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #334155;
+  margin: 0 0 10px;
+}
+
+.resume-bullet-point {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #1e293b;
+}
+
+.resume-pill-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 /* High-Contrast Confidence Bars */
 .confidence-row {
   display: flex;
@@ -18,7 +98,7 @@
 .confidence-name {
   font-size: 13.5px;
   font-weight: 600;
-  color: #0f172a !important; /* Deep navy-slate for crisp readability */
+  color: #0f172a !important;
   min-width: 220px;
   flex: 1;
 }
@@ -212,6 +292,7 @@
 
     <div class="scan-hero-grid" id="input-section">
 
+      <!-- LEFT COLUMN: INPUT CONTROLS -->
       <div class="detector-panel">
         <form id="resume-form" enctype="multipart/form-data">
 
@@ -290,37 +371,105 @@
         </div>
       </div>
 
-      <!-- SCAN SPECIFICATION MOCKUP -->
-      <div class="scan-mock">
-        <div class="scan-mock-header">
-          <span class="scan-mock-dot"></span><span class="scan-mock-dot"></span><span class="scan-mock-dot"></span>
-          <span class="scan-mock-title">ENTERPRISE AUDIT PREVIEW</span>
+      <!-- RIGHT COLUMN: STICKY RAIL PREVIEW & ATS GUIDE -->
+      <div class="sticky-preview-rail">
+
+        <!-- 1. TOP PART: REALISTIC EXECUTIVE RESUME MOCKUP -->
+        <div class="scan-mock" style="margin-bottom:0; padding:18px 20px;">
+          <div class="scan-mock-header" style="margin-bottom:12px;">
+            <span class="scan-mock-dot"></span><span class="scan-mock-dot"></span><span class="scan-mock-dot"></span>
+            <span class="scan-mock-title" style="letter-spacing:0.8px; font-weight:700;">LIVE ATS PARSER SIMULATION</span>
+          </div>
+
+          <div class="scan-mock-paper resume-mock-container" style="position:relative; overflow:hidden; padding:18px 20px;">
+            <div class="scan-line"></div>
+            
+            <div class="scan-mock-badge" style="top:14px; right:14px;">88<small>/100</small></div>
+
+            <div class="resume-mock-name">Alexander W. Morgan, P.E.</div>
+            <div class="resume-mock-headline">
+              Lead Structural Systems Engineer &bull; Chicago, IL &bull; alex.morgan@email.com
+            </div>
+
+            <div class="resume-section-divider">
+              Executive Profile
+            </div>
+            <p class="resume-mock-summary">
+              Licensed engineer with 8+ years leading seismic structural analysis and reinforced concrete design for $90M+ infrastructure. Expert in ETABS, STAAD Pro, and predictive BOQ modeling.
+            </p>
+
+            <div class="resume-section-divider">
+              Verified Impact Highlights
+            </div>
+
+            <div class="scan-mock-line" style="margin-bottom:6px;">
+              <span class="resume-bullet-point">
+                <strong>Designed</strong> dynamic foundation systems with ETABS, reducing concrete load costs by 18%
+              </span>
+              <span class="resume-pill-tag" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;">quantified ✓</span>
+            </div>
+
+            <div class="scan-mock-line" style="margin-bottom:6px;">
+              <span class="resume-bullet-point">
+                <strong>Spearheaded</strong> seismic retrofits across 14 high-rises compliant with ACI 318 &amp; AISC standards
+              </span>
+              <span class="resume-pill-tag" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">taxonomy ✓</span>
+            </div>
+
+            <div class="scan-mock-line" style="margin-bottom:2px;">
+              <span class="resume-bullet-point">
+                <strong>Automated</strong> bill of quantities (BOQ) pipeline, accelerating milestone sign-offs by 3 weeks
+              </span>
+              <span class="resume-pill-tag" style="background:#fdf4ff; color:#86198f; border:1px solid #f5d0fe;">action verb ✓</span>
+            </div>
+          </div>
         </div>
-        <div class="scan-mock-paper">
-          <div class="scan-line"></div>
-          <div class="scan-mock-badge">84<small>/100</small></div>
 
-          <div class="scan-mock-name">Dr. Elena Vance, MD</div>
-          <div class="scan-mock-contact">Neurology · Board Certified ABPN · Clinical Research</div>
-          <div class="scan-mock-section">CORE ACHIEVEMENTS</div>
+        <!-- 2. BOTTOM PART: THE ANATOMY OF AN ATS-COMPLIANT RESUME -->
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+          
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <span style="font-size:16px;">💡</span>
+            <strong style="font-size:13px; color:#0f172a; text-transform:uppercase; letter-spacing:0.04em; font-weight:800;">The Anatomy of a Modern Resume</strong>
+          </div>
 
-          <div class="scan-mock-line">
-            <span>Interpreted 450+ routine & ambulatory EEGs and EMGs</span>
-            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">verified ✓</span>
+          <p style="font-size:11.5px; line-height:1.55; color:#475569; margin:0 0 14px;">
+            A modern resume is not an exhaustive career autobiography—it is a <strong>targeted value proposition</strong>. Over 90% of Fortune 500 employers parse resumes through applicant tracking algorithms before a human recruiter ever sees them.
+          </p>
+
+          <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+            
+            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
+              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span>
+              <div>
+                <div style="font-size:12px; font-weight:700; color:#0f172a;">The Google XYZ Formula</div>
+                <div style="font-size:11px; color:#64748b; line-height:1.4;">Accomplished <em>[X]</em>, as measured by <em>[Y]</em>, by doing <em>[Z]</em>. Eliminate vague duties; lead with measurable outcomes.</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
+              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span>
+              <div>
+                <div style="font-size:12px; font-weight:700; color:#0f172a;">Contextual Keyword Density</div>
+                <div style="font-size:11px; color:#64748b; line-height:1.4;">Don't keyword-stuff. Modern ATS engines analyze tools in relation to outcomes and professional certifications.</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
+              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span>
+              <div>
+                <div style="font-size:12px; font-weight:700; color:#0f172a;">Clean Hierarchical Typography</div>
+                <div style="font-size:11px; color:#64748b; line-height:1.4;">Avoid complex multi-column tables, text boxes, and icons that corrupt plain-text parsers during extraction.</div>
+              </div>
+            </div>
+
           </div>
-          <div class="scan-mock-line">
-            <span>Led acute stroke protocol cutting door-to-needle time by 22%</span>
-            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">quantified ✓</span>
-          </div>
-          <div class="scan-mock-line">
-            <span>Administered tPA interventions in multidisciplinary clinical rounds</span>
-            <span class="scan-mock-tag good" style="background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;">clinical ✓</span>
+
+          <div style="margin-top:12px; font-size:10.5px; color:#64748b; text-align:center; font-weight:500;">
+            Audited continuously against 50+ enterprise industry benchmarks.
           </div>
         </div>
-      </div>
 
-      <div class="scan-mock-caption">
-        Equipped with calibrated industry taxonomies across Medicine, Engineering, Science, and Academia.
       </div>
 
     </div>
@@ -548,7 +697,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // Clear, High-Contrast Suggested Disciplines
   function renderConfidenceBlock(detection) {
     if (!detection || !detection.ranked_domains) return "";
     const rows = detection.ranked_domains.slice(0, 4).map(d => `
@@ -592,7 +740,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Validated Competencies</span>
             <span style="font-size:11px; font-weight:600; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:10px;">${presentList.length} Found</span>
           </div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">${presentChips}</div>
+          <div style="flex-wrap:wrap; display:flex; gap:6px;">${presentChips}</div>
         </div>
 
         <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
@@ -600,7 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Recommended Growth Keywords</span>
             <span style="font-size:11px; font-weight:600; background:#f1f5f9; color:#475569; padding:2px 7px; border-radius:10px;">${missingList.length} Suggested</span>
           </div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">${missingChips}</div>
+          <div style="flex-wrap:wrap; display:flex; gap:6px;">${missingChips}</div>
         </div>
       </div>
     `;
@@ -700,7 +848,6 @@ document.addEventListener("DOMContentLoaded", () => {
     generateExecutiveReport(scoreData, autoData, preferredData, score, verdictLabel);
   }
 
-  // Generates the Detailed, Beautiful Official PDF / Print Document
   function generateExecutiveReport(scoreData, autoData, preferredData, score, verdictLabel) {
     const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
     const autoSkills = autoData.skills || {};
