@@ -1,10 +1,10 @@
 """JobShield Universal Enterprise Domain Matching & Taxonomy Resolver.
 
-Key Features:
-  1. Bidirectional Acronym & Synonym Resolution (100+ standard mappings).
-  2. Non-linear asymptotic scoring curve: eliminates artificial 100% spikes.
-     Strong candidates land realistically between 68% and 86%.
-  3. Weighted core breadth ratio + persona anchor boost.
+Architecture:
+  - Bidirectional Acronym & Synonym Knowledge Layer (Precomputed O(1) lookups)
+  - Morphological Stemming (with length-safe boundary guards)
+  - Inverse Dilution Penalties for Cross-Domain Stopwords
+  - Asymptotic Diminishing Returns Curve (prevents artificial 100% spikes)
 """
 import json
 import re
@@ -16,7 +16,8 @@ DOMAIN_FILE = BASE_DIR / "domain_keywords.json"
 
 _DOMAINS_CACHE = None
 
-GLOBAL_ACRONYM_MAP = {
+# Universal Bidirectional Abbreviation & Synonym Dictionary (Collisions Resolved)
+RAW_ACRONYM_MAP = {
     # Medical & Clinical
     "eeg": ["electroencephalogram", "electroencephalography"],
     "emg": ["electromyogram", "electromyography"],
@@ -39,11 +40,12 @@ GLOBAL_ACRONYM_MAP = {
     "facc": ["fellow of the american college of cardiology"],
     "facs": ["fellow of the american college of surgeons"],
     "dvt": ["deep vein thrombosis"],
-    "cad": ["coronary artery disease"],
     "tpa": ["tissue plasminogen activator", "thrombolytic"],
 
-    # Engineering (Mechanical, Civil, Electrical, Chemical, Robotics)
-    "cad": ["computer aided design", "autocad"],
+    # Multi-Domain (Medical + Engineering)
+    "cad": ["coronary artery disease", "computer aided design", "autocad"],
+
+    # Engineering & Hardware
     "cam": ["computer aided manufacturing"],
     "cae": ["computer aided engineering"],
     "fea": ["finite element analysis"],
@@ -101,7 +103,7 @@ GLOBAL_ACRONYM_MAP = {
     "etl": ["extract transform load"],
     "elt": ["extract load transform"],
 
-    # Scientific Research & Lab Techniques
+    # Scientific Research & Laboratory
     "sem": ["scanning electron microscopy"],
     "tem": ["transmission electron microscopy"],
     "xrd": ["x-ray diffraction"],
@@ -129,10 +131,19 @@ GLOBAL_ACRONYM_MAP = {
     "hris": ["human resources information system"]
 }
 
+# Precompute bidirectional lookup table for O(1) matching speed
+GLOBAL_EXPANSIONS = {}
+for short_token, expansions in RAW_ACRONYM_MAP.items():
+    token_lower = short_token.lower()
+    variants = set([token_lower] + [e.lower() for e in expansions])
+    for item in variants:
+        GLOBAL_EXPANSIONS[item] = variants
+
 CROSS_DOMAIN_DILUTERS = {
     "patient", "clinical", "hospital", "medical", "treatment", "care", "healthcare",
     "system", "systems", "design", "analysis", "data", "management", "tools",
-    "software", "engineering", "research", "project", "operations", "compliance"
+    "software", "engineering", "research", "project", "operations", "compliance",
+    "communication", "teamwork", "documentation", "reporting", "planning"
 }
 
 
@@ -158,30 +169,27 @@ def _normalize(text):
     return (text or "").lower()
 
 
-def _extract_header_lines(text, max_lines=12):
+def _extract_header_lines(text, max_lines=14):
     lines = [l.strip().lower() for l in (text or "").splitlines() if len(l.strip()) > 3]
     return " \n ".join(lines[:max_lines])
 
 
 def _get_expanded_forms(term):
-    term_clean = term.strip().lower()
-    variants = {term_clean}
-    if term_clean in GLOBAL_ACRONYM_MAP:
-        variants.update(GLOBAL_ACRONYM_MAP[term_clean])
-    for short_form, expansions in GLOBAL_ACRONYM_MAP.items():
-        if term_clean in expansions:
-            variants.add(short_form)
-            variants.update(expansions)
-    return variants
+    clean = term.strip().lower()
+    return GLOBAL_EXPANSIONS.get(clean, {clean})
 
 
 def _flexible_keyword_match(term, text_lower):
     for variant in _get_expanded_forms(term):
         escaped = re.escape(variant)
+        # Apply length guards to prevent false-positives on short acronyms
         if " " in variant or "-" in variant:
             pattern = r"\b" + escaped + r"(?:s|es)?\b"
+        elif len(variant) <= 3:
+            pattern = r"\b" + escaped + r"(?:s)?\b"
         else:
             pattern = r"\b" + escaped + r"(?:s|es|ed|ing)?\b"
+
         if re.search(pattern, text_lower):
             return True
     return False
@@ -192,7 +200,7 @@ def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
     core_skills = domain_data.get("core", [])
     supporting_skills = domain_data.get("supporting", [])
 
-    # 1. Title / Persona Anchor Check
+    # 1. Title / Persona Anchor Check (Priority given to headers)
     title_anchor_hits = 0
     body_alias_hits = 0
     for alias in aliases:
@@ -216,28 +224,24 @@ def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
         if _flexible_keyword_match(skill, full_text_lower):
             matched_supporting.append(skill)
 
-    # 4. Realistic Scoring Curve (Diminishing Returns)
-    # Total available skills in this taxonomy
+    # 4. Dimension-Weighted Scoring (Diminishing Returns)
     total_core = max(len(core_skills), 1)
     core_ratio = len(matched_core) / total_core
     supp_ratio = len(matched_supporting) / max(len(supporting_skills), 1)
 
-    # Base competency points from breadth (max 65 pts)
-    # Demonstrating ~50% of an entire field's core competencies is already senior-level
+    # Core breadth accounts for the bulk of competency points (max 65)
     breadth_score = min(65.0, (core_ratio * 75.0) + (supp_ratio * 20.0))
 
-    # Seniority & Persona Anchor Boost (max 22 pts)
+    # Persona / Header Anchor boost (max 22)
     anchor_bonus = 0.0
     if title_anchor_hits > 0:
         anchor_bonus = 18.0 + min(4.0, (title_anchor_hits - 1) * 2.0)
     elif body_alias_hits > 0:
         anchor_bonus = 8.0 + min(4.0, (body_alias_hits - 1) * 2.0)
 
-    # Raw combined score
     combined = breadth_score + anchor_bonus
 
-    # Asymptotic ceiling: only profiles matching nearly all core and supporting tools reach 90-95%
-    # Mathematical soft cap ensures nobody hits 100% on a standard resume
+    # Asymptotic ceiling: smooth score distribution without 100% inflation
     if combined > 70:
         excess = combined - 70
         calibrated_score = 70 + (25 * (1 - math.exp(-excess / 25)))
@@ -246,12 +250,12 @@ def _score_domain(domain_name, domain_data, full_text_lower, header_text_lower):
 
     final_score = max(10, min(95, round(calibrated_score)))
 
-    # Raw points preserved for rank comparisons
-    raw_points = (title_anchor_hits * 14.0) + (body_alias_hits * 6.0)
+    # Raw points calculation for ranking domains against each other
+    raw_points = (title_anchor_hits * 16.0) + (body_alias_hits * 6.0)
     for c in matched_core:
         raw_points += (1.0 if c.lower() in CROSS_DOMAIN_DILUTERS else 3.0)
     for s in matched_supporting:
-        raw_points += (0.3 if s.lower() in CROSS_DOMAIN_DILUTERS else 1.0)
+        raw_points += (0.2 if s.lower() in CROSS_DOMAIN_DILUTERS else 1.0)
 
     return {
         "domain": domain_name,
@@ -276,6 +280,7 @@ def detect_best_domain(resume_text):
         result = _score_domain(name, data, full_lower, header_lower)
         ranked.append(result)
 
+    # Sort descending by raw points
     ranked.sort(key=lambda x: (x["raw_points"], x["score"]), reverse=True)
 
     best = ranked[0]
