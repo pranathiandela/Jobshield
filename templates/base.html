@@ -18,7 +18,9 @@
       <a href="/resume-screening" class="{{ 'active' if active=='resume' else '' }}">Resume Screening</a>
       <a href="/dashboard" class="{{ 'active' if active=='dashboard' else '' }}">Dashboard</a>
       <a href="/history" class="{{ 'active' if active=='history' else '' }}">History</a>
+      <a href="/scam-chronicles" class="{{ 'active' if active=='scams' else '' }}">Scam Chronicles</a>
       <a href="/about-help" class="{{ 'active' if active=='help' else '' }}">About &amp; Help</a>
+    
     </nav>
     {% if current_user.is_authenticated %}
       <div class="account-menu">
