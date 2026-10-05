@@ -548,6 +548,10 @@ def profile_character():
 def about_help():
     return render_template("help.html", title="About & Help", active="help")
 
+@app.route("/scam-chronicles")
+def scam_chronicles():
+    return render_template("stories.html", title="Scam Chronicles", active="scams")
+
 
 if __name__ == "__main__":
     with app.app_context():
