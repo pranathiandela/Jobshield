@@ -1,0 +1,529 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Caveat:wght@600&family=IBM+Plex+Mono:wght@500&display=swap');
+.sp { --ink:var(--site-bg); --site-bg:#0c0e13; --fg:#eef0f5; --fg2:#cfd4df; --line:#272c38; --line2:var(--line2); --surface2:#1b202b; --hz:#ffc700; --paper:#f1ebdc; --hazard:#ffc700; --alert:#e63946; --muted:#a0a8b8;
+  --display:'Bricolage Grotesque','Arial Black',sans-serif; --serif:'Newsreader',Georgia,serif; --mono:'IBM Plex Mono',Consolas,monospace; --hand:'Caveat','Comic Sans MS',cursive;
+  position:relative; width:var(--vw,100vw); margin-left:calc(50% - var(--vw,100vw)/2); color:var(--fg);
+  font-family:var(--serif); font-size:19px; line-height:1.65; overflow:hidden; box-sizing:border-box; }
+.sp[data-mode="light"] { --fg:#14171f; --fg2:#3b4252; --muted:#5b6475; --line:#d6dae3; --line2:#d3d8e2; --surface2:#e9ecf2; --hz:#9a5b00; }
+.sp *, .sp *::before, .sp *::after { box-sizing:border-box; }
+.sp .w { width:min(1120px,92vw); margin:0 auto; position:relative; }
+.sp button:focus-visible { outline:3px solid var(--hz); outline-offset:3px; }
+
+/* hero with drifting question marks and a scanned photo */
+.sp .hero { position:relative; padding:64px 0 90px; overflow:hidden; background:radial-gradient(ellipse at 80% 20%, rgba(230,57,70,.25), transparent 55%); }
+.sp .hero > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.22; filter:grayscale(1) contrast(1.2); }
+.sp .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent, var(--ink)); }
+.sp .qs { position:absolute; inset:0; z-index:1; pointer-events:none; }
+.sp .qs i { position:absolute; font:800 var(--s,90px)/1 var(--display); font-style:normal; color:transparent; -webkit-text-stroke:2px var(--c,rgba(255,199,0,.55));
+  left:var(--x); top:var(--y); animation:drift var(--t,12s) ease-in-out infinite alternate; }
+.sp .qs i:nth-child(3n) { color:rgba(230,57,70,.28); -webkit-text-stroke:0; }
+.sp[data-mode="light"] .qs i:nth-child(3n) { color:rgba(230,57,70,.13); } .sp[data-mode="light"] .qs i { -webkit-text-stroke-color:rgba(154,91,0,.35); }
+@keyframes drift { from { transform:translateY(0) rotate(var(--r1,-12deg)); } to { transform:translateY(-34px) rotate(var(--r2,14deg)); } }
+.sp .hero .w { z-index:2; display:grid; grid-template-columns:1.25fr .75fr; gap:40px; align-items:center; }
+.sp .hero .w > * { animation:rise .9s cubic-bezier(.2,.7,.2,1) both; } .sp .hero .w > *:nth-child(2) { animation-delay:.3s; }
+@keyframes rise { from { opacity:0; transform:translateY(26px); } }
+.sp .kicker { font:500 13px var(--mono); color:var(--hz); margin:0 0 18px; }
+.sp h1 { font:800 clamp(2.6rem,6.4vw,5.4rem)/.98 var(--display); letter-spacing:-.03em; margin:0 0 24px; text-wrap:balance; }
+.sp h1 em { font-style:normal; color:var(--alert); display:block; }
+.sp .lede { max-width:34em; color:var(--fg2); margin:0; }
+.sp .offer { position:relative; background:var(--paper); color:#1a1a1a; padding:26px 24px 30px; transform:rotate(2.5deg); box-shadow:0 24px 50px rgba(0,0,0,.55); font-size:14px; line-height:1.5; }
+.sp .offer b { font:800 17px var(--display); display:block; margin-bottom:8px; }
+.sp .offer i { display:block; height:7px; background:#cfc7b2; margin:9px 0; border-radius:2px; }
+.sp .offer .pay { font:800 26px var(--display); margin-top:14px; }
+.sp .offer .void { position:absolute; right:12px; bottom:22px; font:800 44px var(--display); color:var(--alert); border:5px solid var(--alert); padding:0 12px; transform:rotate(-14deg); animation:stamp .5s 1.4s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes stamp { from { transform:rotate(-14deg) scale(2.4); opacity:0; } }
+.sp .tape { background:var(--hazard); color:#111; border-block:3px solid #111; overflow:hidden; white-space:nowrap; transform:rotate(-1.2deg); margin:-14px -2vw 0; position:relative; z-index:3; }
+.sp .tape div { display:inline-block; padding:9px 0; font:800 15px var(--display); letter-spacing:.08em; animation:slide 26s linear infinite; }
+@keyframes slide { to { transform:translateX(-50%); } }
+
+.sp .sec { padding:64px 0 6px; }
+.sp h2 { font:800 clamp(1.9rem,4vw,3.1rem)/1.05 var(--display); letter-spacing:-.02em; margin:0 0 14px; text-wrap:balance; }
+.sp .sub { color:var(--muted); max-width:40em; margin:0 0 34px; }
+.sp .note { border-left:4px solid var(--hazard); padding:4px 0 4px 16px; color:var(--fg2); font-size:16px; margin:0 0 30px; max-width:46em; }
+.sp .chips { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+.sp .chip { background:transparent; color:var(--fg); border:1.5px solid var(--line); border-radius:999px; padding:8px 18px; font:700 14px var(--display); cursor:pointer; transition:.2s; }
+.sp .chip:hover { border-color:var(--hz); } .sp .chip.on { background:var(--hazard); color:#111; border-color:var(--hz); }
+
+/* scroll reveals: slide in from the side the content sits on */
+.sp .rv { opacity:0; transform:translateX(var(--dx,-40px)); transition:opacity .9s, transform .9s cubic-bezier(.2,.7,.2,1); }
+.sp .rv.r { --dx:40px; } .sp .rv.in { opacity:1; transform:none; }
+
+/* stories: full-bleed photo cut on a slant, no card frame */
+.sp .row { position:relative; display:grid; grid-template-columns:1.05fr 1fr; align-items:center; gap:0; margin:0 0 20px; min-height:440px; }
+.sp .row.flip { grid-template-columns:1fr 1.05fr; } .sp .row.flip .pic { order:2; clip-path:polygon(0 0,100% 0,100% 100%,12% 100%); }
+.sp .pic { position:relative; min-height:440px; height:100%; margin-left:calc(50% - var(--vw,100vw)/2); clip-path:polygon(0 0,100% 0,88% 100%,0 100%); background:#1d222d; overflow:hidden; }
+.sp .row.flip .pic { margin-left:0; margin-right:calc(50% - var(--vw,100vw)/2); }
+.sp .pic svg, .sp .pic img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.sp .pic img { filter:grayscale(1) contrast(1.2) brightness(.75); mix-blend-mode:luminosity; }
+.sp .pic::before { content:''; position:absolute; z-index:3; left:0; right:0; height:90px; top:-90px; background:linear-gradient(180deg, transparent, rgba(255,199,0,.32)); border-bottom:2px solid var(--hazard); animation:scan 4.5s linear infinite; }
+@keyframes scan { to { top:100%; } }
+.sp .pic .hud { position:absolute; z-index:4; inset:22px 60px 22px 22px; border:2px solid rgba(255,199,0,.0); pointer-events:none;
+  background:linear-gradient(var(--hazard),var(--hazard)) 0 0/26px 3px, linear-gradient(var(--hazard),var(--hazard)) 0 0/3px 26px, linear-gradient(var(--hazard),var(--hazard)) 100% 0/26px 3px, linear-gradient(var(--hazard),var(--hazard)) 100% 0/3px 26px,
+  linear-gradient(var(--hazard),var(--hazard)) 0 100%/26px 3px, linear-gradient(var(--hazard),var(--hazard)) 0 100%/3px 26px, linear-gradient(var(--hazard),var(--hazard)) 100% 100%/26px 3px, linear-gradient(var(--hazard),var(--hazard)) 100% 100%/3px 26px; background-repeat:no-repeat; }
+.sp .pic .tag { position:absolute; z-index:5; left:40px; top:40px; background:#111; color:var(--hz); font:500 12px var(--mono); padding:5px 10px; animation:blink 1.6s steps(2) infinite; }
+@keyframes blink { 50% { opacity:.35; } }
+.sp .pic .loss { position:absolute; z-index:5; left:40px; bottom:34px; }
+.sp .loss small { display:block; font:500 12px var(--mono); color:#d8dce6; }
+.sp .loss strong { font:800 clamp(2.4rem,4.6vw,3.8rem)/1 var(--display); color:var(--alert); text-shadow:0 4px 20px rgba(0,0,0,.7); }
+.sp .txt { padding:30px 0 30px clamp(8px,3vw,44px); position:relative; }
+.sp .row.flip .txt { padding:30px clamp(8px,3vw,44px) 30px 0; }
+.sp .txt h3 { font:800 clamp(1.6rem,2.8vw,2.3rem)/1.08 var(--display); margin:0 0 6px; }
+.sp .who { font:500 12.5px var(--mono); color:var(--muted); margin:0 0 18px; }
+.sp .txt p { margin:0 0 14px; max-width:33em; }
+.sp .txt p.first::first-letter { font:800 3.6em/.8 var(--display); float:left; margin:6px 10px 0 0; color:var(--hz); }
+.sp .flags { margin:18px 0 0; padding:0; list-style:none; }
+.sp .flags li { position:relative; font-size:16px; padding:4px 0 4px 26px; }
+.sp .flags li::before { content:'?'; position:absolute; left:2px; color:var(--alert); font:800 18px var(--display); }
+.sp .flags li span { position:relative; display:inline-block; }
+.sp .flags li span::after { content:''; position:absolute; inset:1px -3px; background:#000; border-bottom:1px solid #333; transform-origin:left; transition:transform .7s cubic-bezier(.7,0,.2,1); }
+.sp .row.open .flags li span::after { transform:scaleX(0); } .sp .flags li:nth-child(2) span::after { transition-delay:.12s; } .sp .flags li:nth-child(3) span::after { transition-delay:.24s; }
+.sp .row.open .flags li::before { content:'\2715'; }
+.sp .reveal { margin-top:10px; background:none; color:var(--hz); border:0; font:800 14px var(--display); cursor:pointer; padding:6px 0; text-decoration:underline; text-underline-offset:4px; }
+
+/* evidence board: loose objects with handwritten notes */
+.sp .board { position:relative; display:flex; flex-wrap:wrap; justify-content:center; gap:56px 80px; padding:20px 0 50px; }
+.sp .check { position:relative; width:min(430px,92%); background:#e8e1cf; color:#1a1a1a; padding:20px 20px 16px; font:500 12px/1.5 var(--mono); transform:rotate(-3.5deg); box-shadow:0 22px 40px rgba(0,0,0,.55); }
+.sp .check::before, .sp .check::after { content:''; position:absolute; width:90px; height:26px; background:rgba(255,199,0,.55); top:-12px; }
+.sp .check::before { left:-26px; transform:rotate(-35deg); } .sp .check::after { right:-26px; transform:rotate(35deg); }
+.sp .check .amt { font:800 18px var(--display); border-block:1px solid #b9b19b; padding:6px 0; margin:8px 0; }
+.sp .check .micr { letter-spacing:.12em; } .sp .check .sig { font:600 26px var(--hand); color:#27408b; margin-top:6px; }
+.sp .phone { position:relative; width:min(310px,92%); background:#0a0c11; border:7px solid #2a3040; border-radius:34px; padding:34px 14px 18px; transform:rotate(2.5deg); box-shadow:0 22px 40px rgba(0,0,0,.55); display:flex; flex-direction:column; gap:10px; }
+.sp .phone::before { content:''; position:absolute; top:10px; left:50%; width:70px; height:8px; margin-left:-35px; background:#2a3040; border-radius:6px; }
+.sp .m { max-width:90%; padding:9px 13px; font:400 14px/1.45 system-ui,sans-serif; border-radius:14px; opacity:0; transform:translateY(12px) scale(.96); transition:.6s cubic-bezier(.2,.7,.2,1); }
+.sp .m.them { background:#232938; border-bottom-left-radius:3px; } .sp .m.me { background:#1d4d3a; align-self:flex-end; border-bottom-right-radius:3px; }
+.sp .m small { display:block; color:var(--hz); font:700 11px var(--mono); margin-bottom:3px; }
+.sp .phone.on .m { opacity:1; transform:none; } .sp .phone.on .m:nth-child(2) { transition-delay:1s; } .sp .phone.on .m:nth-child(3) { transition-delay:2s; }
+.sp .hw { position:absolute; font:600 26px/1.1 var(--hand); color:var(--hz); max-width:210px; transform:rotate(-4deg); }
+.sp .hw.a { left:2%; bottom:-8px; } .sp .hw.b { right:2%; top:-6px; }
+.sp .hw svg { display:block; width:60px; margin-top:4px; }
+
+/* quiz: one big question at a time, no frame */
+.sp .quiz { position:relative; text-align:center; padding:50px 0 30px; }
+.sp .quiz .big { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font:800 clamp(280px,42vw,520px)/1 var(--display); color:transparent; -webkit-text-stroke:2px rgba(255,199,0,.16); animation:sway 9s ease-in-out infinite alternate; pointer-events:none; }
+@keyframes sway { from { transform:translate(-50%,-50%) rotate(-8deg); } to { transform:translate(-50%,-52%) rotate(8deg); } }
+.sp .quiz > div { position:relative; z-index:1; max-width:640px; margin:0 auto; }
+.sp .qn { font:500 13px var(--mono); color:var(--hz); margin:0 0 14px; }
+.sp .qt { font:italic 400 clamp(1.3rem,2.6vw,1.8rem)/1.4 var(--serif); margin:0 0 28px; min-height:6.5em; }
+.sp .qb { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.sp .qb button { font:800 16px var(--display); padding:13px 30px; border-radius:999px; border:2px solid var(--fg); background:transparent; color:var(--fg); cursor:pointer; transition:.2s; }
+.sp .qb button:hover { background:var(--fg); color:var(--site-bg); }
+.sp .qr { min-height:7.5em; margin:24px auto 0; font-size:17px; color:var(--fg2); animation:rise .5s both; }
+.sp .qr b { display:block; font:800 1.5rem var(--display); margin-bottom:4px; } .sp .qr .ok { color:#4ade80; } .sp .qr .no { color:var(--alert); }
+.sp .qnext { margin-top:6px; background:var(--hazard); color:#111; border:0; border-radius:999px; font:800 14px var(--display); padding:10px 24px; cursor:pointer; }
+
+/* fake address under the magnifier */
+.sp .urls { display:grid; gap:26px; max-width:760px; }
+.sp .url { position:relative; background:var(--surface2); border-radius:999px; padding:16px 26px; font:500 17px var(--mono); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.sp .url::before { content:'\1F512'; font-size:15px; }
+.sp .url em { font:700 12px var(--display); font-style:normal; margin-left:auto; padding:3px 12px; border-radius:99px; background:#1d4d3a; }
+.sp .url.bad em { background:var(--alert); }
+.sp .url mark { background:transparent; color:var(--fg); position:relative; }
+.sp .url.bad mark::after { content:''; position:absolute; left:-6px; right:-6px; top:-8px; bottom:-8px; border:3px solid var(--alert); border-radius:50%; transform:scale(.2); opacity:0; }
+.sp .urls.in .url.bad mark::after { animation:ring 1.2s .6s cubic-bezier(.3,1.5,.5,1) forwards; } .sp .urls.in .url.bad mark { color:var(--alert); }
+@keyframes ring { to { transform:scale(1); opacity:1; } }
+
+/* ten-second test: questions as typography, not boxes */
+.sp .tq { display:grid; grid-template-columns:90px 1fr 1fr; gap:10px 30px; align-items:center; padding:20px 0; }
+.sp .tq:nth-child(even) { margin-left:6%; }
+.sp .tq .g { font:800 84px/1 var(--display); color:transparent; -webkit-text-stroke:2px var(--hz); text-align:center; transition:transform .8s cubic-bezier(.3,1.6,.5,1); transform:rotate(-30deg) scale(.4); }
+.sp .tq.in .g { transform:rotate(8deg) scale(1); }
+.sp .tq h4 { font:800 clamp(1.3rem,2.4vw,1.8rem)/1.1 var(--display); margin:0; position:relative; display:inline-block; }
+.sp .tq h4::after { content:''; position:absolute; left:0; bottom:-5px; height:4px; width:100%; background:var(--alert); transform:scaleX(0); transform-origin:left; transition:transform .9s .3s; }
+.sp .tq.in h4::after { transform:scaleX(1); }
+.sp .tq p { margin:0; font-size:16px; color:var(--fg2); }
+
+/* recovery path as a drawn timeline */
+.sp .tl { position:relative; padding-left:70px; }
+.sp .tl::before { content:''; position:absolute; left:23px; top:10px; bottom:10px; width:4px; background:var(--alert); transform:scaleY(0); transform-origin:top; transition:transform 2s ease-out; }
+.sp .tl.in::before { transform:scaleY(1); }
+.sp .st { position:relative; padding:0 0 46px; counter-increment:n; }
+.sp .tl { counter-reset:n; }
+.sp .st::before { content:counter(n); position:absolute; left:-70px; top:-4px; width:50px; height:50px; border-radius:50%; background:var(--paper); color:#111; font:800 24px/50px var(--display); text-align:center; }
+.sp .st h4 { font:800 1.4rem var(--display); margin:0 0 6px; } .sp .st p { margin:0; max-width:36em; color:var(--fg2); }
+.sp .end { text-align:center; padding:60px 0 90px; color:var(--muted); font-size:17px; }
+.sp .end b { display:block; font:800 clamp(1.6rem,3.4vw,2.4rem)/1.15 var(--display); color:var(--fg); margin-bottom:8px; text-wrap:balance; }
+
+@media (max-width:860px) {
+  .sp .hero .w, .sp .row, .sp .row.flip { grid-template-columns:1fr; }
+  .sp .pic, .sp .row.flip .pic { order:0; min-height:320px; margin:0 calc(50% - var(--vw,100vw)/2); clip-path:polygon(0 0,100% 0,100% 92%,0 100%); }
+  .sp .txt, .sp .row.flip .txt { padding:24px 0; } .sp .offer { max-width:320px; margin:10px auto 0; }
+  .sp .tq { grid-template-columns:60px 1fr; } .sp .tq p { grid-column:2; } .sp .tq:nth-child(even) { margin-left:0; } .sp .tq .g { font-size:56px; }
+  .sp .hw { position:static; display:block; margin:0 auto; } .sp { font-size:17.5px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sp *, .sp *::before, .sp *::after { animation:none !important; transition:none !important; }
+  .sp .rv, .sp .m { opacity:1 !important; transform:none !important; } .sp .tl::before { transform:none; } .sp .tq .g { transform:none; } .sp .tq h4::after { transform:none; }
+}
+
+/* watermark words fill empty margins */
+.sp .w.sec[data-wm]::before { content:attr(data-wm); position:absolute; right:-6vw; top:6px; font:800 clamp(120px,24vw,340px)/1 var(--display); color:transparent; -webkit-text-stroke:1.5px color-mix(in srgb, var(--fg) 9%, transparent); pointer-events:none; z-index:0; animation:wm 24s ease-in-out infinite alternate; }
+@keyframes wm { from { transform:translateX(0); } to { transform:translateX(-5vw); } }
+.sp .w.sec > * { position:relative; z-index:1; }
+
+/* verified numbers with a growing bar chart */
+.sp .stats { display:grid; grid-template-columns:1fr 1fr; gap:30px 60px; align-items:end; padding:70px 0 20px; }
+.sp .bars { display:flex; align-items:flex-end; gap:34px; height:230px; border-bottom:2px solid #3a4152; }
+.sp .bars div { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; font:800 15px var(--display); }
+.sp .bars i { display:block; width:100%; background:#3a4152; transform:scaleY(0); transform-origin:bottom; transition:transform 1.4s cubic-bezier(.2,.8,.2,1); margin-top:8px; }
+.sp .bars div:nth-child(2) i { background:#7a5a22; } .sp .bars div:nth-child(3) i { background:var(--alert); }
+.sp .stats.in .bars i { transform:scaleY(1); } .sp .bars div:nth-child(2) i { transition-delay:.25s; } .sp .bars div:nth-child(3) i { transition-delay:.5s; }
+.sp .bars small { font:500 12px var(--mono); color:var(--muted); margin-top:8px; }
+.sp .bignums b { display:block; font:800 clamp(2.6rem,6vw,4.6rem)/1 var(--display); color:var(--hz); }
+.sp .bignums p { margin:2px 0 22px; color:var(--fg2); font-size:16px; max-width:26em; }
+.sp .stats .src, .sp .src { font:500 12px var(--mono); color:var(--muted); grid-column:1/-1; }
+.sp .src a { color:var(--hz); }
+
+/* real stories index: typography that fills with colour on hover */
+.sp .nw { display:grid; grid-template-columns:62px 1fr auto; gap:6px 24px; align-items:center; width:100%; text-align:left; background:none; border:0; border-top:1px solid var(--line2); color:inherit; padding:26px 10px; cursor:pointer; position:relative; overflow:hidden; font:inherit; }
+.sp .nw:last-of-type { border-bottom:1px solid var(--line2); }
+.sp .nw::before { content:''; position:absolute; inset:0; background:var(--hazard); transform:scaleX(0); transform-origin:left; transition:transform .5s cubic-bezier(.7,0,.2,1); }
+.sp .nw:hover::before, .sp .nw:focus-visible::before { transform:scaleX(1); }
+.sp .nw > * { position:relative; transition:color .25s, transform .4s; } .sp .nw:hover > * { color:#111; } .sp .nw:hover h3 { transform:translateX(10px); }
+.sp .nw .n { font:800 2.4rem/1 var(--display); color:transparent; -webkit-text-stroke:1.5px var(--hz); } .sp .nw:hover .n { -webkit-text-stroke-color:#111; }
+.sp .nw h3 { font:800 clamp(1.3rem,2.7vw,2rem)/1.1 var(--display); margin:0; }
+.sp .nw small { display:block; font:500 12.5px var(--mono); color:var(--muted); margin-top:6px; } .sp .nw:hover small { color:#333; }
+.sp .nw .amt { text-align:right; font:800 1.8rem/1 var(--display); color:var(--alert); } .sp .nw .amt em { display:block; font:700 12px var(--display); font-style:normal; color:var(--fg); margin-top:6px; } .sp .nw:hover .amt, .sp .nw:hover .amt em { color:#111; }
+
+/* scrolling scam phrases and a full-bleed photo band */
+.sp .phr { background:var(--alert); color:#fff; overflow:hidden; white-space:nowrap; transform:rotate(1deg); margin:46px -2vw 0; position:relative; z-index:3; }
+.sp .phr div { display:inline-block; padding:12px 0; font:italic 600 21px var(--serif); animation:slide 40s linear infinite reverse; }
+.sp .shot { position:relative; margin:56px 0 0; min-height:62vh; display:flex; align-items:center; background:#14181f url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80') center/cover fixed; overflow:hidden; }
+.sp .shot::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(12,14,19,.95) 25%, rgba(12,14,19,.45)); }
+.sp .shot::after { content:''; position:absolute; left:0; right:0; height:120px; top:-120px; background:linear-gradient(180deg, transparent, rgba(255,199,0,.28)); border-bottom:2px solid var(--hazard); animation:scan 6s linear infinite; }
+.sp .shot p { position:relative; z-index:2; font:800 clamp(2rem,5.4vw,4.2rem)/1.04 var(--display); letter-spacing:-.02em; max-width:13em; margin:0; text-wrap:balance; }
+.sp .shot p span { color:var(--hz); }
+
+/* scammer's playbook */
+.sp .pb-line { position:relative; display:flex; justify-content:space-between; margin:10px 0 44px; }
+.sp .pb-line::before, .sp .pb-fill { content:''; position:absolute; left:6%; right:6%; top:17px; height:4px; background:var(--line2); border-radius:4px; }
+.sp .pb-fill { right:auto; width:0; background:var(--alert); transition:width .9s cubic-bezier(.3,.8,.2,1); z-index:1; }
+.sp .pb-s { position:relative; z-index:2; flex:1; background:none; border:0; color:var(--muted); cursor:pointer; font:800 clamp(.9rem,1.7vw,1.15rem) var(--display); padding:0; text-align:center; transition:color .3s; }
+.sp .pb-s i { display:block; width:38px; height:38px; margin:0 auto 12px; border-radius:50%; background:var(--ink); border:4px solid #3a4152; transition:.4s cubic-bezier(.3,1.6,.5,1); }
+.sp .pb-s.done i { border-color:var(--alert); background:var(--alert); }
+.sp .pb-s.on { color:var(--fg); } .sp .pb-s.on i { border-color:var(--hz); background:var(--hazard); transform:scale(1.25); box-shadow:0 0 0 8px rgba(255,199,0,.18); }
+.sp .pb-body { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+.sp .pb-art { position:relative; aspect-ratio:3/2; background:#161b26; overflow:hidden; border-radius:4px; }
+.sp .pb-art::before { content:''; position:absolute; z-index:3; left:0; right:0; height:70px; top:-70px; background:linear-gradient(180deg, transparent, rgba(255,199,0,.28)); border-bottom:2px solid var(--hazard); animation:scan 5s linear infinite; }
+.sp .pb-art svg { position:absolute; inset:0; width:100%; height:100%; animation:rise .6s both; }
+.sp .pb-txt h3 { font:800 clamp(1.7rem,3vw,2.4rem)/1.05 var(--display); margin:0 0 14px; }
+.sp .pb-k { font:700 14px var(--display); color:var(--hz); margin:22px 0 4px; } .sp .pb-txt p { margin:0; max-width:32em; } .sp .pb-txt .pb-k { margin:24px 0 4px; }
+.sp .pb-m { margin-top:20px; font:600 13px var(--display); color:var(--muted); }
+.sp .bar { display:block; height:10px; background:var(--line2); border-radius:99px; margin:6px 0 14px; overflow:hidden; }
+.sp .bar i { display:block; height:100%; width:0; background:var(--hazard); transition:width 1s cubic-bezier(.3,.8,.2,1); } .sp .bar.red i { background:var(--alert); }
+.sp .pb-tip { margin-top:14px !important; padding-left:16px; border-left:4px solid var(--hazard); font-size:16px; color:var(--fg2); }
+@media (max-width:860px) { .sp .pb-body { grid-template-columns:1fr; } .sp .pb-s span { font-size:.8rem; } }
+/* story reader */
+.sp .rd { position:fixed; inset:0; z-index:100; background:var(--ink); overflow-y:auto; transform:translateY(100%); visibility:hidden; transition:transform .65s cubic-bezier(.7,0,.2,1), visibility 0s .65s; }
+.sp .rd.open { transform:none; visibility:visible; transition:transform .65s cubic-bezier(.7,0,.2,1); }
+.sp .rd-x { position:fixed; top:16px; right:16px; z-index:110; background:#fff; color:#111; border:0; border-radius:999px; font:800 14px var(--display); padding:10px 18px; cursor:pointer; }
+.sp .rd-art { position:relative; height:min(46vh,400px); overflow:hidden; background:#161b26; }
+.sp .rd-art svg { position:absolute; inset:0; width:100%; height:100%; }
+.sp .rd-art::before { content:''; position:absolute; z-index:3; left:0; right:0; height:90px; top:-90px; background:linear-gradient(180deg, transparent, rgba(255,199,0,.32)); border-bottom:2px solid var(--hazard); animation:scan 4.5s linear infinite; }
+.sp .rd-art::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 50%, var(--ink)); }
+.sp .rd-in { width:min(740px,90vw); margin:-40px auto 0; position:relative; z-index:4; padding-bottom:90px; }
+.sp .rd-in .kk { font:500 13px var(--mono); color:var(--hz); margin:0 0 10px; }
+.sp .rd-in h2 { font:800 clamp(2rem,5vw,3.4rem)/1.02 var(--display); margin:0 0 18px; }
+.sp .rd-in .meta { display:flex; gap:28px; flex-wrap:wrap; margin:0 0 30px; font:500 13px var(--mono); color:var(--muted); } .sp .rd-in .meta b { display:block; font:800 2.4rem/1 var(--display); color:var(--alert); }
+.sp .rd-in .art p { margin:0 0 20px; font-size:20px; line-height:1.75; } .sp .rd-in .art p:first-child::first-letter { font:800 4em/.8 var(--display); float:left; margin:8px 12px 0 0; color:var(--hz); }
+.sp .pull { font:italic 400 clamp(1.5rem,3.2vw,2.2rem)/1.3 var(--serif); border-left:4px solid var(--alert); padding-left:22px; margin:34px 0; color:var(--fg); }
+.sp .rd-in h5 { font:800 1.1rem var(--display); color:var(--hz); margin:40px 0 14px; }
+.sp .flow { list-style:none; margin:0; padding:0 0 0 26px; border-left:3px solid var(--alert); } .sp .flow li { position:relative; padding:0 0 18px 20px; font-size:17px; }
+.sp .flow li::before { content:''; position:absolute; left:-37px; top:7px; width:14px; height:14px; border-radius:50%; background:var(--ink); border:3px solid var(--alert); }
+.sp .rd.open .flow li { animation:rise .6s both; } .sp .rd.open .flow li:nth-child(2) { animation-delay:.15s; } .sp .rd.open .flow li:nth-child(3) { animation-delay:.3s; } .sp .rd.open .flow li:nth-child(4) { animation-delay:.45s; } .sp .rd.open .flow li:nth-child(5) { animation-delay:.6s; }
+.sp .rd-in .fl li { list-style:none; padding:3px 0 3px 26px; position:relative; font-size:17px; } .sp .rd-in .fl { padding:0; margin:0; } .sp .rd-in .fl li::before { content:'\2715'; position:absolute; left:0; color:var(--alert); font-weight:700; }
+.sp .rd-nav { display:flex; justify-content:space-between; gap:12px; margin-top:44px; flex-wrap:wrap; } .sp .rd-nav .qnext { margin:0; }
+@media (max-width:860px) { .sp .stats { grid-template-columns:1fr; } .sp .nw { grid-template-columns:44px 1fr; } .sp .nw .amt { grid-column:2; text-align:left; } .sp .shot { background-attachment:scroll; } }
+@media (prefers-reduced-motion:reduce) { .sp .bars i { transform:none; } .sp .rd { transition:none !important; } }
+/* accents that sit on dark photos keep the bright yellow in any theme */
+.sp .pic .tag, .sp .shot p span, .sp .rd-art .tag { color:var(--hazard); }
+.sp .rd { z-index:2147483000; } .sp .rd-x { z-index:2147483001; background:var(--fg); color:var(--site-bg); }
+</style>
+
+<div class="sp" data-theme="auto">
+  
+  <div class="hero">
+    <img src="https://images.unsplash.com/photo-1563986768609?auto=format&fit=crop&w=1400&q=80" alt="" onerror="this.remove()">
+    <div class="qs" id="qs" aria-hidden="true"></div>
+    <div class="w">
+      <div>
+        <p class="kicker">Job scam files</p>
+        <h1>The job was fake. <em>The loss was real.</em></h1>
+        <p class="lede">Fake recruiters do not look like criminals. They look like a friendly message, a professional offer letter and a great salary. Would you have noticed? Read real cases from around the world, see how the scam is played step by step, then test yourself.</p>
+      </div>
+      <div class="offer" aria-hidden="true"><b>OFFER OF EMPLOYMENT</b>Dear candidate, we are delighted to confirm your remote position.<i></i><i style="width:80%"></i><i style="width:60%"></i><div class="pay">$45 / hour</div><span class="void">FAKE</span></div>
+    </div>
+  </div>
+  <div class="tape" aria-hidden="true"><div><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span><span>SCAM ALERT &nbsp;&bull;&nbsp; NEVER PAY TO GET A JOB &nbsp;&bull;&nbsp; VERIFY THE RECRUITER &nbsp;&bull;&nbsp; </span></div></div>
+
+  
+  <div class="w stats rv" id="stats">
+    <div><div class="bars" aria-label="Reported US job scam losses"><div><span>$90M</span><i style="height:56px"></i><small>2020</small></div><div><span>$286M</span><i style="height:178px"></i><small>2023</small></div><div><span>$501M</span><i style="height:100%;max-height:170px"></i><small>2024</small></div></div>
+      <p class="src" style="margin-top:10px">Reported losses to job scams in the US, FTC data</p></div>
+    <div class="bignums"><b><span class="cnt" data-to="20000" data-s="+">0</span></b><p>reports of task scams in the first half of 2024 alone, up from about 5,000 in all of 2023.</p>
+      <b><span class="cnt" data-to="39" data-s="%">0</span></b><p>of all job scam reports in that period were task scams, where you pay to earn.</p></div>
+    <p class="src">Source: <a href="https://ftc.gov/system/files/ftc_gov/pdf/task-scams-spotlight-2024.pdf" target="_blank" rel="noopener">FTC data spotlight on task scams</a> and FTC Consumer Sentinel figures as reported by Bitdefender. Only reported cases are counted, so real losses are likely higher.</p>
+  </div>
+
+  <div class="w sec" data-wm="REAL" id="news">
+    <h2>Six real cases. Tap one to read.</h2>
+    <p class="sub">Each story comes from news reports or official warnings. We summarised them in our own words and linked every source.</p>
+    <button class="nw rv" type="button" data-i="0"><span class="n">01</span><span><h3>The offer letter that opened a half-billion-dollar vault</h3><small>Fake job offer · Corporate target, March 2022</small></span><span class="amt">$540M+<em>Read the story</em></span></button><button class="nw rv r" type="button" data-i="1"><span class="n">02</span><span><h3>Hired for an IT job in Thailand, held in a scam compound</h3><small>Fake job ads · Southeast Asia, 2022</small></span><span class="amt">~130<em>Read the story</em></span></button><button class="nw rv" type="button" data-i="2"><span class="n">03</span><span><h3>The email that looked official, and the wire that wasn't</h3><small>Fake job offer · Michigan, USA</small></span><span class="amt">$5,000<em>Read the story</em></span></button><button class="nw rv r" type="button" data-i="3"><span class="n">04</span><span><h3>A grandmother, hotel reviews and a lifetime of savings</h3><small>Fake remote job · Pennsylvania, USA</small></span><span class="amt">$220K+<em>Read the story</em></span></button><button class="nw rv" type="button" data-i="4"><span class="n">05</span><span><h3>Thirty-eight more transfers to twenty-two accounts</h3><small>Fake part-time job · Kuala Terengganu, Malaysia, July 2025</small></span><span class="amt">RM500K<em>Read the story</em></span></button><button class="nw rv r" type="button" data-i="5"><span class="n">06</span><span><h3>A travel-agency job that billed its victim for five months</h3><small>Fake remote job · Switzerland, June 2025</small></span><span class="amt">CHF 80K<em>Read the story</em></span></button>
+  </div>
+  <div class="phr" aria-hidden="true"><div><span>"Pay a small refundable deposit" &nbsp;&#10033;&nbsp; </span><span>"Message our director on Telegram" &nbsp;&#10033;&nbsp; </span><span>"No interview needed" &nbsp;&#10033;&nbsp; </span><span>"Buy your laptop from our approved vendor" &nbsp;&#10033;&nbsp; </span><span>"Earn $200 a day liking posts" &nbsp;&#10033;&nbsp; </span><span>"Pay a small refundable deposit" &nbsp;&#10033;&nbsp; </span><span>"Message our director on Telegram" &nbsp;&#10033;&nbsp; </span><span>"No interview needed" &nbsp;&#10033;&nbsp; </span><span>"Buy your laptop from our approved vendor" &nbsp;&#10033;&nbsp; </span><span>"Earn $200 a day liking posts" &nbsp;&#10033;&nbsp; </span><span>"Pay a small refundable deposit" &nbsp;&#10033;&nbsp; </span><span>"Message our director on Telegram" &nbsp;&#10033;&nbsp; </span><span>"No interview needed" &nbsp;&#10033;&nbsp; </span><span>"Buy your laptop from our approved vendor" &nbsp;&#10033;&nbsp; </span><span>"Earn $200 a day liking posts" &nbsp;&#10033;&nbsp; </span></div></div>
+  <div class="shot"><div class="w"><p>Scammers don't need you to be careless. They need <span>one hopeful moment.</span></p></div></div>
+
+  <div class="w sec" data-wm="PLAYBOOK" id="playbook">
+    <h2>Inside the scammer's playbook</h2>
+    <p class="sub">Almost every job scam follows the same five steps. Tap a step to see what you notice, and what is really going on.</p>
+    <div class="pb">
+      <div class="pb-line" id="pbl" role="tablist" aria-label="Scam stages"><span class="pb-fill" id="pbf"></span>
+        <button class="pb-s on" type="button" data-i="0" role="tab"><i></i><span>The hook</span></button>
+        <button class="pb-s" type="button" data-i="1" role="tab"><i></i><span>The move</span></button>
+        <button class="pb-s" type="button" data-i="2" role="tab"><i></i><span>The trust</span></button>
+        <button class="pb-s" type="button" data-i="3" role="tab"><i></i><span>The ask</span></button>
+        <button class="pb-s" type="button" data-i="4" role="tab"><i></i><span>The vanish</span></button>
+      </div>
+      <div class="pb-body" id="pbb">
+        <div class="pb-art" id="pba"></div>
+        <div class="pb-txt"><h3 id="pbh"></h3>
+          <p class="pb-k">What you see</p><p id="pbs"></p>
+          <p class="pb-k">What is really happening</p><p id="pbr"></p>
+          <div class="pb-m"><span>Your trust</span><b class="bar"><i id="pbt"></i></b><span>Your money at risk</span><b class="bar red"><i id="pbk"></i></b></div>
+          <p class="pb-tip" id="pbtip"></p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="w sec" data-wm="FAKE">
+    <h2>How it plays out, illustrated</h2>
+    <p class="note">These are composite case studies. Names, firms and amounts are illustrative and based on patterns job seekers commonly report to consumer-protection agencies. They are not records of specific individuals.</p>
+    <div class="chips" role="group" aria-label="Filter stories"><button class="chip on" data-f="all">All stories</button><button class="chip" data-f="check">Fake cheque</button><button class="chip" data-f="task">Task and crypto</button><button class="chip" data-f="identity">Identity theft</button></div>
+  </div>
+
+  <div class="w">
+    <div class="row" data-c="check">
+      <div class="pic"><svg viewBox="0 0 400 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="380" fill="#1d222d"/><g transform="rotate(-8 200 190)"><rect x="50" y="110" width="300" height="140" fill="#e8e1cf"/><rect x="70" y="140" width="140" height="8" fill="#b9b19b"/><rect x="70" y="164" width="220" height="8" fill="#b9b19b"/><rect x="70" y="210" width="180" height="10" fill="#8b8470"/><text x="262" y="236" font-family="Arial Black" font-size="34" fill="#e63946" transform="rotate(-12 262 236)">BOUNCED</text></g></svg><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80" alt="Cheques and financial paperwork on a desk" loading="lazy" onerror="this.remove()"><div class="hud"></div><span class="tag">SCANNING: FAKE CHEQUE</span>
+        <div class="loss"><small>Lost</small><strong><span class="cnt" data-to="4850">$0</span></strong></div></div>
+      <div class="txt rv r"><h3>The cheque that paid for a laptop</h3><p class="who">Marcus, 26, junior front-end developer</p>
+        <p class="first">Marcus aced a text-only interview for a $45 an hour remote role. A few days later, "HR" posted him a cashier's cheque for $5,400 and told him to buy a laptop and desk from their approved vendor.</p>
+        <p>The money showed up in his banking app, so he sent $4,850 to the vendor. Three days later the cheque bounced and the bank took the full amount back.</p>
+        <ul class="flags"><li><span>The interview happened only by text, never on video.</span></li><li><span>The employer asked him to send money by transfer.</span></li><li><span>A cheque can show in your balance days before it is verified.</span></li></ul><button class="reveal" type="button">Reveal the red flags</button></div></div>
+    <div class="row flip" data-c="task">
+      <div class="pic"><svg viewBox="0 0 400 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="380" fill="#1b2230"/><rect x="130" y="50" width="140" height="270" rx="22" fill="#0a0c11" stroke="#3a4152" stroke-width="4"/><rect x="146" y="90" width="108" height="26" rx="8" fill="#232938"/><rect x="166" y="126" width="88" height="26" rx="8" fill="#1d4d3a"/><rect x="146" y="162" width="100" height="26" rx="8" fill="#232938"/><circle cx="200" cy="250" r="30" fill="#ffc700"/><text x="188" y="262" font-family="Arial Black" font-size="32" fill="#111">$</text><path d="M200 280v50" stroke="#e63946" stroke-width="4" stroke-dasharray="6 6"/></svg><img src="https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?auto=format&fit=crop&w=900&q=80" alt="Phone showing a cryptocurrency transaction" loading="lazy" onerror="this.remove()"><div class="hud"></div><span class="tag">SCANNING: TASK SCAM</span>
+        <div class="loss"><small>Lost</small><strong><span class="cnt" data-to="27300">$0</span></strong></div></div>
+      <div class="txt rv"><h3>The "easy tasks" that kept costing more</h3><p class="who">Priya, 31, switching careers</p>
+        <p class="first">A WhatsApp message offered $200 a day to "boost app ratings". Priya paid in $100 of crypto on day one and withdrew $180, which was enough to make her trust the site.</p>
+        <p>Then came a "bonus task" that needed a $3,000 deposit to release her $8,000 balance. More deposits followed, then a $10,000 "tax fee". After that the site vanished.</p>
+        <ul class="flags"><li><span>An unsolicited offer from a personal phone number.</span></li><li><span>She had to deposit her own money, in crypto, to unlock earnings.</span></li><li><span>A small early payout was used to build trust before the big ask.</span></li></ul><button class="reveal" type="button">Reveal the red flags</button></div></div>
+    <div class="row" data-c="identity">
+      <div class="pic"><svg viewBox="0 0 400 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="380" fill="#221a1f"/><rect x="70" y="100" width="260" height="170" rx="14" fill="#e4dcc7"/><circle cx="130" cy="170" r="30" fill="#8b8470"/><rect x="180" y="150" width="120" height="10" fill="#8b8470"/><rect x="180" y="176" width="90" height="10" fill="#8b8470"/><rect x="90" y="230" width="220" height="12" fill="#1a1a1a"/><path d="M330 60v70a22 22 0 1 1-30-20" fill="none" stroke="#e63946" stroke-width="7"/></svg><img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=900&q=80" alt="Padlock over a keyboard representing data theft" loading="lazy" onerror="this.remove()"><div class="hud"></div><span class="tag">SCANNING: ID THEFT</span>
+        <div class="loss"><small>Fraudulent loans</small><strong><span class="cnt" data-to="14200">$0</span></strong></div></div>
+      <div class="txt rv r"><h3>The onboarding portal that wasn't</h3><p class="who">David, 48, operations specialist</p>
+        <p class="first">David applied for a remote healthcare coordinator job. The link led to a copy of the company's portal, and two hours after a short questionnaire he had an offer.</p>
+        <p>"Onboarding" asked for his full SSN, a scan of his licence, bank details and his mother's maiden name. Two months later he found two car loans taken out in his name.</p>
+        <ul class="flags"><li><span>The address was careers-biohealth-inc.com, not the real company domain.</span></li><li><span>ID documents were requested before any live meeting.</span></li><li><span>The offer arrived two hours after applying.</span></li></ul><button class="reveal" type="button">Reveal the red flags</button></div></div>
+  </div>
+
+  <div class="w sec" data-wm="PROOF">
+    <h2>What did they actually receive?</h2>
+    <p class="sub">Two typical pieces of "evidence", recreated for education.</p>
+    <div class="board">
+      <div class="check rv"><div>FIRST NATIONAL ALLIANCE BANK &nbsp; No. 094821</div><div>PAY TO: [ CANDIDATE NAME ]</div><div class="amt">$5,850.00 &mdash; FIVE THOUSAND EIGHT HUNDRED FIFTY</div><div class="micr">&#9094;021000089&#9094; 094821884&#9095; 1042</div><div class="sig">A. Jenkins</div></div>
+      <div class="phone rv r" id="chat"><div class="m them"><small>"Sarah, HR"</small>We loved your profile! Remote data reviewer, $55/hr. Can we chat on Telegram?</div><div class="m me">Can you send the official job post from your company website?</div><div class="m them"><small>"Sarah, HR"</small>Our portal is closed due to high volume. Message @Director_Hiring_Desk with code #HR-8849 today.</div></div>
+      <div class="hw a">Why does the routing code not match the bank?<svg viewBox="0 0 60 30"><path d="M5 5 C 25 30, 40 5, 55 22 M48 14 L55 22 L44 25" fill="none" stroke="#ffc700" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="hw b">Why leave the job site for a private chat?<svg viewBox="0 0 60 30"><path d="M5 25 C 25 0, 40 25, 55 8 M48 4 L55 8 L50 19" fill="none" stroke="#ffc700" stroke-width="3" stroke-linecap="round"/></svg></div>
+    </div>
+  </div>
+
+  <div class="w sec">
+    <h2>Would you have caught it?</h2>
+    <p class="sub">Four messages. Decide if each one is a real offer or a scam.</p>
+    <div class="quiz"><div class="big" aria-hidden="true">?</div>
+      <div><p class="qn" id="qn"></p><p class="qt" id="qt"></p>
+        <div class="qb" id="qb"><button data-a="real">Real offer</button><button data-a="scam">Scam</button></div>
+        <div class="qr" id="qr" aria-live="polite"></div></div></div>
+  </div>
+
+  <div class="w sec">
+    <h2>Can you spot the fake address?</h2>
+    <p class="sub">Scammers copy the brand and change the web address. Look closely.</p>
+    <div class="urls rv" id="urls">
+      <div class="url">biohealth.com/careers <em>real</em></div>
+      <div class="url bad">careers<mark>-biohealth-inc</mark>.com/apply <em>lookalike</em></div>
+    </div>
+  </div>
+
+  <div class="w sec" data-wm="VERIFY">
+    <h2>Ask yourself six questions</h2>
+    <p class="sub">If an offer fails even one, stop and verify before you reply.</p>
+    <div class="tq rv"><div class="g">?</div><h4>Does it ask for money?</h4><p>Real employers never charge for training, equipment, visas or "registration".</p></div><div class="tq rv"><div class="g">?</div><h4>Did they contact you first?</h4><p>Unrequested offers on WhatsApp or Telegram are a classic opening.</p></div><div class="tq rv"><div class="g">?</div><h4>Does the email match?</h4><p>Check that the sender domain is the official one, not a lookalike.</p></div><div class="tq rv"><div class="g">?</div><h4>Is there a live interview?</h4><p>No video call and a very fast offer are both warning signs.</p></div><div class="tq rv"><div class="g">?</div><h4>Is the pay too good?</h4><p>High pay for very simple work is bait.</p></div><div class="tq rv"><div class="g">?</div><h4>Do they want ID early?</h4><p>Never share ID numbers or bank details before a verified, signed contract.</p></div>
+  </div>
+
+  <div class="w sec" data-wm="ACT">
+    <h2>What if it already happened?</h2>
+    <p class="sub">Act in the first 24 hours. Speed matters most.</p>
+    <div class="tl rv" id="tl">
+      <div class="st"><h4>Call your bank</h4><p>Ask for a stop or recall on any transfer and lock affected cards and accounts.</p></div>
+      <div class="st"><h4>Protect your identity</h4><p>If you shared ID details, place a credit freeze and change every password the scammer could know.</p></div>
+      <div class="st"><h4>Report it</h4><p>Keep all messages and receipts. In India, call 1930 or use cybercrime.gov.in. In the US, report at reportfraud.ftc.gov and ic3.gov.</p></div>
+    </div>
+  </div>
+
+  <div class="w end"><b>You are not gullible. They are professionals.</b>Sharing these stories is how the next person spots the trap in time.</div>
+
+  <div class="rd" id="rd" aria-hidden="true" role="dialog" aria-label="Story reader"><button class="rd-x" id="rdx" type="button">&#10005; Close story</button><div id="rda"></div></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var $ = function (q, c) { return Array.prototype.slice.call((c || document).querySelectorAll(q)); };
+  /* follow the host site: reuse its background, pick light/dark text to suit it */
+  var sp = document.querySelector('.sp');
+  function lum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; }
+  function siteBg() {
+    var el = sp.parentElement, m, p, imgs = [], c;
+    while (el) {
+      var cs = getComputedStyle(el); m = cs.backgroundColor.match(/rgba?\(([^)]+)\)/);
+      if (m) { p = m[1].split(',').map(parseFloat); if (p.length < 4 || p[3] > 0.5) return { rgb: p.slice(0, 3), solid: true }; }
+      if (cs.backgroundImage && cs.backgroundImage !== 'none') { (cs.backgroundImage.match(/rgba?\([^)]+\)/g) || []).forEach(function (x) { var q = x.match(/[\d.]+/g).map(parseFloat); if (q.length < 4 || q[3] > 0.5) imgs.push(q.slice(0, 3)); }); }
+      el = el.parentElement;
+    }
+    if (imgs.length) { c = [0, 0, 0]; imgs.forEach(function (q) { c[0] += q[0] / imgs.length; c[1] += q[1] / imgs.length; c[2] += q[2] / imgs.length; }); return { rgb: c.map(Math.round), solid: false }; }
+    return null;
+  }
+  function applyTheme() {
+    var forced = sp.getAttribute('data-theme'), b = siteBg(), mode;
+    if (forced === 'dark' || forced === 'light') mode = forced;
+    else mode = b ? (lum(b.rgb) < 0.5 ? 'dark' : 'light') : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    sp.setAttribute('data-mode', mode);
+    sp.style.setProperty('--site-bg', b && b.solid ? 'rgb(' + b.rgb.join(',') + ')' : (mode === 'dark' ? (b ? 'rgb(' + b.rgb.join(',') + ')' : '#0c0e13') : (b ? 'rgb(' + b.rgb.join(',') + ')' : '#ffffff')));
+    sp.style.setProperty('--vw', document.documentElement.clientWidth + 'px');
+  }
+  applyTheme(); window.addEventListener('resize', applyTheme);
+  /* drifting question marks */
+  var qs = document.getElementById('qs');
+  for (var i = 0; i < 18; i++) {
+    var e = document.createElement('i'); e.textContent = '?';
+    e.style.cssText = '--x:' + (Math.random() * 96) + '%;--y:' + (Math.random() * 90) + '%;--s:' + (50 + Math.random() * 130) + 'px;--t:' + (8 + Math.random() * 10) + 's;--r1:' + (-25 + Math.random() * 20) + 'deg;--r2:' + (5 + Math.random() * 25) + 'deg;animation-delay:-' + (Math.random() * 8) + 's';
+    qs.appendChild(e);
+  }
+  /* filters and red-flag redactions */
+  var chips = $('.sp .chip'), rows = $('.sp .row');
+  chips.forEach(function (c) { c.addEventListener('click', function () {
+    chips.forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on');
+    var f = c.getAttribute('data-f');
+    rows.forEach(function (r) { r.style.display = (f === 'all' || r.getAttribute('data-c') === f) ? '' : 'none'; });
+  }); });
+  $('.sp .reveal').forEach(function (b) { b.addEventListener('click', function () {
+    var r = b.closest('.row'); r.classList.toggle('open');
+    b.textContent = r.classList.contains('open') ? 'Hide the red flags' : 'Reveal the red flags';
+  }); });
+  /* count-up for the losses */
+  function count(el) {
+    var to = +el.getAttribute('data-to'), p = el.getAttribute('data-p') || (el.textContent.charAt(0) === '$' ? '$' : ''), sf = el.getAttribute('data-s') || '', t0 = null;
+    (function step(t) { t0 = t0 || t; var k = Math.min((t - t0) / 1800, 1); el.textContent = p + Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString() + sf; if (k < 1) requestAnimationFrame(step); })(performance.now());
+  }
+  /* reveal on scroll */
+  var targets = $('.sp .rv, .sp .tq, .sp .pic, .sp .tl, .sp .phone, .sp .stats');
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (en) {
+    if (!en.isIntersecting) return; var t = en.target; t.classList.add('in'); io.unobserve(t);
+    if (t.id === 'urls' || t.id === 'chat') t.classList.add(t.id === 'chat' ? 'on' : 'in');
+    $('.cnt', t).forEach(count);
+  }); }, { threshold: .3 }) : null;
+  targets.forEach(function (t) { io ? io.observe(t) : (t.classList.add('in', 'on'), $('.cnt', t).forEach(function (c) { c.textContent = (c.getAttribute('data-p') || '$') + (+c.getAttribute('data-to')).toLocaleString() + (c.getAttribute('data-s') || ''); })); });
+  /* quiz */
+  var Q = [
+    ['"Hi! We saw your profile. $55/hr, only 2 hours a day. Message our director on Telegram to start today."', 'scam', 'A stranger, pay that is too good, and a move to a private chat are three red flags in one message.'],
+    ['After two video interviews, an email from the company\'s official domain sends an offer letter and says equipment will be shipped by their IT team at no cost.', 'real', 'This looks legitimate: live interviews, no money asked, official domain. Still confirm by calling a number from the company\'s own website.'],
+    ['"Congratulations! Pay a refundable security deposit of \u20B92,500 to confirm your seat."', 'scam', 'Real employers never charge you to hire you, and "refundable" deposits are rarely refunded.'],
+    ['"HR will mail you a cheque so you can buy your laptop from our approved vendor."', 'scam', 'This is the fake-cheque trap. The cheque bounces after you have already paid the vendor.']
+  ], qi = 0, score = 0, qn = document.getElementById('qn'), qt = document.getElementById('qt'), qr = document.getElementById('qr'), qb = document.getElementById('qb');
+  function show() {
+    qb.style.display = ''; qr.innerHTML = '';
+    qn.textContent = 'Message ' + (qi + 1) + ' of ' + Q.length; qt.textContent = Q[qi][0];
+  }
+  $('button', qb).forEach(function (b) { b.addEventListener('click', function () {
+    var right = b.getAttribute('data-a') === Q[qi][1]; if (right) score++;
+    qb.style.display = 'none';
+    qr.innerHTML = '<b class="' + (right ? 'ok' : 'no') + '">' + (right ? 'Correct.' : 'Not quite.') + '</b>' + Q[qi][2] + '<br><button class="qnext" type="button">' + (qi < Q.length - 1 ? 'Next message' : 'See my score') + '</button>';
+    qr.querySelector('.qnext').addEventListener('click', function () {
+      qi++;
+      if (qi < Q.length) { show(); return; }
+      qn.textContent = 'Your score'; qt.textContent = score + ' out of ' + Q.length;
+      qr.innerHTML = (score === Q.length ? 'Sharp eyes. Keep verifying every offer.' : 'Scammers count on exactly these slips. Read the red flags again.') + '<br><button class="qnext" type="button">Try again</button>';
+      qr.querySelector('.qnext').addEventListener('click', function () { qi = 0; score = 0; show(); });
+    });
+  }); });
+  show();
+
+  /* real-story reader */
+  var S = [{"k": "Fake job offer · Corporate target, March 2022", "t": "The offer letter that opened a half-billion-dollar vault", "art": "file", "lab": "Stolen from the Ronin network", "loss": "$540M+", "n": "01", "where": "Sky Mavis / Axie Infinity", "when": "Attack in March 2022; method reported July 2022", "body": ["A senior engineer at Sky Mavis, the studio behind the game Axie Infinity, was approached about a job at a company that, according to reports, did not exist. After several rounds of interviews came an offer with an extremely generous pay package, delivered as a PDF.", "Opening that document quietly installed spyware. From the engineer's machine the attackers worked their way into the Ronin network and took control of enough validators to approve withdrawals. Roughly $540 million in crypto left the system, and US authorities linked the theft to North Korea's Lazarus Group. Estimates of the total vary by outlet and by crypto prices.", "This was not a one-off. Security researchers had already seen the same group using fake job offers against defence and aerospace staff since 2020 in a campaign nicknamed Operation Dream Job."], "pull": "The company did not exist. The malware did.", "steps": ["A recruiter approaches the engineer for a job at a firm with no real footprint", "Several interview rounds build trust", "An offer arrives with a very generous package, as a PDF", "Opening the file installs spyware on a work machine", "The attackers move through the network and drain the bridge"], "flags": ["A company you cannot verify, offering unusually high pay", "Easy interviews followed by a fast, generous offer", "The offer arrives as a file you must open on a work device"], "src": [["The Hacker News", "https://thehackernews.com/2022/07/hackers-used-fake-job-offer-to-hack-and.html"], ["Security Affairs", "https://securityaffairs.com/133113/cyber-crime/axie-infinity-hack-fake-job-offer.html"]]}, {"k": "Fake job ads · Southeast Asia, 2022", "t": "Hired for an IT job in Thailand, held in a scam compound", "art": "map", "lab": "Indians rescued in 2022", "loss": "~130", "n": "02", "where": "Myanmar, Laos, Cambodia", "when": "October 2022, with later rescues reported", "body": ["India's foreign ministry said it had rescued about 130 Indians who were forced to work in cyber-scam operations in Myanmar, Laos and Cambodia. They had answered social media adverts for well-paid IT jobs in Thailand, promoted through agents in Dubai, Bangkok and some Indian cities.", "The jobs were fake. Many of the workers were taken across borders, some into parts of Myanmar that are hard to reach, and were held captive and made to run online fraud.", "Later, Maharashtra cyber police said they had rescued more than 60 Indians from similar compounds and arrested five agents. Officials described victims being flown to Thailand on tourist visas, then moved across a river by small boat into guarded compounds."], "pull": "The offer was a job. The destination was a cage.", "steps": ["A social media advert promises a high-paying IT job in Thailand", "An agent arranges passports and flights, often on tourist visas", "The recruit is moved across a border into a guarded compound", "They are forced to run online fraud on other people", "Governments and police begin rescue operations"], "flags": ["A very well-paid overseas job found through a social media advert", "A work contract that begins with a tourist visa", "Agents based in other countries who ask you to travel quickly"], "src": [["Al Jazeera (AP)", "https://www.aljazeera.com/news/2022/10/8/indian-workers-rescued-from-digital-job-scams-in-southeast-asia"], ["Scroll.in", "https://scroll.in/latest/1081252/over-60-indians-rescued-from-cyber-scam-centres-in-myanmar-five-agents-arrested"]]}, {"k": "Fake job offer · Michigan, USA", "t": "The email that looked official, and the wire that wasn't", "art": "cheque", "lab": "Wired to the fake vendor", "loss": "$5,000", "n": "03", "where": "Troy, Michigan", "when": "Reported by local TV news", "body": ["A Michigan man had been job hunting since March when he got an email confirming he had the job at a California construction company. The message came from a lookalike web address, not the company's own.", "The scammers told him to deposit a cheque through his banking app and then wire $5,000 to an \"accredited vendor\" so he could buy office equipment for remote work. He did, and the cheque did not hold up.", "He later described the offer as a life raft made of lead. Troy police urge people to slow down, verify the offer independently, and talk to someone they trust before sending money."], "pull": "A real employer will never need you to spend first and be paid back later.", "steps": ["An email from a lookalike domain confirms the job", "A cheque arrives to deposit by mobile app", "He is told to wire $5,000 to an approved vendor for equipment", "The cheque is rejected and the wire cannot be undone"], "flags": ["The sender's web address is a near copy of the company's", "You are asked to deposit a cheque and then send money onward", "Equipment must come from a vendor chosen by the employer"], "src": [["Denver7 / Scripps News", "https://www.denver7.com/business/jobs-employment/i-lost-a-lot-of-money-michigan-man-loses-thousands-in-recent-job-scam"]]}, {"k": "Fake remote job · Pennsylvania, USA", "t": "A grandmother, hotel reviews and a lifetime of savings", "art": "stars", "lab": "Savings lost", "loss": "$220K+", "n": "04", "where": "Berks County, Pennsylvania", "when": "Reported by CBS News Philadelphia", "body": ["Bonnie Haring told CBS News Philadelphia that she accepted a simple remote job approving pre-written hotel reviews. Within days, authorities say, it turned out to be a task scam that cost her more than $220,000, the savings she had expected to rely on for the rest of her life.", "The US Federal Trade Commission explains how these scams work: victims are given simple, repetitive tasks such as leaving reviews, told they earn commission for each one, and shown balances in an app. Payment is often demanded in cryptocurrency or other hard-to-trace ways.", "She reported the loss to police and federal agencies, but investigators said the chances of getting money back are very low."], "pull": "It looked like work. It was a way to move her savings out of her account.", "steps": ["A message offers an easy remote job approving reviews", "Tasks and commissions appear inside an app", "Requests for money begin, framed as needed to continue", "Savings are drained in hard-to-trace payments", "Reports to police follow, with little chance of recovery"], "flags": ["Simple tasks that pay surprisingly well", "Money requested before you can withdraw your earnings", "Payments in crypto or other hard-to-trace methods"], "src": [["AOL Finance (from CBS News Philadelphia)", "https://www.aol.com/finance/pennsylvania-retiree-lost-221k-remote-140000801.html"]]}, {"k": "Fake part-time job · Kuala Terengganu, Malaysia, July 2025", "t": "Thirty-eight more transfers to twenty-two accounts", "art": "nodes", "lab": "Lost by one trader", "loss": "RM500K", "n": "05", "where": "Kuala Terengganu, Malaysia", "when": "Police statement, July 2025", "body": ["A 38-year-old trader was approached on Facebook on May 14 by a contact offering part-time work with high commissions. He was told to download an app from a link and buy items through it in order to earn.", "At first he received some commission, which made the work feel real. Encouraged, he made 38 more transactions to 22 different bank accounts, using savings from selling fruit, groceries and cattle, plus money borrowed from friends and credit cards.", "Police said the total lost was RM500,639.50 and are investigating the case as cheating."], "pull": "Every small payout made the next payment feel safer.", "steps": ["A Facebook contact offers part-time work with big commissions", "An app is installed from a link", "Early commissions are paid to build trust", "Dozens of transfers go to many different bank accounts", "The victim reports to police after savings are gone"], "flags": ["A stranger on social media offering easy commission", "An app installed from a link you were sent", "Payments requested to many different personal bank accounts"], "src": [["Malay Mail / Bernama", "https://www.malaymail.com/news/malaysia/2025/07/10/terengganu-trader-loses-over-rm500000-to-online-job-scam-on-facebook/183432"]]}, {"k": "Fake remote job · Switzerland, June 2025", "t": "A travel-agency job that billed its victim for five months", "art": "coins", "lab": "Paid in fake fees", "loss": "CHF 80K", "n": "06", "where": "Switzerland", "when": "Warning from the National Cyber Security Centre, June 2025", "body": ["Switzerland's National Cyber Security Centre reported a rise in fake job offers promising easy online work such as product reviews or game testing. In one case a victim lost almost CHF 80,000, which was their entire life savings.", "It began as a remote position at what looked like a travel agency: put together travel packages and earn a commission for each task. Each time the victim did what was asked, the scammers invented a new fee.", "Over five months the victim paid nearly CHF 80,000 in fake fees. The platforms used in such scams imitated well-known brands, and some promised pay in crypto."], "pull": "Each fee was the last one, until the next one arrived.", "steps": ["A remote job at a travel agency is offered", "Tasks assembling travel packages promise commission", "A new fee appears after every completed demand", "Five months and nearly CHF 80,000 later, the savings are gone"], "flags": ["A vague description of the company and the work", "A new fee after every step you complete", "Pressure to pay upfront to unlock your pay"], "src": [["Swiss NCSC weekly review", "https://www.ncsc.admin.ch/ncsc/en/home/aktuell/im-fokus/2025/wochenrueckblick_23.html"]]}];
+  function art(t) {
+    var h = '<svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect width="800" height="420" fill="#161b26"/>', i, a, x, y;
+    if (t === 'file') h += '<g transform="rotate(-6 400 210)"><rect x="270" y="50" width="260" height="320" fill="#f1ebdc"/><rect x="300" y="90" width="140" height="14" fill="#1a1a1a"/><rect x="300" y="125" width="200" height="8" fill="#b9b19b"/><rect x="300" y="145" width="180" height="8" fill="#b9b19b"/><rect x="300" y="165" width="200" height="8" fill="#b9b19b"/><text x="300" y="250" font-family="Arial Black" font-size="30" fill="#e63946">OFFER.pdf</text></g><circle cx="560" cy="330" r="34" fill="#e63946"/><path d="M544 330h32M560 314v32M548 318l24 24M572 318l-24 24" stroke="#161b26" stroke-width="5"/>';
+    if (t === 'map') { for (i = 0; i < 120; i++) h += '<circle cx="' + (60 + (i % 15) * 48) + '" cy="' + (50 + Math.floor(i / 15) * 44) + '" r="2.5" fill="#2b3345"/>'; h += '<path d="M120 300 C 300 80, 480 80, 640 200" fill="none" stroke="#ffc700" stroke-width="4" stroke-dasharray="10 10"/><circle cx="120" cy="300" r="12" fill="#ffc700"/><circle cx="640" cy="200" r="16" fill="#e63946"/><rect x="615" y="175" width="50" height="50" fill="none" stroke="#e63946" stroke-width="4"/><text x="90" y="335" fill="#cfd4df" font-family="monospace" font-size="16">INDIA</text><text x="585" y="255" fill="#cfd4df" font-family="monospace" font-size="16">MYANMAR</text><text x="330" y="105" fill="#ffc700" font-family="monospace" font-size="16">"IT JOB IN THAILAND"</text>'; }
+    if (t === 'cheque') h += '<g transform="rotate(-7 300 210)"><rect x="110" y="120" width="400" height="190" fill="#e8e1cf"/><rect x="140" y="160" width="160" height="10" fill="#b9b19b"/><text x="140" y="230" font-family="Arial Black" font-size="34" fill="#1a1a1a">$5,400.00</text><text x="140" y="285" font-family="monospace" font-size="18" fill="#555">&#9094;021000089&#9094; 094821884</text></g><path d="M540 215 L650 215" stroke="#ffc700" stroke-width="6" stroke-dasharray="12 8"/><path d="M640 195 l22 20 -22 20" fill="none" stroke="#ffc700" stroke-width="6"/><text x="670" y="212" font-family="Arial Black" font-size="26" fill="#e63946">$5,000</text><text x="670" y="240" font-family="monospace" font-size="15" fill="#cfd4df">"VENDOR"</text>';
+    if (t === 'stars') { for (i = 0; i < 5; i++) h += '<polygon transform="translate(' + (140 + i * 120) + ' 150)" points="0,-44 13,-14 46,-14 20,6 30,38 0,18 -30,38 -20,6 -46,-14 -13,-14" fill="#ffc700"/>'; h += '<rect x="170" y="260" width="460" height="12" fill="#2b3345"/><rect x="170" y="290" width="360" height="12" fill="#2b3345"/><rect x="170" y="320" width="420" height="12" fill="#2b3345"/><text x="560" y="340" font-family="Arial Black" font-size="24" fill="#e63946">APPROVE</text>'; }
+    if (t === 'nodes') { h += '<circle cx="400" cy="210" r="36" fill="#e63946"/>'; for (i = 0; i < 22; i++) { a = i / 22 * 6.283; x = 400 + Math.cos(a) * (150 + (i % 2) * 40); y = 210 + Math.sin(a) * (110 + (i % 2) * 25); h += '<line x1="400" y1="210" x2="' + x + '" y2="' + y + '" stroke="#ffc700" stroke-opacity=".5" stroke-dasharray="5 6"/><circle cx="' + x + '" cy="' + y + '" r="9" fill="#ffc700"/>'; } h += '<text x="372" y="217" font-family="Arial Black" font-size="18" fill="#161b26">YOU</text>'; }
+    if (t === 'coins') { for (i = 0; i < 7; i++) h += '<ellipse cx="' + (260 + (i % 3) * 140) + '" cy="' + (310 - i * 30) + '" rx="62" ry="20" fill="' + (i % 2 ? '#ffc700' : '#d8a900') + '"/>'; h += '<text x="520" y="120" font-family="Arial Black" font-size="46" fill="#e63946">FEE</text><text x="560" y="170" font-family="Arial Black" font-size="36" fill="#e63946" opacity=".7">FEE</text><text x="600" y="215" font-family="Arial Black" font-size="28" fill="#e63946" opacity=".45">FEE</text><text x="140" y="90" font-family="monospace" font-size="18" fill="#cfd4df">5 MONTHS OF TASKS</text>'; }
+    return h + '</svg>';
+  }
+  var rd = document.getElementById('rd'), rda = document.getElementById('rda'), cur = 0, lastBtn = null;
+  function openStory(i, btn) {
+    var x = S[i]; cur = i; if (btn) lastBtn = btn;
+    rda.innerHTML = '<div class="rd-art">' + art(x.art) + '</div><div class="rd-in"><p class="kk">' + x.k + '</p><h2>' + x.t + '</h2>' +
+      '<div class="meta"><div><b>' + x.loss + '</b>' + x.lab + '</div><div>' + x.where + '<br>' + x.when + '</div></div>' +
+      '<div class="art">' + x.body.map(function (p) { return '<p>' + p + '</p>'; }).join('') + '</div><p class="pull">' + x.pull + '</p>' +
+      '<h5>How it unfolded</h5><ul class="flow">' + x.steps.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ul>' +
+      '<h5>What gave it away</h5><ul class="fl">' + x.flags.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ul>' +
+      '<p class="src" style="margin-top:34px">Sources: ' + x.src.map(function (s) { return '<a href="' + s[1] + '" target="_blank" rel="noopener">' + s[0] + '</a>'; }).join(', ') + '</p>' +
+      '<div class="rd-nav"><button class="qnext" id="rdn" type="button">Next story</button></div></div>';
+    rd.scrollTop = 0; rd.classList.add('open'); rd.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+    document.getElementById('rdn').addEventListener('click', function () { openStory((cur + 1) % S.length); });
+    document.getElementById('rdx').focus();
+  }
+  function closeStory() { rd.classList.remove('open'); rd.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; if (lastBtn) lastBtn.focus(); }
+  $('.sp .nw').forEach(function (b) { b.addEventListener('click', function () { openStory(+b.getAttribute('data-i'), b); }); });
+  document.getElementById('rdx').addEventListener('click', closeStory);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && rd.classList.contains('open')) closeStory(); });
+
+  /* scammer's playbook */
+  var P = [
+    ['The hook', 'A friendly message about a remote job with great pay and no interview. It mentions your profile.', 'The same message went to thousands of people. Your name came from a job site or a data leak.', 15, 0, 'Real recruiters name the company and the role, and write from a company email or the job platform.'],
+    ['The move', 'The recruiter says the portal is busy and asks you to continue on WhatsApp or Telegram.', 'A private chat takes the conversation off platforms that keep records and can ban the account.', 35, 5, 'Ask for the job post on the company\u2019s own website before you go anywhere else.'],
+    ['The trust', 'You finish a few easy tasks or receive a polished offer letter, and a small payout arrives.', 'The payout is bait. The letter and the website are copies that take an afternoon to make.', 85, 10, 'A quick early payout is a reason to be more careful, not less.'],
+    ['The ask', 'A problem appears: a deposit to unlock your balance, a cheque for equipment, or a fee for training or tax.', 'This is the real goal of every earlier step. The more you trust them, the bigger the ask.', 70, 100, 'Real employers never need you to pay first. Stop, and talk to someone you trust.'],
+    ['The vanish', 'Replies stop, the site disappears, or new fees keep arriving. The cheque bounces.', 'The money has moved through many accounts or into crypto, and getting it back is very hard.', 0, 100, 'If you have paid, call your bank at once and report it. In India, call 1930.']
+  ];
+  function pbArt(i) {
+    var h = '<svg viewBox="0 0 600 400" aria-hidden="true">';
+    if (i === 0) h += '<rect x="215" y="40" width="170" height="320" rx="26" fill="#0a0c11" stroke="#3a4152" stroke-width="5"/><rect x="235" y="90" width="130" height="50" rx="12" fill="#232938"/><rect x="235" y="156" width="110" height="36" rx="12" fill="#232938"/><text x="248" y="122" fill="#ffc700" font-family="monospace" font-size="15">$55/hr remote!</text><path d="M470 60 v120 a38 38 0 1 1 -60 -30" fill="none" stroke="#e63946" stroke-width="9" stroke-linecap="round"/><circle cx="470" cy="60" r="9" fill="#ffc700"/>';
+    if (i === 1) h += '<rect x="60" y="110" width="190" height="150" rx="14" fill="#232938"/><text x="82" y="150" fill="#cfd4df" font-family="Arial Black" font-size="20">Job portal</text><text x="82" y="190" fill="#e63946" font-family="Arial Black" font-size="20">CLOSED</text><path d="M270 185 H350" stroke="#ffc700" stroke-width="6" stroke-dasharray="12 8"/><path d="M342 167 l24 18 -24 18" fill="none" stroke="#ffc700" stroke-width="6"/><circle cx="470" cy="185" r="78" fill="#1d6fb0"/><path d="M430 188 L512 152 L494 226 L468 206 L452 224 L450 200 Z" fill="#fff"/>';
+    if (i === 2) h += '<rect x="90" y="70" width="230" height="270" fill="#f1ebdc" transform="rotate(-5 205 205)"/><rect x="120" y="110" width="120" height="12" fill="#1a1a1a" transform="rotate(-5 205 205)"/><rect x="120" y="140" width="170" height="8" fill="#b9b19b" transform="rotate(-5 205 205)"/><rect x="120" y="160" width="150" height="8" fill="#b9b19b" transform="rotate(-5 205 205)"/><circle cx="440" cy="120" r="44" fill="#ffc700"/><text x="424" y="136" font-family="Arial Black" font-size="46" fill="#111">$</text><circle cx="440" cy="250" r="54" fill="none" stroke="#3ddc84" stroke-width="9"/><path d="M414 252 l20 20 36 -42" fill="none" stroke="#3ddc84" stroke-width="10" stroke-linecap="round"/><text x="388" y="345" fill="#3ddc84" font-family="monospace" font-size="18">PAID $18</text>';
+    if (i === 3) h += '<rect x="90" y="150" width="170" height="130" rx="18" fill="#3a4152"/><rect x="200" y="190" width="80" height="50" rx="10" fill="#232938"/><path d="M280 215 H400" stroke="#e63946" stroke-width="8" stroke-dasharray="14 9"/><path d="M390 193 l28 22 -28 22" fill="none" stroke="#e63946" stroke-width="8"/><circle cx="480" cy="215" r="68" fill="#e63946"/><text x="450" y="242" font-family="Arial Black" font-size="76" fill="#fff">$</text><text x="410" y="320" fill="#ffc700" font-family="monospace" font-size="18">"UNLOCK DEPOSIT"</text>';
+    if (i === 4) h += '<rect x="130" y="100" width="190" height="160" rx="14" fill="none" stroke="#3a4152" stroke-width="4" stroke-dasharray="10 10"/><text x="150" y="190" fill="#7a8396" font-family="monospace" font-size="18">ACCOUNT DELETED</text><circle cx="470" cy="190" r="70" fill="none" stroke="#e63946" stroke-width="6" stroke-dasharray="4 12"/><text x="438" y="205" font-family="Arial Black" font-size="46" fill="#e63946" opacity=".7">$0</text><text x="130" y="330" fill="#cfd4df" font-family="monospace" font-size="17">...and the chat is gone.</text>';
+    return h + '</svg>';
+  }
+  var pbS = $('.sp .pb-s'), pbCur = 0, pbTimer = null;
+  function pbShow(i) {
+    pbCur = i; var d = P[i];
+    pbS.forEach(function (b, n) { b.classList.toggle('on', n === i); b.classList.toggle('done', n < i); b.setAttribute('aria-selected', n === i); });
+    document.getElementById('pbf').style.width = (i / 4 * 88) + '%';
+    document.getElementById('pba').innerHTML = pbArt(i);
+    document.getElementById('pbh').textContent = d[0] + (i === 3 ? ': where it turns' : '');
+    document.getElementById('pbs').textContent = d[1]; document.getElementById('pbr').textContent = d[2]; document.getElementById('pbtip').textContent = d[5];
+    document.getElementById('pbt').style.width = d[3] + '%'; document.getElementById('pbk').style.width = d[4] + '%';
+  }
+  function pbStop() { if (pbTimer) { clearInterval(pbTimer); pbTimer = null; } }
+  pbS.forEach(function (b) { b.addEventListener('click', function () { pbStop(); pbShow(+b.getAttribute('data-i')); }); });
+  pbShow(0);
+  var pbEl = document.getElementById('pbb');
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    new IntersectionObserver(function (e, o) { if (e[0].isIntersecting) { o.disconnect(); pbTimer = setInterval(function () { if (pbCur >= 4) { pbStop(); return; } pbShow(pbCur + 1); }, 3600); } }, { threshold: .5 }).observe(pbEl);
+  }
+});
+</script>
+{% endblock %}
