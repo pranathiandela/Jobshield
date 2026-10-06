@@ -21,17 +21,36 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("scan-btn");
 
 
+  /*
+   * ==========================================================
+   * DETECTOR INPUTS
+   * ==========================================================
+   */
+
+  const descriptionElement =
+    document.getElementById("job_text");
+
+  const jobFileElement =
+    document.getElementById("job_file");
+
+  const jobUrlElement =
+    document.getElementById("job_url");
+
+
+  /*
+   * ==========================================================
+   * SUBMIT FORM
+   * ==========================================================
+   */
+
   form.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
 
-    const descriptionElement =
-      document.getElementById("job_text");
-
-    const jobFileElement =
-      document.getElementById("job_file");
-
+    /*
+     * Read current values
+     */
 
     const description =
       descriptionElement
@@ -45,34 +64,121 @@ document.addEventListener("DOMContentLoaded", () => {
       jobFileElement.files.length > 0;
 
 
+    const jobUrl =
+      jobUrlElement
+        ? jobUrlElement.value.trim()
+        : "";
+
+
     /*
-     * User must provide either:
+     * ========================================================
+     * DETERMINE WHICH INPUT MODE IS BEING USED
+     * ========================================================
      *
-     * 1. Job description
-     * OR
-     * 2. Job file
+     * The new detector supports:
+     *
+     * 1. Job Description
+     * 2. Job File
+     * 3. Job URL
+     *
      */
 
-    if (!description && !jobFileSelected) {
+    let inputMode = "";
+
+
+    if (jobUrl) {
+
+      inputMode = "url";
+
+    } else if (jobFileSelected) {
+
+      inputMode = "file";
+
+    } else if (description) {
+
+      inputMode = "description";
+
+    }
+
+
+    /*
+     * ========================================================
+     * VALIDATION
+     * ========================================================
+     */
+
+    if (!inputMode) {
 
       result.hidden = false;
 
       result.innerHTML =
         '<div class="notice">' +
-        'Please enter a job description or upload a PDF, DOCX, or TXT job file before scanning.' +
+        'Please enter a job description, upload a PDF/DOCX/TXT file, or enter a job URL before scanning.' +
         '</div>';
 
 
       if (descriptionElement) {
+
         descriptionElement.focus();
+
       }
 
       return;
+
     }
 
 
     /*
-     * Disable button
+     * URL validation
+     */
+
+    if (inputMode === "url") {
+
+      let validUrl = false;
+
+      try {
+
+        const parsedUrl =
+          new URL(jobUrl);
+
+        validUrl =
+          parsedUrl.protocol === "http:" ||
+          parsedUrl.protocol === "https:";
+
+      } catch (error) {
+
+        validUrl = false;
+
+      }
+
+
+      if (!validUrl) {
+
+        result.hidden = false;
+
+        result.innerHTML =
+          '<div class="notice">' +
+          'Please enter a valid HTTP or HTTPS job URL.' +
+          '</div>';
+
+
+        if (jobUrlElement) {
+
+          jobUrlElement.focus();
+
+        }
+
+        return;
+
+      }
+
+    }
+
+
+    /*
+     * ========================================================
+     * DISABLE BUTTON
+     * ========================================================
      */
 
     button.disabled = true;
@@ -81,7 +187,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Show progress
+     * ========================================================
+     * SHOW PROGRESS
+     * ========================================================
      */
 
     progress.hidden = false;
@@ -96,7 +204,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Scanning steps
+     * ========================================================
+     * SCANNING STEPS
+     * ========================================================
      */
 
     const scanSteps = [
@@ -132,11 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       /*
-       * Create form data
-       *
-       * The form uses multipart/form-data,
-       * so this includes both normal fields
-       * and the optional PDF/DOCX/TXT file.
+       * ========================================================
+       * CREATE FORM DATA
+       * ========================================================
        */
 
       const payload =
@@ -144,7 +252,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       /*
-       * Send to Flask backend
+       * Tell Flask which detector mode was selected.
+       */
+
+      payload.set(
+        "input_mode",
+        inputMode
+      );
+
+
+      /*
+       * ========================================================
+       * CLEAN INACTIVE INPUTS
+       * ========================================================
+       *
+       * This prevents old/stale values from another mode
+       * interfering with the selected mode.
+       */
+
+      if (inputMode === "url") {
+
+        payload.delete("job_text");
+
+        payload.delete("job_file");
+
+      }
+
+
+      if (inputMode === "description") {
+
+        payload.delete("job_file");
+
+      }
+
+
+      if (inputMode === "file") {
+
+        payload.delete("job_text");
+
+      }
+
+
+      /*
+       * ========================================================
+       * SEND TO FLASK BACKEND
+       * ========================================================
        */
 
       const response =
@@ -174,6 +326,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
+      /*
+       * ========================================================
+       * SERVER ERROR
+       * ========================================================
+       */
+
       if (!response.ok) {
 
         throw new Error(
@@ -184,7 +342,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       /*
-       * Complete progress
+       * ========================================================
+       * COMPLETE PROGRESS
+       * ========================================================
        */
 
       fill.style.width = "100%";
@@ -197,7 +357,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       /*
-       * Render result
+       * ========================================================
+       * RENDER RESULT
+       * ========================================================
        */
 
       renderResult(data);
@@ -299,10 +461,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /*
      * Get the correct visual class
-     *
-     * SAFE   -> safe
-     * RISKY  -> risky
-     * MEDIUM -> medium
      */
 
     const verdictClass =
@@ -530,7 +688,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </span>
 
                 <strong>
-                  ${mlFraudPercentage.toFixed(2)}%
+                  ${
+                    mlFraudPercentage !== null
+                      ? mlFraudPercentage.toFixed(2)
+                      : "N/A"
+                  }%
                 </strong>
 
               </div>
@@ -800,7 +962,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     if (targetScore === 0) {
+
       return;
+
     }
 
 

@@ -75,140 +75,196 @@
             </div>
 
 
-            <!-- =================================================
-                 JOB DESCRIPTION / JOB FILE
-            ================================================== -->
+<!-- =================================================
+     JOB DESCRIPTION / JOB FILE / JOB URL
+================================================== -->
 
-            <div class="form-row wide">
+<div class="form-row wide">
 
-              <div
-                style="
-                  display:flex;
-                  justify-content:space-between;
-                  align-items:center;
-                  gap:15px;
-                  margin-bottom:8px;
-                  flex-wrap:wrap;
-                "
-              >
+  <div
+    style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    "
+  >
 
-                <label
-                  for="job_text"
-                  style="margin-bottom:0;"
-                >
-                  Job Description
-                </label>
+    <label style="margin-bottom:0;">
+      Job Source
+    </label>
 
+    <div
+      style="
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+      "
+    >
 
-                <!-- JOB FILE SWITCH -->
+      <button
+        type="button"
+        id="job-description-mode-btn"
+        class="btn btn-nav job-input-option active"
+      >
+        📝 Job Description
+      </button>
 
-                <button
-                  type="button"
-                  id="job-file-toggle"
-                  class="btn btn-nav"
-                  style="white-space:nowrap;"
-                >
-                  📁 Upload Job File
-                </button>
+      <button
+        type="button"
+        id="job-file-mode-btn"
+        class="btn btn-nav job-input-option"
+      >
+        📁 Upload Job File
+      </button>
 
-              </div>
+      <button
+        type="button"
+        id="job-url-mode-btn"
+        class="btn btn-nav job-input-option"
+      >
+        🔗 Job URL
+      </button>
 
+    </div>
 
-              <!-- =================================================
-                   TEXT MODE - DEFAULT
-              ================================================== -->
-
-              <div id="description-mode">
-
-                <textarea
-                  id="job_text"
-                  name="job_text"
-                  placeholder="Paste the complete job description here..."
-                ></textarea>
-
-              </div>
-
-
-              <!-- =================================================
-                   JOB FILE MODE
-              ================================================== -->
-
-              <div
-                id="job-file-mode"
-                hidden
-              >
-
-                <div
-                  style="
-                    border:2px dashed rgba(0,0,0,0.15);
-                    border-radius:12px;
-                    padding:28px 20px;
-                    text-align:center;
-                  "
-                >
-
-                  <div
-                    style="
-                      font-size:32px;
-                      margin-bottom:8px;
-                    "
-                  >
-                    📄
-                  </div>
+  </div>
 
 
-                  <strong>
-                    Upload Job File
-                  </strong>
+  <!-- =================================================
+       DESCRIPTION MODE
+  ================================================== -->
+
+  <div id="description-mode">
+
+    <textarea
+      id="job_text"
+      name="job_text"
+      placeholder="Paste the complete job description here..."
+    ></textarea>
+
+  </div>
 
 
-                  <p
-                    style="
-                      margin:6px 0 16px;
-                      opacity:.7;
-                    "
-                  >
-                    Upload a job description in PDF, DOCX, or TXT format.
-                    Maximum file size: 5 MB.
-                  </p>
+  <!-- =================================================
+       FILE MODE
+  ================================================== -->
+
+  <div
+    id="job-file-mode"
+    hidden
+  >
+
+    <div
+      style="
+        border:2px dashed rgba(0,0,0,0.15);
+        border-radius:12px;
+        padding:28px 20px;
+        text-align:center;
+      "
+    >
+
+      <div
+        style="
+          font-size:32px;
+          margin-bottom:8px;
+        "
+      >
+        📄
+      </div>
+
+      <strong>
+        Upload Job File
+      </strong>
+
+      <p
+        style="
+          margin:6px 0 16px;
+          opacity:.7;
+        "
+      >
+        Upload a job description in PDF, DOCX, or TXT format.
+        Maximum file size: 5 MB.
+      </p>
+
+      <input
+        id="job_file"
+        name="job_file"
+        type="file"
+        accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+      >
+
+      <div
+        id="job-file-name"
+        class="file-help"
+        style="margin-top:10px;"
+      >
+        No job file selected.
+      </div>
+
+    </div>
+
+  </div>
 
 
-                  <input
-                    id="job_file"
-                    name="job_file"
-                    type="file"
-                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                  >
+  <!-- =================================================
+       URL MODE
+  ================================================== -->
 
+  <div
+    id="job-url-mode"
+    hidden
+  >
 
-                  <div
-                    id="job-file-name"
-                    class="file-help"
-                    style="margin-top:10px;"
-                  >
-                    No job file selected.
-                  </div>
+    <div
+      style="
+        border:2px dashed rgba(0,0,0,0.15);
+        border-radius:12px;
+        padding:24px 20px;
+      "
+    >
 
-                </div>
+      <strong>
+        🔗 Analyze Job From URL
+      </strong>
 
+      <p
+        style="
+          margin:6px 0 14px;
+          opacity:.7;
+        "
+      >
+        Paste the public job listing URL. JobShield will
+        extract the readable job information and analyze it
+        using the same detection engine.
+      </p>
 
-                <!-- SWITCH BACK -->
+      <input
+        id="job_url"
+        name="job_url"
+        type="url"
+        placeholder="https://example.com/jobs/software-engineer"
+        autocomplete="url"
+      >
 
-                <button
-                  type="button"
-                  id="description-toggle"
-                  class="btn btn-nav"
-                  style="
-                    margin-top:12px;
-                  "
-                >
-                  📝 Use Job Description
-                </button>
+      <div
+        class="file-help"
+        style="
+          margin-top:10px;
+          opacity:.7;
+        "
+      >
+        Public HTTP/HTTPS job pages only. Some
+        JavaScript-only or login-protected pages may not be readable.
+      </div>
 
-              </div>
+    </div>
 
-            </div>
+  </div>
 
+</div>
 
             <!-- LOCATION -->
 
@@ -276,22 +332,7 @@
           <div class="detector-grid two">
 
 
-            <!-- JOB URL -->
-
-            <div class="form-row">
-
-              <label for="job_url">
-                Job URL
-              </label>
-
-              <input
-                id="job_url"
-                name="job_url"
-                type="url"
-                placeholder="https://example.com/jobs/123"
-              >
-
-            </div>
+        
 
 
             <!-- COMPANY WEBSITE -->
@@ -453,78 +494,168 @@
      JOB FILE / DESCRIPTION TOGGLE
 ========================================================== -->
 
+<!-- =========================================================
+     JOB INPUT MODE SWITCHER
+========================================================== -->
+
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const jobFileToggle =
-    document.getElementById("job-file-toggle");
+  const descriptionButton =
+    document.getElementById("job-description-mode-btn");
 
-  const descriptionToggle =
-    document.getElementById("description-toggle");
+  const fileButton =
+    document.getElementById("job-file-mode-btn");
+
+  const urlButton =
+    document.getElementById("job-url-mode-btn");
+
 
   const descriptionMode =
     document.getElementById("description-mode");
 
-  const jobFileMode =
+  const fileMode =
     document.getElementById("job-file-mode");
 
-  const jobFileInput =
+  const urlMode =
+    document.getElementById("job-url-mode");
+
+
+  const jobText =
+    document.getElementById("job_text");
+
+  const jobFile =
     document.getElementById("job_file");
+
+  const jobUrl =
+    document.getElementById("job_url");
 
   const fileName =
     document.getElementById("job-file-name");
 
 
   if (
-    !jobFileToggle ||
-    !descriptionToggle ||
+    !descriptionButton ||
+    !fileButton ||
+    !urlButton ||
     !descriptionMode ||
-    !jobFileMode
+    !fileMode ||
+    !urlMode
   ) {
     return;
   }
 
 
   /* ==========================================================
-     SWITCH TO JOB FILE
+     CHANGE ACTIVE BUTTON
   ========================================================== */
 
-  jobFileToggle.addEventListener("click", () => {
+  function setActiveButton(activeButton) {
 
-    descriptionMode.hidden = true;
+    [
+      descriptionButton,
+      fileButton,
+      urlButton
+    ].forEach(button => {
 
-    jobFileMode.hidden = false;
+      button.classList.remove("active");
 
-    jobFileToggle.hidden = true;
+    });
 
-  });
+    activeButton.classList.add("active");
+
+  }
 
 
   /* ==========================================================
-     SWITCH BACK TO DESCRIPTION
+     DESCRIPTION MODE
   ========================================================== */
 
-  descriptionToggle.addEventListener("click", () => {
-
-    jobFileMode.hidden = true;
+  descriptionButton.addEventListener("click", () => {
 
     descriptionMode.hidden = false;
+    fileMode.hidden = true;
+    urlMode.hidden = true;
 
-    jobFileToggle.hidden = false;
+    setActiveButton(descriptionButton);
+
+    if (jobFile) {
+      jobFile.value = "";
+    }
+
+    if (jobUrl) {
+      jobUrl.value = "";
+    }
+
+    if (fileName) {
+      fileName.textContent =
+        "No job file selected.";
+    }
 
   });
 
 
   /* ==========================================================
-     SHOW SELECTED FILE NAME + CLIENT-SIDE VALIDATION
+     FILE MODE
   ========================================================== */
 
-  if (jobFileInput) {
+  fileButton.addEventListener("click", () => {
 
-    jobFileInput.addEventListener("change", () => {
+    descriptionMode.hidden = true;
+    fileMode.hidden = false;
+    urlMode.hidden = true;
 
-      if (!jobFileInput.files.length) {
+    setActiveButton(fileButton);
+
+    if (jobText) {
+      jobText.value = "";
+    }
+
+    if (jobUrl) {
+      jobUrl.value = "";
+    }
+
+  });
+
+
+  /* ==========================================================
+     URL MODE
+  ========================================================== */
+
+  urlButton.addEventListener("click", () => {
+
+    descriptionMode.hidden = true;
+    fileMode.hidden = true;
+    urlMode.hidden = false;
+
+    setActiveButton(urlButton);
+
+    if (jobText) {
+      jobText.value = "";
+    }
+
+    if (jobFile) {
+      jobFile.value = "";
+    }
+
+    if (fileName) {
+      fileName.textContent =
+        "No job file selected.";
+    }
+
+  });
+
+
+  /* ==========================================================
+     FILE VALIDATION
+  ========================================================== */
+
+  if (jobFile) {
+
+    jobFile.addEventListener("change", () => {
+
+      if (!jobFile.files.length) {
 
         fileName.textContent =
           "No job file selected.";
@@ -535,7 +666,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       const file =
-        jobFileInput.files[0];
+        jobFile.files[0];
+
 
       const allowedExtensions = [
         ".pdf",
@@ -543,14 +675,17 @@ document.addEventListener("DOMContentLoaded", () => {
         ".txt"
       ];
 
+
       const fileNameLower =
         file.name.toLowerCase();
+
 
       const validExtension =
         allowedExtensions.some(
           extension =>
             fileNameLower.endsWith(extension)
         );
+
 
       const maxSize =
         5 * 1024 * 1024;
@@ -561,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fileName.textContent =
           "Invalid file type. Please choose PDF, DOCX, or TXT.";
 
-        jobFileInput.value = "";
+        jobFile.value = "";
 
         return;
 
@@ -573,7 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fileName.textContent =
           "File is too large. Maximum size is 5 MB.";
 
-        jobFileInput.value = "";
+        jobFile.value = "";
 
         return;
 
