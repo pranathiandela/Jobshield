@@ -72,15 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /*
      * ========================================================
-     * DETERMINE WHICH INPUT MODE IS BEING USED
+     * DETERMINE INPUT MODE
      * ========================================================
-     *
-     * The new detector supports:
-     *
-     * 1. Job Description
-     * 2. Job File
-     * 3. Job URL
-     *
      */
 
     let inputMode = "";
@@ -265,9 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
        * ========================================================
        * CLEAN INACTIVE INPUTS
        * ========================================================
-       *
-       * This prevents old/stale values from another mode
-       * interfering with the selected mode.
        */
 
       if (inputMode === "url") {
@@ -424,11 +414,27 @@ document.addEventListener("DOMContentLoaded", () => {
       data.next_steps || [];
 
 
-    const score =
+    /*
+     * ========================================================
+     * LEGITIMACY SCORE
+     * ========================================================
+     */
+
+    const rawScore =
       Number(
         data.score ??
         data.legitimacy_score ??
         0
+      );
+
+
+    const score =
+      clamp(
+        Number.isFinite(rawScore)
+          ? Math.round(rawScore)
+          : 0,
+        0,
+        100
       );
 
 
@@ -439,7 +445,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * ML assessment
+     * ========================================================
+     * ML ASSESSMENT
+     * ========================================================
      */
 
     const mlAvailable =
@@ -451,16 +459,22 @@ document.addEventListener("DOMContentLoaded", () => {
       "Unavailable";
 
 
+    const rawMlPercentage =
+      Number(
+        data.ml_fraud_percentage
+      );
+
+
     const mlFraudPercentage =
-      Number.isFinite(
-        Number(data.ml_fraud_percentage)
-      )
-        ? Number(data.ml_fraud_percentage)
+      Number.isFinite(rawMlPercentage)
+        ? clamp(rawMlPercentage, 0, 100)
         : null;
 
 
     /*
-     * Get the correct visual class
+     * ========================================================
+     * VISUAL STATE
+     * ========================================================
      */
 
     const verdictClass =
@@ -469,6 +483,12 @@ document.addEventListener("DOMContentLoaded", () => {
         score
       );
 
+
+    /*
+     * ========================================================
+     * CHECK ROWS
+     * ========================================================
+     */
 
     const checkRows =
       Object.entries(groups)
@@ -512,6 +532,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .join("");
 
 
+    /*
+     * ========================================================
+     * LIST RENDERER
+     * ========================================================
+     */
+
     const list =
       (items, className) => {
 
@@ -551,7 +577,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Result HTML
+     * ========================================================
+     * CIRCULAR SCORE
+     *
+     * Uses SVG so the visual does not depend on extra CSS.
+     * The circle represents the REAL backend score.
+     * ========================================================
+     */
+
+    const circleRadius = 52;
+
+    const circleCircumference =
+      2 * Math.PI * circleRadius;
+
+
+    const scoreOffset =
+      circleCircumference -
+      (
+        score / 100
+      ) * circleCircumference;
+
+
+    /*
+     * ========================================================
+     * ML BAR
+     * ========================================================
+     */
+
+    const mlBarWidth =
+      mlFraudPercentage !== null
+        ? mlFraudPercentage
+        : 0;
+
+
+    /*
+     * ========================================================
+     * RESULT HTML
+     * ========================================================
      */
 
     result.hidden = false;
@@ -559,24 +621,114 @@ document.addEventListener("DOMContentLoaded", () => {
 
     result.innerHTML = `
 
+      <!-- ====================================================
+           RESULT HERO
+      ===================================================== -->
+
       <div class="result-hero">
 
-        <div>
 
-          <div class="result-score">
+        <!-- CIRCULAR SCORE -->
 
-            <span id="animated-score">
+        <div
+          class="score-ring"
+          aria-label="Legitimacy score ${score} out of 100"
+          style="
+            width:154px;
+            height:154px;
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+          "
+        >
+
+          <svg
+            width="154"
+            height="154"
+            viewBox="0 0 154 154"
+            style="
+              position:absolute;
+              inset:0;
+              transform:rotate(-90deg);
+            "
+            aria-hidden="true"
+          >
+
+            <!-- Background circle -->
+
+            <circle
+              cx="77"
+              cy="77"
+              r="${circleRadius}"
+              fill="none"
+              stroke="rgba(255,255,255,.09)"
+              stroke-width="9"
+            ></circle>
+
+
+            <!-- Score circle -->
+
+            <circle
+              id="score-circle"
+              cx="77"
+              cy="77"
+              r="${circleRadius}"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="9"
+              stroke-linecap="round"
+              stroke-dasharray="${circleCircumference}"
+              stroke-dashoffset="${circleCircumference}"
+              style="
+                transition:
+                  stroke-dashoffset 1.2s ease;
+              "
+            ></circle>
+
+          </svg>
+
+
+          <div
+            style="
+              position:relative;
+              z-index:2;
+              text-align:center;
+            "
+          >
+
+            <div
+              id="animated-score"
+              style="
+                font-size:42px;
+                font-weight:700;
+                line-height:1;
+                letter-spacing:-.04em;
+              "
+            >
               0
-            </span>
+            </div>
 
-            <small>
-              LEGITIMACY / 100
-            </small>
+
+            <div
+              style="
+                margin-top:7px;
+                font-size:9px;
+                letter-spacing:.14em;
+                opacity:.65;
+                white-space:nowrap;
+              "
+            >
+              LEGITIMACY
+            </div>
 
           </div>
 
         </div>
 
+
+        <!-- RESULT SUMMARY -->
 
         <div>
 
@@ -604,13 +756,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
           </p>
 
+
+          <!-- SCORE DESCRIPTION -->
+
+          <div
+            style="
+              margin-top:14px;
+              font-size:12px;
+              opacity:.68;
+            "
+          >
+
+            Legitimacy score:
+            <strong>
+              ${score}/100
+            </strong>
+
+          </div>
+
         </div>
 
       </div>
 
 
+      <!-- ====================================================
+           REPORT GRID
+      ===================================================== -->
+
       <div class="report-grid">
 
+
+        <!-- VERIFICATION CHECKS -->
 
         <div class="report-card">
 
@@ -626,6 +802,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
 
+        <!-- SUSPICIOUS SIGNALS -->
+
         <div class="report-card">
 
           <h3>
@@ -640,6 +818,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
 
+        <!-- SAFE SIGNALS -->
+
         <div class="report-card">
 
           <h3>
@@ -653,6 +833,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         </div>
 
+
+        <!-- EVIDENCE -->
 
         <div class="report-card">
 
@@ -670,6 +852,10 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
 
+      <!-- ====================================================
+           ML ASSESSMENT
+      ===================================================== -->
+
       ${
         mlAvailable
           ? `
@@ -681,22 +867,66 @@ document.addEventListener("DOMContentLoaded", () => {
               </h3>
 
 
-              <div class="metric">
+              <!-- FRAUD PROBABILITY -->
 
-                <span>
-                  Fraud probability
-                </span>
+              <div
+                style="
+                  margin:4px 0 18px;
+                "
+              >
 
-                <strong>
-                  ${
-                    mlFraudPercentage !== null
-                      ? mlFraudPercentage.toFixed(2)
-                      : "N/A"
-                  }%
-                </strong>
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:9px;
+                    font-size:13px;
+                  "
+                >
+
+                  <span>
+                    Fraud probability
+                  </span>
+
+                  <strong>
+                    ${
+                      mlFraudPercentage !== null
+                        ? mlFraudPercentage.toFixed(2)
+                        : "N/A"
+                    }%
+                  </strong>
+
+                </div>
+
+
+                <div
+                  style="
+                    width:100%;
+                    height:9px;
+                    overflow:hidden;
+                    border-radius:999px;
+                    background:rgba(255,255,255,.08);
+                  "
+                >
+
+                  <div
+                    id="ml-fraud-bar"
+                    style="
+                      width:0%;
+                      height:100%;
+                      border-radius:999px;
+                      background:currentColor;
+                      transition:width 1.1s ease;
+                    "
+                  ></div>
+
+                </div>
 
               </div>
 
+
+              <!-- ML PREDICTION -->
 
               <div class="metric">
 
@@ -726,6 +956,10 @@ document.addEventListener("DOMContentLoaded", () => {
           : ""
       }
 
+
+      <!-- ====================================================
+           NEXT STEPS
+      ===================================================== -->
 
       <div class="report-card next-steps">
 
@@ -769,6 +1003,10 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
 
+      <!-- ====================================================
+           FOOTER
+      ===================================================== -->
+
       <div class="report-footer">
 
         <span class="small">
@@ -790,14 +1028,101 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Score animation
+     * ========================================================
+     * ANIMATE SCORE
+     * ========================================================
      */
 
     animateScore(score);
 
 
     /*
-     * Print button
+     * ========================================================
+     * ANIMATE SCORE CIRCLE
+     * ========================================================
+     */
+
+    const scoreCircle =
+      document.getElementById(
+        "score-circle"
+      );
+
+
+    if (scoreCircle) {
+
+      /*
+       * Start completely empty.
+       */
+
+      scoreCircle.style.strokeDashoffset =
+        String(circleCircumference);
+
+
+      /*
+       * Small delay makes the animation visible.
+       */
+
+      requestAnimationFrame(() => {
+
+        requestAnimationFrame(() => {
+
+          scoreCircle.style.strokeDashoffset =
+            String(scoreOffset);
+
+        });
+
+      });
+
+    }
+
+
+    /*
+     * ========================================================
+     * ML FRAUD BAR
+     * ========================================================
+     */
+
+    const mlBar =
+      document.getElementById(
+        "ml-fraud-bar"
+      );
+
+
+    if (
+      mlBar &&
+      mlFraudPercentage !== null
+    ) {
+
+      /*
+       * Start empty.
+       */
+
+      mlBar.style.width =
+        "0%";
+
+
+      /*
+       * Animate to the REAL backend value.
+       */
+
+      requestAnimationFrame(() => {
+
+        requestAnimationFrame(() => {
+
+          mlBar.style.width =
+            mlBarWidth + "%";
+
+        });
+
+      });
+
+    }
+
+
+    /*
+     * ========================================================
+     * PRINT BUTTON
+     * ========================================================
      */
 
     const printButton =
@@ -817,7 +1142,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Scroll to result
+     * ========================================================
+     * SCROLL TO RESULT
+     * ========================================================
      */
 
     result.scrollIntoView({
@@ -890,7 +1217,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * Fallback based on score
+     * FALLBACK BASED ON SCORE
      */
 
     const numericScore =
@@ -968,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const animationSpeed = 30;
+    const animationSpeed = 18;
 
 
     const animation =
@@ -995,6 +1322,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
       }, animationSpeed);
+
+  }
+
+
+  /*
+   * ==========================================================
+   * CLAMP NUMBER
+   * ==========================================================
+   */
+
+  function clamp(value, minimum, maximum) {
+
+    return Math.min(
+      maximum,
+      Math.max(
+        minimum,
+        value
+      )
+    );
 
   }
 

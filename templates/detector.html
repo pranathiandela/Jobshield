@@ -75,196 +75,173 @@
             </div>
 
 
-<!-- =================================================
-     JOB DESCRIPTION / JOB FILE / JOB URL
-================================================== -->
+            <!-- =================================================
+                 JOB DESCRIPTION / JOB FILE / JOB URL
+            ================================================== -->
 
-<div class="form-row wide">
+            <div class="form-row wide">
 
-  <div
-    style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:15px;
-      margin-bottom:12px;
-      flex-wrap:wrap;
-    "
-  >
+              <!-- INPUT METHOD SELECTOR -->
 
-    <label style="margin-bottom:0;">
-      Job Source
-    </label>
+              <div class="job-input-options">
 
-    <div
-      style="
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-      "
-    >
-
-      <button
-        type="button"
-        id="job-description-mode-btn"
-        class="btn btn-nav job-input-option active"
-      >
-        📝 Job Description
-      </button>
-
-      <button
-        type="button"
-        id="job-file-mode-btn"
-        class="btn btn-nav job-input-option"
-      >
-        📁 Upload Job File
-      </button>
-
-      <button
-        type="button"
-        id="job-url-mode-btn"
-        class="btn btn-nav job-input-option"
-      >
-        🔗 Job URL
-      </button>
-
-    </div>
-
-  </div>
+                <button
+                  type="button"
+                  id="job-description-mode-btn"
+                  class="btn btn-nav job-input-option active"
+                >
+                  📝 Job Description
+                </button>
 
 
-  <!-- =================================================
-       DESCRIPTION MODE
-  ================================================== -->
-
-  <div id="description-mode">
-
-    <textarea
-      id="job_text"
-      name="job_text"
-      placeholder="Paste the complete job description here..."
-    ></textarea>
-
-  </div>
+                <button
+                  type="button"
+                  id="job-file-mode-btn"
+                  class="btn btn-nav job-input-option"
+                >
+                  📁 Upload File
+                </button>
 
 
-  <!-- =================================================
-       FILE MODE
-  ================================================== -->
+                <button
+                  type="button"
+                  id="job-url-mode-btn"
+                  class="btn btn-nav job-input-option"
+                >
+                  🔗 Job URL
+                </button>
 
-  <div
-    id="job-file-mode"
-    hidden
-  >
-
-    <div
-      style="
-        border:2px dashed rgba(0,0,0,0.15);
-        border-radius:12px;
-        padding:28px 20px;
-        text-align:center;
-      "
-    >
-
-      <div
-        style="
-          font-size:32px;
-          margin-bottom:8px;
-        "
-      >
-        📄
-      </div>
-
-      <strong>
-        Upload Job File
-      </strong>
-
-      <p
-        style="
-          margin:6px 0 16px;
-          opacity:.7;
-        "
-      >
-        Upload a job description in PDF, DOCX, or TXT format.
-        Maximum file size: 5 MB.
-      </p>
-
-      <input
-        id="job_file"
-        name="job_file"
-        type="file"
-        accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-      >
-
-      <div
-        id="job-file-name"
-        class="file-help"
-        style="margin-top:10px;"
-      >
-        No job file selected.
-      </div>
-
-    </div>
-
-  </div>
+              </div>
 
 
-  <!-- =================================================
-       URL MODE
-  ================================================== -->
+              <!-- =================================================
+                   DESCRIPTION MODE
+              ================================================== -->
 
-  <div
-    id="job-url-mode"
-    hidden
-  >
+              <div id="description-mode">
 
-    <div
-      style="
-        border:2px dashed rgba(0,0,0,0.15);
-        border-radius:12px;
-        padding:24px 20px;
-      "
-    >
+                <textarea
+                  id="job_text"
+                  name="job_text"
+                  placeholder="Paste the complete job description here..."
+                ></textarea>
 
-      <strong>
-        🔗 Analyze Job From URL
-      </strong>
+              </div>
 
-      <p
-        style="
-          margin:6px 0 14px;
-          opacity:.7;
-        "
-      >
-        Paste the public job listing URL. JobShield will
-        extract the readable job information and analyze it
-        using the same detection engine.
-      </p>
 
-      <input
-        id="job_url"
-        name="job_url"
-        type="url"
-        placeholder="https://example.com/jobs/software-engineer"
-        autocomplete="url"
-      >
+              <!-- =================================================
+                   FILE MODE
+              ================================================== -->
 
-      <div
-        class="file-help"
-        style="
-          margin-top:10px;
-          opacity:.7;
-        "
-      >
-        Public HTTP/HTTPS job pages only. Some
-        JavaScript-only or login-protected pages may not be readable.
-      </div>
+              <div
+                id="job-file-mode"
+                hidden
+              >
 
-    </div>
+                <div class="file-upload-box">
 
-  </div>
+                  <div
+                    style="
+                      font-size:32px;
+                      margin-bottom:8px;
+                    "
+                  >
+                    📄
+                  </div>
 
-</div>
+
+                  <strong>
+                    Upload Job File
+                  </strong>
+
+
+                  <p>
+                    Upload a job description in PDF, DOCX, or TXT format.
+                    Maximum file size: 5 MB.
+                  </p>
+
+
+                  <input
+                    id="job_file"
+                    name="job_file"
+                    type="file"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  >
+
+
+                  <div
+                    id="job-file-name"
+                    class="file-help"
+                    style="margin-top:10px;"
+                  >
+                    No job file selected.
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- =================================================
+                   URL MODE
+              ================================================== -->
+
+              <div
+                id="job-url-mode"
+                hidden
+              >
+
+                <div
+                  style="
+                    border:2px dashed rgba(0,0,0,0.15);
+                    border-radius:12px;
+                    padding:24px 20px;
+                  "
+                >
+
+                  <strong>
+                    🔗 Analyze Job From URL
+                  </strong>
+
+
+                  <p
+                    style="
+                      margin:6px 0 14px;
+                      opacity:.7;
+                    "
+                  >
+                    Paste the public job listing URL. JobShield will
+                    extract the readable job information and analyze it
+                    using the same detection engine.
+                  </p>
+
+
+                  <input
+                    id="job_url"
+                    name="job_url"
+                    type="url"
+                    placeholder="https://example.com/jobs/software-engineer"
+                    autocomplete="url"
+                  >
+
+
+                  <div
+                    class="file-help"
+                    style="
+                      margin-top:10px;
+                      opacity:.7;
+                    "
+                  >
+                    Public HTTP/HTTPS job pages only. Some
+                    JavaScript-only or login-protected pages may not be readable.
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
 
             <!-- LOCATION -->
 
@@ -330,9 +307,6 @@
 
 
           <div class="detector-grid two">
-
-
-        
 
 
             <!-- COMPANY WEBSITE -->
@@ -491,10 +465,6 @@
 
 
 <!-- =========================================================
-     JOB FILE / DESCRIPTION TOGGLE
-========================================================== -->
-
-<!-- =========================================================
      JOB INPUT MODE SWITCHER
 ========================================================== -->
 
@@ -580,13 +550,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setActiveButton(descriptionButton);
 
+
     if (jobFile) {
       jobFile.value = "";
     }
 
+
     if (jobUrl) {
       jobUrl.value = "";
     }
+
 
     if (fileName) {
       fileName.textContent =
@@ -608,9 +581,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setActiveButton(fileButton);
 
+
     if (jobText) {
       jobText.value = "";
     }
+
 
     if (jobUrl) {
       jobUrl.value = "";
@@ -631,13 +606,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setActiveButton(urlButton);
 
+
     if (jobText) {
       jobText.value = "";
     }
 
+
     if (jobFile) {
       jobFile.value = "";
     }
+
 
     if (fileName) {
       fileName.textContent =

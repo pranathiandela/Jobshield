@@ -2212,3 +2212,889 @@ footer{
     font-size: 10px;
   }
 }
+/* ==========================================================
+   JOBSHIELD DETECTION — INPUT METHOD SELECTOR
+   ========================================================== */
+
+.detector-page .job-input-options{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.detector-page .job-input-option{
+  position:relative;
+  min-height:52px;
+  padding:12px 16px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:rgba(1,29,28,.42);
+  color:var(--silver-mist);
+  font-size:12px;
+  font-weight:500;
+  text-align:center;
+  cursor:pointer;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease,
+    transform .2s ease;
+}
+
+.detector-page .job-input-option:hover{
+  border-color:rgba(203,255,252,.28);
+  color:var(--platinum);
+  background:rgba(1,29,28,.68);
+  transform:translateY(-1px);
+}
+
+.detector-page .job-input-option.active{
+  border-color:rgba(203,255,252,.42);
+  background:rgba(203,255,252,.07);
+  color:var(--platinum);
+  box-shadow:inset 0 0 0 1px rgba(203,255,252,.04);
+}
+
+.detector-page .job-input-option:focus-visible{
+  outline:2px solid rgba(203,255,252,.45);
+  outline-offset:2px;
+}
+
+/* Input method content panels */
+
+.detector-page #description-mode,
+.detector-page #job-file-mode,
+.detector-page #job-url-mode{
+  animation:detectorInputIn .22s ease both;
+}
+
+@keyframes detectorInputIn{
+  from{
+    opacity:0;
+    transform:translateY(4px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Consistent file / URL panels */
+
+.detector-page #job-file-mode > div,
+.detector-page #job-url-mode > div{
+  border-color:rgba(255,255,255,.12) !important;
+  background:rgba(1,29,28,.28);
+}
+
+.detector-page #job-file-mode strong,
+.detector-page #job-url-mode strong{
+  color:var(--platinum);
+  font-weight:500;
+}
+
+.detector-page #job-file-mode p,
+.detector-page #job-url-mode p{
+  color:var(--silver-mist);
+  font-size:12px;
+  line-height:1.6;
+  max-width:680px;
+  margin:7px auto 14px;
+}
+
+.detector-page #job-url-mode input{
+  width:100%;
+}
+
+@media(max-width:760px){
+
+  .detector-page .job-input-options{
+    grid-template-columns:1fr;
+  }
+
+  .detector-page .job-input-option{
+    min-height:48px;
+  }
+
+}
+/* ==========================================================
+   JOBSHIELD — PROFESSIONAL FILE UPLOAD
+   ========================================================== */
+
+.detector-page .file-upload-box{
+  width:100%;
+  padding:22px;
+  border:1px dashed rgba(203,255,252,.22);
+  border-radius:12px;
+  background:rgba(1,29,28,.32);
+  text-align:center;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.detector-page .file-upload-box:hover{
+  border-color:rgba(203,255,252,.40);
+  background:rgba(203,255,252,.035);
+}
+
+.detector-page .file-upload-box input[type="file"]{
+  width:100%;
+  max-width:520px;
+  padding:8px;
+  border:0;
+  background:transparent;
+  color:var(--silver-mist);
+  font-size:12px;
+  cursor:pointer;
+}
+
+.detector-page .file-upload-box input[type="file"]::file-selector-button{
+  margin-right:12px;
+  padding:10px 18px;
+  border:1px solid rgba(203,255,252,.28);
+  border-radius:8px;
+  background:rgba(203,255,252,.07);
+  color:var(--platinum);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease;
+}
+
+.detector-page .file-upload-box input[type="file"]::file-selector-button:hover{
+  background:rgba(203,255,252,.12);
+  border-color:rgba(203,255,252,.42);
+  transform:translateY(-1px);
+}
+/* ==========================================================
+   JOBSHIELD — INPUT METHOD CARDS
+   ========================================================== */
+
+.detector-page .job-input-options{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  width:100%;
+  margin-bottom:18px;
+}
+
+.detector-page .job-input-option{
+  position:relative;
+  min-height:64px;
+  padding:14px 18px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  background:rgba(1,29,28,.38);
+  color:var(--silver-mist);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.detector-page .job-input-option:hover{
+  border-color:rgba(203,255,252,.28);
+  background:rgba(203,255,252,.035);
+  color:var(--platinum);
+  transform:translateY(-1px);
+}
+
+.detector-page .job-input-option.active{
+  border-color:rgba(203,255,252,.42);
+  background:rgba(203,255,252,.075);
+  color:var(--platinum);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(203,255,252,.06),
+    0 8px 24px rgba(0,0,0,.10);
+}
+
+.detector-page .job-input-option.active::after{
+  content:"";
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:-1px;
+  height:2px;
+  border-radius:2px;
+  background:var(--gradient-aurora);
+  opacity:.85;
+}
+
+.detector-page .job-input-option:focus-visible{
+  outline:2px solid rgba(203,255,252,.42);
+  outline-offset:3px;
+}
+
+@media(max-width:760px){
+
+  .detector-page .job-input-options{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .detector-page .job-input-option{
+    min-height:52px;
+  }
+
+}
+/* ==========================================================
+   JOBSHIELD — INPUT PANELS
+   ========================================================== */
+
+.detector-page #job-file-mode > .file-upload-box,
+.detector-page #job-url-mode > div{
+  position:relative;
+  width:100%;
+  padding:26px 28px;
+  border:1px solid rgba(203,255,252,.14) !important;
+  border-radius:12px;
+  background:rgba(1,29,28,.34) !important;
+  text-align:left;
+  box-sizing:border-box;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.detector-page #job-file-mode > .file-upload-box:hover,
+.detector-page #job-url-mode > div:hover{
+  border-color:rgba(203,255,252,.25) !important;
+  background:rgba(203,255,252,.025) !important;
+}
+
+
+/* ---------- FILE UPLOAD ---------- */
+
+.detector-page #job-file-mode .file-upload-box{
+  text-align:center;
+}
+
+.detector-page #job-file-mode .file-upload-box > div:first-child{
+  width:46px;
+  height:46px;
+  margin:0 auto 12px !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(203,255,252,.14);
+  border-radius:10px;
+  background:rgba(203,255,252,.045);
+  font-size:21px !important;
+}
+
+.detector-page #job-file-mode .file-upload-box strong{
+  display:block;
+  color:var(--platinum);
+  font-size:14px;
+  font-weight:500;
+}
+
+.detector-page #job-file-mode .file-upload-box p{
+  max-width:600px;
+  margin:7px auto 18px !important;
+  color:var(--silver-mist);
+  font-size:12px;
+  line-height:1.6;
+}
+
+.detector-page #job-file-mode input[type="file"]{
+  display:block;
+  margin:0 auto;
+}
+
+
+/* ---------- FILE NAME ---------- */
+
+.detector-page #job-file-name{
+  color:var(--silver-mist);
+  font-size:11px;
+  line-height:1.5;
+}
+
+
+/* ---------- URL PANEL ---------- */
+
+.detector-page #job-url-mode > div{
+  padding:24px 26px !important;
+}
+
+.detector-page #job-url-mode strong{
+  display:block;
+  color:var(--platinum);
+  font-size:14px;
+  font-weight:500;
+  margin-bottom:2px;
+}
+
+.detector-page #job-url-mode p{
+  max-width:720px;
+  color:var(--silver-mist);
+  font-size:12px;
+  line-height:1.65;
+}
+
+.detector-page #job-url-mode input[type="url"]{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:2px;
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media(max-width:760px){
+
+  .detector-page #job-file-mode > .file-upload-box,
+  .detector-page #job-url-mode > div{
+    padding:22px 18px;
+  }
+
+}
+/* ==========================================================
+   JOBSHIELD — VERIFICATION DETAILS
+   ========================================================== */
+
+.detector-page .detector-section:nth-of-type(2) .form-row{
+  position:relative;
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:9px;
+  color:var(--platinum);
+  font-size:12px;
+  font-weight:500;
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row input{
+  min-height:46px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:9px;
+  background:rgba(1,29,28,.48);
+  color:var(--platinum);
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row input:hover{
+  border-color:rgba(203,255,252,.20);
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row input:focus{
+  border-color:rgba(203,255,252,.38);
+  background:rgba(1,29,28,.68);
+  box-shadow:0 0 0 3px rgba(203,255,252,.045);
+  outline:none;
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row input::placeholder{
+  color:rgba(203,255,252,.38);
+}
+
+
+/* Small contextual hints */
+
+.detector-page .detector-section:nth-of-type(2) .form-row::after{
+  display:block;
+  margin-top:7px;
+  color:rgba(203,255,252,.42);
+  font-size:10px;
+  line-height:1.5;
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row:nth-child(1)::after{
+  content:"Verify the company's official web presence.";
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row:nth-child(2)::after{
+  content:"Use the name provided by the recruiter.";
+}
+
+.detector-page .detector-section:nth-of-type(2) .form-row:nth-child(3)::after{
+  content:"Check whether the contact matches the company.";
+}
+
+
+/* Mobile */
+
+@media(max-width:760px){
+
+  .detector-page .detector-section:nth-of-type(2) .form-row input{
+    min-height:44px;
+  }
+
+}
+/* ==========================================================
+   JOBSHIELD — SCAN ACTION AREA
+   ========================================================== */
+
+.detector-page .scan-bar{
+  position:relative;
+  padding:22px 32px;
+  border-top:1px solid rgba(255,255,255,.07);
+  background:rgba(1,29,28,.42);
+  gap:24px;
+}
+
+.detector-page .scan-bar > div:first-child{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.detector-page .scan-bar strong{
+  color:var(--platinum);
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:.01em;
+}
+
+.detector-page .scan-bar span{
+  color:var(--silver-mist);
+  font-size:11px;
+  line-height:1.5;
+}
+
+
+/* ---------- MAIN SCAN BUTTON ---------- */
+
+.detector-page #scan-btn{
+  position:relative;
+  min-width:205px;
+  min-height:46px;
+  padding:12px 20px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+
+  border:1px solid rgba(203,255,252,.28);
+  border-radius:9px;
+
+  background:var(--gradient-aurora);
+  color:#011d1c;
+
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.01em;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.16);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    filter .2s ease;
+}
+
+.detector-page #scan-btn:hover{
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.22);
+
+  filter:brightness(1.05);
+}
+
+.detector-page #scan-btn:active{
+  transform:translateY(0);
+}
+
+.detector-page #scan-btn:focus-visible{
+  outline:2px solid rgba(203,255,252,.5);
+  outline-offset:3px;
+}
+
+
+/* ---------- BUTTON ARROW ---------- */
+
+.detector-page #scan-btn > span{
+  color:inherit;
+  font-size:12px;
+  font-weight:600;
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media(max-width:760px){
+
+  .detector-page .scan-bar{
+    flex-direction:column;
+    align-items:stretch;
+    padding:20px;
+  }
+
+  .detector-page #scan-btn{
+    width:100%;
+    min-width:0;
+  }
+
+}
+/* ==========================================================
+   JOBSHIELD — RESULT DASHBOARD
+   ========================================================== */
+
+.detector-page .detector-result{
+  position:relative;
+  padding:32px;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:rgba(1,29,28,.30);
+  animation:resultReveal .35s ease both;
+}
+
+@keyframes resultReveal{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+
+/* ==========================================================
+   RESULT HERO
+   ========================================================== */
+
+.detector-page .detector-result .result-hero{
+  position:relative;
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:28px;
+  align-items:center;
+
+  padding:26px;
+  margin-bottom:20px;
+
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;
+
+  background:rgba(1,29,28,.45);
+}
+
+
+/* ==========================================================
+   SCORE
+   ========================================================== */
+
+.detector-page .detector-result .result-score{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+
+  min-height:150px;
+
+  font-size:76px;
+  font-weight:600;
+  line-height:.9;
+  letter-spacing:-.05em;
+
+  color:var(--platinum);
+}
+
+.detector-page .detector-result .result-score small{
+  margin-top:12px;
+
+  font-size:10px;
+  font-weight:500;
+  line-height:1;
+
+  letter-spacing:.15em;
+  text-transform:uppercase;
+
+  color:var(--silver-mist);
+}
+
+
+/* ==========================================================
+   VERDICT
+   ========================================================== */
+
+.detector-page .detector-result .verdict{
+  display:inline-flex;
+  align-items:center;
+
+  padding:7px 12px;
+
+  border-radius:7px;
+
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+
+/* Safe */
+
+.detector-page .detector-result .verdict.safe{
+  color:#c9fff8;
+  border-color:rgba(203,255,252,.35);
+  background:rgba(203,255,252,.055);
+}
+
+
+/* Caution */
+
+.detector-page .detector-result .verdict.medium{
+  color:#ffe0bd;
+  border-color:rgba(255,210,180,.32);
+  background:rgba(255,210,180,.055);
+}
+
+
+/* Risky */
+
+.detector-page .detector-result .verdict.risky{
+  color:#ffc5c5;
+  border-color:rgba(255,120,120,.32);
+  background:rgba(255,120,120,.055);
+}
+
+
+/* ==========================================================
+   RESULT TITLE
+   ========================================================== */
+
+.detector-page .detector-result .result-hero h2{
+  margin:10px 0 8px;
+
+  font-size:26px;
+  font-weight:500;
+  line-height:1.25;
+
+  color:var(--platinum);
+}
+
+.detector-page .detector-result .result-hero p{
+  max-width:720px;
+
+  color:var(--silver-mist);
+
+  font-size:13px;
+  line-height:1.7;
+}
+
+
+/* ==========================================================
+   REPORT CARDS
+   ========================================================== */
+
+.detector-page .detector-result .report-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.detector-page .detector-result .report-card{
+  position:relative;
+
+  padding:20px;
+
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+
+  background:rgba(1,29,28,.34);
+
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.detector-page .detector-result .report-card:hover{
+  border-color:rgba(203,255,252,.18);
+  background:rgba(203,255,252,.018);
+  transform:translateY(-1px);
+}
+
+.detector-page .detector-result .report-card h3{
+  margin-bottom:13px;
+
+  color:var(--platinum);
+
+  font-size:14px;
+  font-weight:500;
+}
+
+
+/* ==========================================================
+   METRICS
+   ========================================================== */
+
+.detector-page .detector-result .metric{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:9px 0;
+
+  border-bottom:1px solid rgba(255,255,255,.055);
+
+  color:var(--silver-mist);
+
+  font-size:12px;
+}
+
+.detector-page .detector-result .metric:last-child{
+  border-bottom:0;
+}
+
+.detector-page .detector-result .metric strong{
+  color:var(--platinum);
+  font-weight:600;
+}
+
+
+/* ==========================================================
+   STATUS ITEMS
+   ========================================================== */
+
+.detector-page .detector-result .good,
+.detector-page .detector-result .warn,
+.detector-page .detector-result .neutral{
+  padding:10px 12px;
+
+  border-radius:8px;
+
+  font-size:12px;
+  line-height:1.55;
+
+  background:rgba(1,29,28,.30);
+}
+
+.detector-page .detector-result .good{
+  border-color:rgba(203,255,252,.20);
+}
+
+.detector-page .detector-result .warn{
+  border-color:rgba(255,210,180,.24);
+}
+
+.detector-page .detector-result .neutral{
+  border-color:rgba(255,255,255,.09);
+  color:var(--silver-mist);
+}
+
+
+/* ==========================================================
+   ML ASSESSMENT
+   ========================================================== */
+
+.detector-page .detector-result .ml-assessment{
+  margin-top:18px;
+
+  padding:22px 24px;
+
+  border:1px solid rgba(203,255,252,.18);
+  border-radius:12px;
+
+  background:rgba(203,255,252,.018);
+}
+
+.detector-page .detector-result .ml-assessment h3{
+  margin-bottom:14px;
+
+  color:var(--platinum);
+
+  font-size:15px;
+  font-weight:500;
+}
+
+.detector-page .detector-result .ml-assessment .metric{
+  padding:11px 0;
+}
+
+
+/* ==========================================================
+   NEXT STEPS
+   ========================================================== */
+
+.detector-page .detector-result .next-steps{
+  margin-top:18px;
+
+  padding:22px 24px;
+
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+
+  background:rgba(1,29,28,.30);
+}
+
+.detector-page .detector-result .next-steps h3{
+  color:var(--platinum);
+  font-size:15px;
+  font-weight:500;
+}
+
+.detector-page .detector-result .next-steps li{
+  margin:8px 0;
+
+  color:var(--silver-mist);
+
+  font-size:12px;
+  line-height:1.6;
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media(max-width:760px){
+
+  .detector-page .detector-result{
+    padding:20px;
+  }
+
+  .detector-page .detector-result .result-hero{
+    grid-template-columns:1fr;
+    gap:18px;
+    padding:20px;
+  }
+
+  .detector-page .detector-result .result-score{
+    min-height:auto;
+    font-size:64px;
+  }
+
+  .detector-page .detector-result .report-grid{
+    grid-template-columns:1fr;
+  }
+
+}
