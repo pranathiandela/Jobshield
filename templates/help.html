@@ -20,28 +20,42 @@
       </p>
     </section>
 
-    <!-- TABS -->
-    <div class="about-help-tabs" role="tablist" aria-label="About and Help">
+    
 
-      <button
-        type="button"
-        class="about-help-tab active"
-        id="about-tab"
-        role="tab"
-        aria-selected="true"
-        aria-controls="about-panel">
-        About
-      </button>
+      <!-- TABS -->
+<div class="about-help-tabs" role="tablist" aria-label="About, Help and Contact">
 
-      <button
-        type="button"
-        class="about-help-tab"
-        id="help-tab"
-        role="tab"
-        aria-selected="false"
-        aria-controls="help-panel">
-        Help / FAQ
-      </button>
+  <button
+    type="button"
+    class="about-help-tab active"
+    id="about-tab"
+    role="tab"
+    aria-selected="true"
+    aria-controls="about-panel">
+    About
+  </button>
+
+  <button
+    type="button"
+    class="about-help-tab"
+    id="help-tab"
+    role="tab"
+    aria-selected="false"
+    aria-controls="help-panel">
+    Help / FAQ
+  </button>
+
+  <button
+    type="button"
+    class="about-help-tab"
+    id="contact-tab"
+    role="tab"
+    aria-selected="false"
+    aria-controls="contact-panel">
+    Contact Us
+  </button>
+
+</div>
 
     </div>
 
@@ -235,6 +249,165 @@
 
       </div>
 
+
+
+      <!-- TEAM SECTION -->
+<section class="jobshield-team-section" aria-labelledby="team-heading">
+
+  <div class="section-heading">
+
+    <h2 id="team-heading">
+      <span class="about-section-number">05</span>
+      Meet Our Team
+    </h2>
+
+    <p>
+      The team members behind the JobShield project and its safer
+      job-search experience.
+    </p>
+
+  </div>
+
+
+  <div class="jobshield-team-grid">
+
+
+    <!-- TEAM MEMBER 01 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href="mailto:pranathiandela@gmail.com"
+        class="jobshield-team-photo-link"
+        aria-label="Email Team Member 01">
+
+        <img
+          src="{{ url_for('static', filename='images/pranathi.jpeg') }}"
+          alt="Team Member 01"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Pranathi Andela</h3>
+
+      <p>Team Lead</p>
+
+    </article>
+
+
+    <!-- TEAM MEMBER 02 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href="mailto:syedtahasin667@gmail.com"
+        class="jobshield-team-photo-link"
+        aria-label="EmailTeam Member 02">
+
+        <img
+          src="{{ url_for('static', filename='images/tahasin.jpeg') }}"
+          alt="Team Member 02"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Tahasin Syed</h3>
+
+      <p>UI/UX design</p>
+
+    </article>
+
+
+    <!-- TEAM MEMBER 03 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href="mailto:prathibhaaaaa27@gmail.com"
+        class="jobshield-team-photo-link"
+        aria-label="Email Team Member 03">
+
+        <img
+          src="{{ url_for('static', filename='images/prathibha.jpeg') }}"
+          alt="Team Member 03"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Pratibha Asadi</h3>
+
+      <p>Coding</p>
+
+    </article>
+
+
+    <!-- TEAM MEMBER 04 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href=""
+        class="jobshield-team-photo-link"
+        aria-label="Open Team Member 04 profile">
+
+        <img
+          src="{{ url_for('static', filename='images/team/member-04.jpg') }}"
+          alt="Team Member 04"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Hruday Shashank</h3>
+
+      <p>Coding</p>
+
+    </article>
+
+
+    <!-- TEAM MEMBER 05 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href=""
+        class="jobshield-team-photo-link"
+        aria-label="Open Team Member 05 profile">
+
+        <img
+          src="{{ url_for('static', filename='images/team/member-05.jpg') }}"
+          alt="Team Member 05"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Varshini Mulagundla</h3>
+
+      <p>Documentation</p>
+
+    </article>
+
+
+    <!-- TEAM MEMBER 06 -->
+    <article class="jobshield-team-card">
+
+      <a
+        href=""
+        class="jobshield-team-photo-link"
+        aria-label="Open Team Member 06 profile">
+
+        <img
+          src="{{ url_for('static', filename='images/team/member-06.jpg') }}"
+          alt="Team Member 06"
+          class="jobshield-team-photo">
+
+      </a>
+
+      <h3>Vasudha Nalluri
+
+      <p>Documentation</p>
+
+    </article>
+
+
+  </div>
+
+</section>
+
       <div class="card about-safety-note">
         <div class="eyebrow">Important</div>
         <h2>Use JobShield as a screening assistant.</h2>
@@ -323,39 +496,421 @@
       </div>
 
     </section>
+        <!-- CONTACT US PANEL -->
+    <section
+      id="contact-panel"
+      class="about-help-panel"
+      role="tabpanel"
+      aria-labelledby="contact-tab"
+      hidden>
+
+      <div class="section-heading">
+
+        <div class="eyebrow">Contact Us</div>
+
+        <h2>
+          We'd love to hear from you.
+        </h2>
+
+        <p>
+          Have a question, found an issue, or want to report a concern
+          about a job posting? Send us your query and our team can review it.
+        </p>
+
+      </div>
+
+
+      <div class="jobshield-contact-layout">
+
+
+        <!-- CONTACT INFORMATION -->
+        <div class="card jobshield-contact-info">
+
+          <div class="eyebrow">
+            Get In Touch
+          </div>
+
+          <h3>
+            How can we help?
+          </h3>
+
+          <p>
+            Use the form to tell us about your question, feedback,
+            technical issue, or concern regarding a job opportunity.
+          </p>
+
+
+          <div class="jobshield-contact-items">
+
+            <div class="jobshield-contact-item">
+
+              <span class="jobshield-contact-icon">
+                ✉
+              </span>
+
+              <div>
+                <strong>Email</strong>
+
+                <p>
+                  jobshield.support@example.com
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="jobshield-contact-item">
+
+              <span class="jobshield-contact-icon">
+                ?
+              </span>
+
+              <div>
+                <strong>General Queries</strong>
+
+                <p>
+                  Ask us about using JobShield and its features.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="jobshield-contact-item">
+
+              <span class="jobshield-contact-icon">
+                !
+              </span>
+
+              <div>
+                <strong>Report a Concern</strong>
+
+                <p>
+                  Tell us about a suspicious job posting or
+                  an issue you encountered.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CONTACT FORM -->
+        <div class="card jobshield-contact-form-card">
+
+          <div class="eyebrow">
+            Send a Message
+          </div>
+
+          <h3>
+            Contact / Complaint Form
+          </h3>
+
+          <form
+            id="jobshield-contact-form"
+            class="jobshield-contact-form">
+
+
+            <!-- NAME + EMAIL -->
+            <div class="jobshield-form-row">
+
+              <div class="jobshield-form-group">
+
+                <label for="contact-name">
+                  Your Name
+                </label>
+
+                <input
+                  type="text"
+                  id="contact-name"
+                  name="name"
+                  placeholder="Enter your name"
+                  required>
+
+              </div>
+
+
+              <div class="jobshield-form-group">
+
+                <label for="contact-email">
+                  Email Address
+                </label>
+
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="email"
+                  placeholder="Enter your email"
+                  required>
+
+              </div>
+
+            </div>
+
+
+            <!-- QUERY TYPE -->
+            <div class="jobshield-form-group">
+
+              <label for="contact-type">
+                Query Type
+              </label>
+
+              <select
+                id="contact-type"
+                name="query_type"
+                required>
+
+                <option value="" selected disabled>
+                  Select a query type
+                </option>
+
+                <option value="general">
+                  General Question
+                </option>
+
+                <option value="technical">
+                  Technical Issue
+                </option>
+
+                <option value="job-report">
+                  Report a Suspicious Job
+                </option>
+
+                <option value="complaint">
+                  Complaint
+                </option>
+
+                <option value="feedback">
+                  Feedback / Suggestion
+                </option>
+
+                <option value="other">
+                  Other
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- SUBJECT -->
+            <div class="jobshield-form-group">
+
+              <label for="contact-subject">
+                Subject
+              </label>
+
+              <input
+                type="text"
+                id="contact-subject"
+                name="subject"
+                placeholder="Enter the subject of your query"
+                required>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div class="jobshield-form-group">
+
+              <label for="contact-message">
+                Your Query / Complaint
+              </label>
+
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="6"
+                placeholder="Describe your query, complaint, or concern..."
+                required></textarea>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+            <button
+              type="submit"
+              class="jobshield-contact-submit">
+
+              Send Query
+
+            </button>
+
+
+            <p
+              id="contact-success-message"
+              class="jobshield-contact-success"
+              hidden>
+
+              Thank you! Your query has been recorded for review.
+
+            </p>
+
+
+          </form>
+
+        </div>
+
+      </div>
+
+
+      <!-- SMALL SAFETY NOTE -->
+      <div class="card jobshield-contact-note">
+
+        <div class="eyebrow">
+          Before You Contact Us
+        </div>
+
+        <p>
+          Please do not include passwords, payment information,
+          OTPs, or other highly sensitive personal information in
+          your message. For suspicious job reports, provide as much
+          non-sensitive information about the job posting as possible.
+        </p>
+
+      </div>
+
+    </section>
 
   </div>
 </main>
 
+
+
 <script>
   (() => {
+
     const aboutTab = document.getElementById("about-tab");
     const helpTab = document.getElementById("help-tab");
+    const contactTab = document.getElementById("contact-tab");
+
     const aboutPanel = document.getElementById("about-panel");
     const helpPanel = document.getElementById("help-panel");
+    const contactPanel = document.getElementById("contact-panel");
 
-    function showPanel(panel, activeTab, inactiveTab) {
-      panel.hidden = false;
-      panel.classList.add("active");
 
-      const otherPanel = panel === aboutPanel ? helpPanel : aboutPanel;
-      otherPanel.hidden = true;
-      otherPanel.classList.remove("active");
+    function showPanel(panel, activeTab) {
 
-      activeTab.classList.add("active");
-      inactiveTab.classList.remove("active");
+      const panels = [
+        aboutPanel,
+        helpPanel,
+        contactPanel
+      ];
 
-      activeTab.setAttribute("aria-selected", "true");
-      inactiveTab.setAttribute("aria-selected", "false");
+      const tabs = [
+        aboutTab,
+        helpTab,
+        contactTab
+      ];
+
+
+      panels.forEach((currentPanel) => {
+
+        if (currentPanel === panel) {
+
+          currentPanel.hidden = false;
+          currentPanel.classList.add("active");
+
+        } else {
+
+          currentPanel.hidden = true;
+          currentPanel.classList.remove("active");
+
+        }
+
+      });
+
+
+      tabs.forEach((currentTab) => {
+
+        if (currentTab === activeTab) {
+
+          currentTab.classList.add("active");
+
+          currentTab.setAttribute(
+            "aria-selected",
+            "true"
+          );
+
+        } else {
+
+          currentTab.classList.remove("active");
+
+          currentTab.setAttribute(
+            "aria-selected",
+            "false"
+          );
+
+        }
+
+      });
+
     }
 
+
     aboutTab.addEventListener("click", () => {
-      showPanel(aboutPanel, aboutTab, helpTab);
+
+      showPanel(
+        aboutPanel,
+        aboutTab
+      );
+
     });
 
+
     helpTab.addEventListener("click", () => {
-      showPanel(helpPanel, helpTab, aboutTab);
+
+      showPanel(
+        helpPanel,
+        helpTab
+      );
+
     });
+
+
+    contactTab.addEventListener("click", () => {
+
+      showPanel(
+        contactPanel,
+        contactTab
+      );
+
+    });
+
+
+    /* =====================================================
+       CONTACT FORM — FRONT-END FEEDBACK
+       ===================================================== */
+
+    const contactForm =
+      document.getElementById("jobshield-contact-form");
+
+    const successMessage =
+      document.getElementById("contact-success-message");
+
+
+    if (contactForm) {
+
+      contactForm.addEventListener(
+        "submit",
+        (event) => {
+
+          event.preventDefault();
+
+          successMessage.hidden = false;
+
+          contactForm.reset();
+
+        }
+      );
+
+    }
+
   })();
 </script>
+
+
 {% endblock %}
