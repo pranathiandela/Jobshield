@@ -1,618 +1,205 @@
 {% extends 'base.html' %}
-
 {% block content %}
-
-<main class="page">
-  <div class="wrap">
-
-    <div class="page-head">
-      <div class="eyebrow">History</div>
-      <h1>Your scan history.</h1>
-      <p>Every scan is stored for your account.</p>
-    </div>
-
-    {% if selected_scan %}
-
-    <!-- SAVED RESULT CARD -->
-    <div class="history-result-card">
-
-      <div class="result-card-top">
-        <div>
-          <div class="eyebrow">Saved Result</div>
-
-          <h2>
-            {{ selected_scan.job_title }}
-          </h2>
-
-          {% if selected_scan.company_name %}
-            <p class="result-company">
-              {{ selected_scan.company_name }}
-            </p>
-          {% else %}
-            <p class="result-company">
-              Company not provided
-            </p>
-          {% endif %}
-        </div>
-
-        <a class="back-link" href="/history">
-          ← Back
-        </a>
-      </div>
-
-
-      <!-- SCORE CARD -->
-      <div class="score-card">
-
-        <div class="score-header">
-          <div>
-            <span class="score-label">Safety Score</span>
-
-            <div class="score-value">
-              {{ selected_scan.score }}
-              <span>/100</span>
-            </div>
-          </div>
-
-          <div class="risk-badge risk-{{ selected_scan.risk|lower }}">
-            {{ selected_scan.risk }}
-          </div>
-        </div>
-
-
-        <!-- PROGRESS BAR -->
-        <div class="progress-section">
-
-          <div class="progress-labels">
-            <span>Risk / Safety level</span>
-            <span>{{ selected_scan.score }}%</span>
-          </div>
-
-          <div class="progress-track">
-            <div
-              class="progress-fill"
-              style="width: {{ [selected_scan.score, 100]|min }}%;"
-            ></div>
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- RESULT DETAILS -->
-      {% if selected_result %}
-
-      <div class="details-card">
-
-        {% set actual_result = selected_result.get('result', selected_result) %}
-
-        {% if actual_result.get('summary') %}
-        <div class="detail-section">
-          <h3>Summary</h3>
-          <p>{{ actual_result.get('summary') }}</p>
-        </div>
-        {% endif %}
-
-
-        {% if actual_result.get('checks') %}
-        <div class="detail-section">
-          <h3>Checks</h3>
-
-          <div class="detail-list">
-            {% for check in actual_result.get('checks', []) %}
-              <div class="detail-item">
-                {{ check }}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-
-        {% if actual_result.get('suspicious_signals') %}
-        <div class="detail-section">
-          <h3>Suspicious Signals</h3>
-
-          <div class="detail-list">
-            {% for signal in actual_result.get('suspicious_signals', []) %}
-              <div class="detail-item">
-                {{ signal }}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-
-        {% if actual_result.get('safe_signals') %}
-        <div class="detail-section">
-          <h3>Safe Signals</h3>
-
-          <div class="detail-list">
-            {% for signal in actual_result.get('safe_signals', []) %}
-              <div class="detail-item">
-                {{ signal }}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-
-        {% if actual_result.get('evidence') %}
-        <div class="detail-section">
-          <h3>Evidence</h3>
-          <p>{{ actual_result.get('evidence') }}</p>
-        </div>
-        {% endif %}
-
-
-        {% if actual_result.get('next_steps') %}
-        <div class="detail-section">
-          <h3>Next Steps</h3>
-
-          <div class="detail-list">
-            {% for step in actual_result.get('next_steps', []) %}
-              <div class="detail-item">
-                {{ step }}
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-
-        <!-- RESUME SCREENING DETAILS -->
-        {% if actual_result.get('relevancy_score') is not none %}
-
-        <div class="detail-section">
-
-          <h3>Resume Relevancy</h3>
-
-          <div class="resume-score-row">
-
-            <strong>
-              {{ actual_result.get('relevancy_score') }}%
-            </strong>
-
-            <span>
-              {{ actual_result.get('keyword_total', 0) }}
-              keywords analyzed
-            </span>
-
-          </div>
-
-
-          <div class="progress-track resume-progress">
-            <div
-              class="progress-fill"
-              style="width: {{ [actual_result.get('relevancy_score', 0), 100]|min }}%;"
-            ></div>
-          </div>
-
-        </div>
-
-        {% endif %}
-
-
-        {% if actual_result.get('matched_keywords') %}
-
-        <div class="detail-section">
-          <h3>Matched Keywords</h3>
-
-          <div class="keyword-list">
-            {% for keyword in actual_result.get('matched_keywords', []) %}
-              <span class="keyword">{{ keyword }}</span>
-            {% endfor %}
-          </div>
-        </div>
-
-        {% endif %}
-
-
-        {% if actual_result.get('missing_keywords') %}
-
-        <div class="detail-section">
-          <h3>Missing Keywords</h3>
-
-          <div class="keyword-list">
-            {% for keyword in actual_result.get('missing_keywords', []) %}
-              <span class="keyword missing">{{ keyword }}</span>
-            {% endfor %}
-          </div>
-        </div>
-
-        {% endif %}
-
-      </div>
-
-      {% endif %}
-
-    </div>
-
-
-    {% else %}
-
-    <!-- HISTORY TABLE -->
-    <div class="panel">
-
-      {% if history %}
-
-      <table class="history-table">
-
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Title</th>
-            <th>Company</th>
-            <th>Risk</th>
-            <th>Score</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {% for x in history %}
-
-          <tr>
-
-            <td>
-              {{ x.created_at.strftime('%d %b %Y, %I:%M %p') }}
-            </td>
-
-            <td>
-              {{ x.job_title }}
-            </td>
-
-            <td>
-              {{ x.company_name or '—' }}
-            </td>
-
-            <td>
-              {{ x.risk }}
-            </td>
-
-            <td>
-              {{ x.score }}/100
-            </td>
-
-            <td>
-              <a
-                class="btn-ghost"
-                href="{{ url_for('history_detail', scan_id=x.id) }}"
-              >
-                View
-              </a>
-            </td>
-
-          </tr>
-
-          {% endfor %}
-
-        </tbody>
-
-      </table>
-
-      {% else %}
-
-      <div class="notice">
-        No scans yet. Run your first check from Detector or Resume Screening.
-      </div>
-
-      {% endif %}
-
-    </div>
-
-    {% endif %}
-
-  </div>
-</main>
-
+{% macro scan_json(src) -%}
+{% set ns = namespace(r=[]) %}
+{% for x in src %}
+{% if x is mapping %}{% set ns.r = ns.r + [x] %}
+{% else %}
+{% set bn = namespace(t='', e='') %}
+{% for k, v in (x.__dict__.items() if x.__dict__ is defined else []) if not k.startswith('_') %}{% set bn.t = bn.t ~ ' ' ~ (v|string) %}{% endfor %}
+{% for k in ['scan_type','scan_kind','kind','type','category','module','section','tool','mode','source'] %}{% if x[k] %}{% set bn.e = bn.e ~ ' ' ~ (x[k]|string|lower) %}{% endif %}{% endfor %}
+{% set blob = bn.t ~ ' ' ~ ((x['result_json'] or x['result'] or x['details'] or x['data'] or '')|string) %}
+{% set pa = blob.split('relevancy_score') %}
+{% set seg = pa[1][:8] if pa|length > 1 else '' %}
+{% set rs = x['relevancy_score'] %}
+{% set has_rel = (seg and ('null' not in seg) and ('None' not in seg) and (seg|select('in', '0123456789')|list|length > 0)) or (rs is defined and rs is not none) %}
+{% set rn = namespace(v='') %}
+{% for key in ['detected_role','detected_domain','best_domain','preferred_domain'] %}{% if not rn.v %}{% for qt in ['"', "'"] %}{% if not rn.v %}{% set pp = blob.split(key ~ qt ~ ': ' ~ qt) %}{% if pp|length > 1 %}{% set rn.v = pp[1].split(qt)[0] %}{% endif %}{% endif %}{% endfor %}{% endif %}{% endfor %}
+{% set rt = namespace(v='') %}
+{% for key in ['job_title','position','role_title','file_name','filename','resume_name'] %}{% if not rt.v %}{% for qt in ['"', "'"] %}{% if not rt.v %}{% set pq = blob.split(key ~ qt ~ ': ' ~ qt) %}{% if pq|length > 1 %}{% set rt.v = pq[1].split(qt)[0] %}{% endif %}{% endif %}{% endfor %}{% endif %}{% endfor %}
+{% set tk = namespace(h='') %}
+{% for t in ['missing_keywords','present_skills','missing_skills','detected_domain','ranked_domains','best_domain','preferred_domain','semantic_similarity','jd_match','skills_detected','keyword_total','line_feedback','top_fixes','bullet_count','detected_sections'] %}{% if not tk.h and t in blob %}{% set tk.h = t %}{% endif %}{% endfor %}
+{% set rk = 'match' in ((x.risk or '')|string|lower) %}
+{% set ex_r = 'resume' in bn.e %}
+{% set ex_j = (not ex_r) and bn.e and ('job' in bn.e or 'detect' in bn.e or 'scam' in bn.e or 'posting' in bn.e) %}
+{% set is_r = ex_r or ((not ex_j) and (has_rel or tk.h or rk)) %}
+{% set ts = x.created_at %}
+{% set ns.r = ns.r + [{
+  'id': x.id,
+  'type': 'resume' if is_r else 'job',
+  'title': x.job_title or 'Untitled',
+  'company': x.company_name or x.company or '',
+  'risk': (x.risk or '')|string|lower,
+  'score': (rs if (rs is defined and rs is not none) else x.score) or 0,
+  'role': x['detected_role'] or x['role'] or rn.v or '',
+  'rtitle': rt.v,
+  'matched': 0, 'total': 0,
+  'ts': (ts.isoformat() + ('' if ts.tzinfo else 'Z')) if ts else '',
+  'url': url_for('history_detail', scan_id=x.id),
+  'why': 'type column says resume' if ex_r else 'type column says job' if ex_j else 'real relevancy_score found' if has_rel else ('resume-only field: ' ~ tk.h) if tk.h else 'risk label says match' if rk else 'no resume signal found'
+}] %}
+{% endif %}
+{% endfor %}
+{{ ns.r|tojson }}
+{%- endmacro %}{% set src = items if items else (history or recent_scans or scans or []) %}
+{% macro lst(t, a) %}{% if a %}<div class="detail-section"><h3>{{ t }}</h3><div class="detail-list">{% for i in a %}<div class="detail-item">{{ i }}</div>{% endfor %}</div></div>{% endif %}{% endmacro %}
+{% macro kw(t, a, c='') %}{% if a %}<div class="detail-section"><h3>{{ t }}</h3><div class="keyword-list">{% for k in a %}<span class="keyword {{ c }}">{{ k }}</span>{% endfor %}</div></div>{% endif %}{% endmacro %}
+<main class="page"><div class="wrap hst">
+<div class="page-head"><div class="eyebrow">History</div><h1>Your scan history.</h1><p>Job postings and resume screenings, all in one place.</p></div>
+
+{% if selected_scan %}
+{% set ar = (selected_result['result'] if selected_result['result'] is defined else selected_result) if selected_result else {} %}
+{% set dblob = (selected_result|string) %}
+{% set rel = ar['relevancy_score'] if (ar['relevancy_score'] is defined and ar['relevancy_score'] is not none) else none %}
+{% set is_r = (rel is not none) or ('match' in ((selected_scan.risk or '')|string|lower)) or ('detected_domain' in dblob) or ('missing_keywords' in dblob) or ('present_skills' in dblob) or ('jd_match' in dblob) or ('line_feedback' in dblob) %}
+{% set sc = (rel if rel is not none else selected_scan.score) or 0 %}
+{% set tone = ('safe' if sc >= 60 else 'caution' if sc >= 40 else 'risky') if is_r else ((selected_scan.risk or 'unknown')|lower) %}
+<div class="history-result-card">
+<div class="result-card-top"><div><div class="eyebrow">{{ 'Resume screening' if is_r else 'Job posting' }}</div><h2>{{ selected_scan.job_title }}</h2><p class="result-company">{{ selected_scan.company_name or 'Company not provided' }}</p></div><a class="back-link" href="/history">Back to history</a></div>
+<div class="score-card">
+<div class="score-header"><div><span class="score-label">{{ 'Match score' if is_r else 'Safety score' }}</span><div class="score-value">{{ sc }}<span>/100</span></div></div>
+<div class="risk-badge risk-{{ tone }}">{{ (selected_scan.risk if ('match' in ((selected_scan.risk or '')|string|lower)) else ('Strong match' if tone == 'safe' else 'Moderate match' if tone == 'caution' else 'Weak match')) if is_r else (selected_scan.risk or 'Unknown') }}</div></div>
+<div class="progress-section"><div class="progress-labels"><span>{{ 'Resume relevancy' if is_r else 'Safety level' }}</span><span>{{ sc }}%</span></div><div class="progress-track"><div class="progress-fill" style="width:{{ [sc, 100]|min }}%"></div></div></div>
+</div>
+{% if selected_result %}
+<div class="details-card">
+{% if ar['summary'] %}<div class="detail-section"><h3>Summary</h3><p>{{ ar['summary'] }}</p></div>{% endif %}
+{{ lst('Checks', ar['checks']) }}
+{{ lst('Suspicious signals', ar['suspicious_signals']) }}
+{{ lst('Safe signals', ar['safe_signals']) }}
+{% if ar['evidence'] %}<div class="detail-section"><h3>Evidence</h3><p>{{ ar['evidence'] }}</p></div>{% endif %}
+{{ lst('Next steps', ar['next_steps']) }}
+{% if rel is not none %}<div class="detail-section"><h3>Resume relevancy</h3><div class="resume-score-row"><strong>{{ sc }}%</strong><span>{{ (ar['keyword_total'] or 0) }} keywords analyzed</span></div></div>{% endif %}
+{{ kw('Matched keywords', ar['matched_keywords']) }}
+{{ kw('Missing keywords', ar['missing_keywords'], 'missing') }}
+</div>
+{% endif %}
+</div>
+
+{% else %}
+{% if request is defined and request.args.get('debug') %}
+<div class="notice" style="margin-top:18px;overflow:auto"><b>Debug: raw fields of the latest scans</b>
+<table style="font-size:12px;width:100%;margin-top:8px">{% for x in src[:12] %}<tr><td colspan="2"><b>Scan #{{ x.id }}</b></td></tr>{% for k, v in (x.items() if x is mapping else x.__dict__.items()) if not k.startswith('_') %}<tr><td style="opacity:.6;white-space:nowrap">{{ k }}</td><td>{{ (v|string)[:160] }}</td></tr>{% endfor %}{% endfor %}</table></div>
+{% endif %}
+{% if src %}
+<div class="nums" id="led"></div>
+<div class="sh2"><span>Last 30 days</span><span>Select a day to filter</span></div><div class="strip" id="strip"></div>
+<div class="bar"><div class="seg" role="tablist"><button data-t="all">All<small></small></button><button data-t="job">Job postings<small></small></button><button data-t="resume">Resumes<small></small></button></div></div>
+<div class="fbar"><input id="q" type="search" placeholder="Search title, company or role" aria-label="Search history">
+<div class="chips"><button class="chip" data-v="all">All</button><button class="chip" data-v="ok">Safe / strong</button><button class="chip" data-v="mid">Caution / moderate</button><button class="chip" data-v="bad">Risky / weak</button></div>
+<select id="s" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="hi">Highest score</option><option value="lo">Lowest score</option></select></div>
+<div class="cnt" id="cnt"></div>
+<div id="list"></div>
+{% else %}
+<div class="notice">No scans yet. Run your first check from <a href="/detector">Detector</a> or <a href="/resume-screening">Resume Screening</a>.</div>
+{% endif %}
+{% endif %}
+</div></main>
 
 <style>
-
-/* ================================
-   SAVED RESULT CARD
-================================ */
-
-.history-result-card {
-  margin-top: 34px;
-  background: rgba(0, 55, 52, 0.55);
-  border: 1px solid rgba(187, 199, 198, 0.18);
-  border-radius: 20px;
-  padding: 32px;
-  overflow: hidden;
-}
-
-
-.result-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-  margin-bottom: 28px;
-}
-
-
-.result-card-top h2 {
-  margin: 10px 0 4px;
-  font-size: 28px;
-  font-weight: 600;
-}
-
-
-.result-company {
-  margin: 0;
-  opacity: 0.72;
-}
-
-
-.back-link {
-  color: inherit;
-  text-decoration: none;
-  opacity: 0.75;
-  padding-bottom: 5px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-
-.back-link:hover {
-  opacity: 1;
-}
-
-
-/* ================================
-   SCORE CARD
-================================ */
-
-.score-card {
-  background: rgba(1, 29, 28, 0.85);
-  border: 1px solid rgba(187, 199, 198, 0.16);
-  border-radius: 16px;
-  padding: 28px;
-}
-
-
-.score-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-
-.score-label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  opacity: 0.6;
-  margin-bottom: 8px;
-}
-
-
-.score-value {
-  font-size: 52px;
-  line-height: 1;
-  font-weight: 600;
-}
-
-
-.score-value span {
-  font-size: 18px;
-  opacity: 0.45;
-  font-weight: 400;
-}
-
-
-/* ================================
-   RISK BADGE
-================================ */
-
-.risk-badge {
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(255,255,255,0.15);
-}
-
-
-.risk-safe {
-  background: rgba(70, 200, 140, 0.14);
-}
-
-
-.risk-caution {
-  background: rgba(240, 190, 70, 0.14);
-}
-
-
-.risk-risky {
-  background: rgba(230, 90, 90, 0.14);
-}
-
-
-/* ================================
-   PROGRESS BAR
-================================ */
-
-.progress-section {
-  margin-top: 30px;
-}
-
-
-.progress-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-
-.progress-track {
-  width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,0.09);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-
-.progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    #66d9c9,
-    #edfffe
-  );
-  transition: width 0.8s ease;
-}
-
-
-.resume-progress {
-  margin-top: 14px;
-}
-
-
-/* ================================
-   DETAILS
-================================ */
-
-.details-card {
-  margin-top: 24px;
-  background: rgba(1, 29, 28, 0.55);
-  border: 1px solid rgba(187, 199, 198, 0.12);
-  border-radius: 16px;
-  padding: 28px;
-}
-
-
-.detail-section {
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-
-.detail-section:first-child {
-  padding-top: 0;
-}
-
-
-.detail-section:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-
-.detail-section h3 {
-  margin: 0 0 12px;
-  font-size: 16px;
-}
-
-
-.detail-section p {
-  margin: 0;
-  line-height: 1.7;
-  opacity: 0.75;
-}
-
-
-.detail-list {
-  display: grid;
-  gap: 8px;
-}
-
-
-.detail-item {
-  padding: 11px 14px;
-  border-radius: 9px;
-  background: rgba(255,255,255,0.035);
-  line-height: 1.5;
-  opacity: 0.8;
-}
-
-
-.resume-score-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 15px;
-}
-
-
-.resume-score-row strong {
-  font-size: 30px;
-}
-
-
-.resume-score-row span {
-  opacity: 0.55;
-  font-size: 13px;
-}
-
-
-/* ================================
-   KEYWORDS
-================================ */
-
-.keyword-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-
-.keyword {
-  display: inline-block;
-  padding: 7px 11px;
-  border-radius: 999px;
-  background: rgba(102, 187, 106, 0.12);
-  border: 1px solid rgba(102, 187, 106, 0.18);
-  font-size: 12px;
-}
-
-
-.keyword.missing {
-  background: rgba(230, 90, 90, 0.1);
-  border-color: rgba(230, 90, 90, 0.18);
-}
-
-
-/* ================================
-   MOBILE
-================================ */
-
-@media (max-width: 700px) {
-
-  .history-result-card {
-    padding: 20px;
-  }
-
-  .result-card-top {
-    flex-direction: column;
-  }
-
-  .score-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .score-value {
-    font-size: 44px;
-  }
-
-  .resume-score-row {
-    flex-direction: column;
-  }
-
-}
-
+.hst{--l:rgba(255,255,255,.1);--m:#66d9c9;--v:#9fbfff;--mut:#bbc7c6}
+.hst .seg{display:inline-flex;border:1px solid var(--l);border-radius:999px;padding:3px;max-width:100%;overflow-x:auto}
+.hst .seg button{border:0;background:none;color:var(--mut);padding:8px 18px;border-radius:999px;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap}
+.hst .seg button:hover{color:#fff}.hst .seg button.on{background:var(--gradient-aurora);color:#062522}.hst .seg small{margin-left:6px;opacity:.6;font-size:12px}
+.hst h2,.hst h3,.hst b,.hst strong{font-weight:500}.hst a:focus-visible,.hst button:focus-visible{outline:2px solid var(--m);outline-offset:3px}
+.hst .tg{font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;color:var(--m)}.hst .tg:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.hst .tg.resume{color:var(--v)}.hst .pl{font-size:12px;padding:4px 10px;border-radius:4px;white-space:nowrap;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c)}
+.hst .nums span{font-size:13px;color:var(--mut)}.hst .nums b{display:block;font-size:42px;line-height:1.05;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.hst .em{color:var(--slate-deep);font-size:13px}
+.page:has(.hst){padding:30px 0 56px}.hst .page-head{margin-bottom:18px}.hst .page-head h1{font-size:clamp(30px,4vw,42px);margin-bottom:8px}.hst .page-head p{font-size:14px}.hst .nums b{font-size:26px;margin-bottom:2px}
+.hst .nums{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--l);border-bottom:1px solid var(--l)}
+.hst .nums>div{padding:14px 20px;border-left:1px solid var(--l)}.hst .nums>div:first-child{border-left:0;padding-left:0}
+.hst .sh2{display:flex;justify-content:space-between;margin-top:20px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}.hst .sh2 span+span{letter-spacing:0;text-transform:none;font-size:13px;color:var(--slate-deep)}
+.hst .strip{display:flex;align-items:flex-end;gap:5px;height:76px;margin-top:14px;border-bottom:1px solid var(--l)}
+.hst .sd{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;height:100%;border:0;background:none;padding:0 0 2px;cursor:pointer;opacity:.85;transition:opacity .2s}.hst .sd:hover,.hst .sd.on{opacity:1}
+.hst .sd u{display:block;width:100%;border-radius:2px}.hst .sd.on{box-shadow:0 2px 0 var(--m)}.hst .sd.z:after{content:'';height:2px;background:rgba(255,255,255,.12)}
+.hst .bar{display:flex;justify-content:center;margin:16px 0 12px}
+.hst .fbar{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--l);border-bottom:1px solid var(--l)}
+.hst .fbar input{flex:1;min-width:220px;width:auto;background:none;border:0;border-radius:0;padding:8px 0;font-size:14px}
+.hst .fbar select{width:auto;padding:9px 14px;font-size:13px;border-radius:6px}
+.hst .chips{display:flex;gap:6px;flex-wrap:wrap}
+.hst .chip{padding:7px 14px;border-radius:999px;border:1px solid var(--l);background:none;color:var(--mut);font-size:13px;cursor:pointer;transition:.2s}
+.hst .chip:hover{color:#fff}.hst .chip.on{background:var(--gradient-aurora);color:#062522;border-color:transparent}
+.hst .cnt{font-size:12px;color:var(--slate-deep);margin-top:14px}
+.hst .mo{margin:20px 0 2px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:400}
+.hst .cd{position:relative;display:grid;grid-template-columns:42px 1fr auto;gap:16px;align-items:center;padding:13px 16px 13px 20px;border-bottom:1px solid var(--l);transition:background .2s}
+.hst .cd:before{content:'';position:absolute;left:0;top:13px;bottom:13px;width:2px;border-radius:2px;background:var(--m)}.hst .cd.resume:before{background:var(--v)}
+.hst .cd:hover{background:rgba(255,255,255,.03)}.hst .rg{width:42px;height:42px}
+.hst .r1{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hst .bd b{display:block;margin:5px 0 2px;font-size:16px}.hst .bd small{display:block;font-size:13px;color:var(--mut)}
+.hst .tr{height:4px;border-radius:4px;background:rgba(255,255,255,.09);margin:12px 0 8px;overflow:hidden;max-width:340px}.hst .tr u{display:block;height:100%;background:var(--c)}
+.hst .cd time{font-size:12px;color:var(--slate-deep);text-align:right;white-space:nowrap}
+.hst #more{margin-top:28px;display:block;margin-inline:auto}
+.history-result-card{margin-top:10px}
+.result-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:28px}
+.result-card-top h2{margin:6px 0 4px;font-size:30px}.result-company{margin:0;color:var(--mut)}
+.result-card-top .eyebrow{justify-content:flex-start}.result-card-top .eyebrow:before{display:none}
+.back-link{color:var(--mut);font-size:13px;border-bottom:1px solid var(--l);padding-bottom:2px;white-space:nowrap}.back-link:hover{color:#fff}
+.score-card{border-top:1px solid var(--l);border-bottom:1px solid var(--l);padding:32px 0}
+.score-header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.score-label{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.score-value{font-size:64px;line-height:1;font-weight:500}.score-value span{font-size:18px;color:var(--slate-deep)}
+.risk-badge{padding:9px 18px;border-radius:4px;font-size:13px;border:1px solid var(--l)}
+.risk-safe{background:rgba(70,200,140,.14)}.risk-caution{background:rgba(240,190,70,.14)}.risk-risky{background:rgba(230,90,90,.14)}
+.progress-section{margin-top:30px}.progress-labels{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;color:var(--mut)}
+.progress-track{width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}.progress-fill{height:100%;background:var(--gradient-bio)}
+.detail-section{padding:28px 0;border-bottom:1px solid var(--l)}.detail-section:last-child{border-bottom:0}
+.detail-section h3{margin:0 0 14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}.detail-section p{line-height:1.7;color:#e6f2f1}
+.detail-list{display:grid}.detail-item{padding:12px 0;border-bottom:1px solid var(--l);line-height:1.55;color:#e6f2f1}.detail-item:last-child{border-bottom:0}
+.resume-score-row{display:flex;align-items:baseline;justify-content:space-between;gap:15px}.resume-score-row strong{font-size:34px}.resume-score-row span{color:var(--mut);font-size:13px}
+.keyword-list{display:flex;flex-wrap:wrap;gap:8px}.keyword{padding:6px 12px;border-radius:4px;background:rgba(95,217,163,.12);font-size:12px}.keyword.missing{background:rgba(240,106,106,.12)}
+@media(max-width:700px){.hst .nums{grid-template-columns:1fr 1fr}.hst .nums>div{border-left:0;border-top:1px solid var(--l);padding:20px 12px 20px 0}.hst .nums>div:nth-child(-n+2){border-top:0}.hst .cd{grid-template-columns:44px 1fr;gap:16px}.hst .rg{width:44px;height:44px}.hst .cd time{grid-column:2;text-align:left}.result-card-top,.score-header{flex-direction:column;align-items:flex-start}.score-value{font-size:52px}}
+@media(prefers-reduced-motion:reduce){.hst *{transition:none!important}}
 </style>
 
+{% if not selected_scan and src %}
+<script>
+(()=>{
+const M={low:'safe',medium:'caution',high:'risky'},TN={safe:'ok',strong:'ok',caution:'mid',moderate:'mid',risky:'bad',weak:'bad'};
+const CO={safe:'#46c88c',strong:'#46c88c',caution:'#f0be46',moderate:'#f0be46',risky:'#e65a5a',weak:'#e65a5a'};
+const band=s=>s>=60?'strong':s>=40?'moderate':'weak';
+const lab=x=>x.type==='job'?cap(x.v):(/match/.test(x.risk||'')?cap(x.risk):cap(x.v)+' match');
+const D={{ scan_json(src) }}.map(x=>{const v=x.type==='job'?(M[x.risk]||x.risk):band(+x.score||0);return {...x,v,tn:TN[v]||'',d:new Date(x.ts)}});
+(()=>{const g=t=>{const c={},n=D.filter(x=>x.type===t).length;D.forEach(x=>{if(x.type===t)c[x.title]=(c[x.title]||0)+1});
+D.forEach(x=>{if(x.type!==t)return;x.raw=x.title;if((c[x.title]>=3&&c[x.title]/n>=.4)||/^(untitled|resume( screening)?|job( posting)?|scan|screening|unknown)$/i.test(String(x.title).trim()))x.title=(x.rtitle&&x.rtitle!==x.title)?x.rtitle:(t==='resume'?'Resume screening':'Job posting')+', '+x.d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})})};g('job');g('resume')})();
+function cu(){document.querySelectorAll('[data-n]').forEach(e=>{const n=+e.dataset.n,s=e.dataset.s||'';if(matchMedia('(prefers-reduced-motion:reduce)').matches){e.textContent=n+s;return}const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/800);e.textContent=Math.round(n*(1-Math.pow(1-k,3)))+s;if(k<1)requestAnimationFrame(f)})(t0)})}
+const $=s=>document.querySelector(s);
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
+const q=new URLSearchParams(location.search);
+let N=20,T=['job','resume'].includes(q.get('type'))?q.get('type'):'all',V=TN[q.get('v')]||'all',Q=(q.get('q')||'').toLowerCase(),S='new',DF=null;
+if(Q)$('#q').value=Q;
+
+$('#led').innerHTML=[[D.length,'Total scans'],[D.filter(x=>x.type==='job').length,'Job postings'],[D.filter(x=>x.type==='resume').length,'Resumes screened'],[D.filter(x=>x.tn==='bad').length,'Need attention']].map(([n,l])=>`<div><b data-n="${n}">0</b><span>${l}</span></div>`).join('');
+
+const card=x=>{const j=x.type==='job',c=CO[x.v]||'#8aa',s=Math.max(0,Math.min(100,+x.score||0));
+return `<a class="cd ${x.type}" style="--c:${c}" href="${E(x.url)}"><svg class="rg" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="${s} 100" transform="rotate(-90 18 18)"/><text x="18" y="22" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">${s}</text></svg><div class="bd"><div class="r1"><span class="tg ${x.type}">${j?'Job posting':'Resume'}</span><span class="pl">${lab(x)}</span></div><b>${E(x.title)}</b><small>${E(j?(x.company||'Company not provided'):(x.role?'Detected role: '+x.role:'Resume screening'))}</small>${j?'':`<div class="tr"><u style="width:${s}%"></u></div>${x.total?`<small>${x.matched} of ${x.total} keywords matched</small>`:''}`}</div><time>${x.d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}</time></a>`};
+
+function strip(){const days=[...Array(30)].map((_,i)=>{const d=new Date(Date.now()-(29-i)*864e5);return d.toDateString()}),m=Math.max(1,...days.map(k=>D.filter(x=>x.d.toDateString()===k).length));
+$('#strip').innerHTML=days.map(k=>{const a=D.filter(x=>x.d.toDateString()===k),j=a.filter(x=>x.type==='job').length,r=a.length-j;
+return `<button class="sd${k===DF?' on':''}${a.length?'':' z'}" data-d="${k}" title="${k}: ${j} job posting${j==1?'':'s'}, ${r} resume${r==1?'':'s'}">${r?`<u style="height:${r/m*60}px;background:#9fbfff"></u>`:''}${j?`<u style="height:${j/m*60}px;background:#66d9c9"></u>`:''}</button>`}).join('')}
+
+function render(){strip();
+document.querySelectorAll('[data-t]').forEach(b=>{b.classList.toggle('on',b.dataset.t===T);b.querySelector('small').textContent=D.filter(x=>b.dataset.t==='all'||x.type===b.dataset.t).length});
+document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===V));
+const a=D.filter(x=>(T==='all'||x.type===T)&&(V==='all'||x.tn===V)&&(!Q||`${x.title} ${x.company} ${x.role}`.toLowerCase().includes(Q))&&(!DF||x.d.toDateString()===DF));
+a.sort(S==='new'?(p,r)=>r.d-p.d:S==='old'?(p,r)=>p.d-r.d:S==='hi'?(p,r)=>r.score-p.score:(p,r)=>p.score-r.score);
+let h='',g='';
+const tot=a.length;a.slice(0,N).forEach(x=>{if(S==='new'||S==='old'){const m=x.d.toLocaleDateString(undefined,{month:'long',year:'numeric'});if(m!==g){g=m;h+=`<h4 class="mo">${m}</h4>`}}h+=card(x)});
+if(tot>N)h+=`<button class="chip" id="more">Show ${Math.min(20,tot-N)} more (${tot-N} left)</button>`;
+$('#list').innerHTML=h||'<div class="notice">No scans match these filters. <a href="/history">Clear filters</a></div>';
+$('#cnt').innerHTML=(tot>N?'Showing '+N+' of ':'')+tot+' result'+(tot==1?'':'s')+(DF?` on ${E(DF)} <button class="chip" id="clr">Clear day</button>`:'')}
+
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{T=b.dataset.t;N=20;render()});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{V=b.dataset.v;N=20;render()});
+$('#q').oninput=e=>{Q=e.target.value.trim().toLowerCase();N=20;render()};
+$('#s').onchange=e=>{S=e.target.value;N=20;render()};
+$('#strip').onclick=e=>{const b=e.target.closest('.sd');if(b){DF=DF===b.dataset.d?null:b.dataset.d;N=20;render()}};
+document.addEventListener('click',e=>{if(e.target.id==='clr'){DF=null;render()}});
+$('#list').onclick=e=>{if(e.target.id==='more'){N+=20;render()}};
+if(q.get('debug'))$('#cnt').insertAdjacentHTML('beforebegin','<div class="notice" style="margin-top:20px;overflow:auto"><b>Classification check</b><table class="history-table"><tr><th>#</th><th>Title</th><th>Sorted as</th><th>Reason</th></tr>'+D.slice(0,25).map(x=>`<tr><td>${x.id}</td><td>${E(x.title)}</td><td>${x.type}</td><td>${E(x.why||'')}</td></tr>`).join('')+'</table></div>');
+render();cu();
+})();
+</script>
+{% endif %}
 {% endblock %}

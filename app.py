@@ -12,6 +12,7 @@ from ml_domain_matcher import screen_for_domain
 from file_processor import (
     extract_text,
     extract_detection_text,
+    extract_resume_layout,
     SUPPORTED_EXTENSIONS,
     UnsupportedFileType,
 )
@@ -451,6 +452,9 @@ def api_screen_resume():
         )
 
 
+        layout = None  # style data (bold/underline/alignment) for the quality score; None for pasted text
+
+
         if resume_file and resume_file.filename:
 
             ext = Path(
@@ -496,6 +500,8 @@ def api_screen_resume():
                 resume_text = extract_text(
                     saved_path
                 )
+
+                layout = extract_resume_layout(saved_path)
 
 
             except UnsupportedFileType:
@@ -557,7 +563,8 @@ def api_screen_resume():
         # Execute resume quality engine
         result = analyze_resume(
             resume_text,
-            job_description or None
+            job_description or None,
+            layout=layout
         )
 
 
@@ -874,6 +881,7 @@ def dashboard():
         "dashboard.html",
         title="Dashboard",
         active="dashboard",
+        history=scans,
         stats={
             "total": len(scans),
             "high": sum(

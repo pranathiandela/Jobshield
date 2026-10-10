@@ -1,10 +1,257 @@
 {% extends 'base.html' %}{% block content %}
-<main class="page"><div class="wrap"><div class="page-head"><div class="eyebrow">Dashboard</div><h1>Your safety overview.</h1><p>A simple command center for your recent checks.</p></div>
-<div class="stat-grid"><div class="stat-box"><div class="stat-number">{{ stats.total }}</div><div class="stat-label">Total scans</div></div><div class="stat-box"><div class="stat-number">{{ stats.high }}</div><div class="stat-label">High-risk listings</div></div><div class="stat-box"><div class="stat-number">{{ stats.medium }}</div><div class="stat-label">Medium-risk listings</div></div><div class="stat-box"><div class="stat-number">{{ stats.low }}</div><div class="stat-label">Low-risk listings</div></div></div>
-<div style="height:24px"></div><div class="cards"><div class="card"><h3>Detector</h3><p>Analyze a job listing and receive a risk score.</p><br><a class="btn-ghost" href="/detector">Open detector</a></div><div class="card"><h3>Resume Screening</h3><p>Upload your resume and review basic exposure signals.</p><br><a class="btn-ghost" href="/resume-screening">Open screening</a></div><div class="card"><h3>History</h3><p>Review your previous job checks and their signals.</p><br><a class="btn-ghost" href="/history">View history</a></div></div>
-{% if recent_scans %}
-<div style="height:24px"></div><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div><div class="eyebrow">Recent checks</div><h2>Latest results</h2></div><a class="btn-ghost" href="/history">View all</a></div>
-<table class="history-table"><thead><tr><th>Date</th><th>Title</th><th>Company</th><th>Risk</th><th>Score</th><th></th></tr></thead><tbody>{% for x in recent_scans %}<tr><td>{{ x.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ x.job_title }}</td><td>{{ x.company or '—' }}</td><td>{{ x.risk }}</td><td>{{ x.score }}/100</td><td><a class="btn-ghost" href="{{ url_for('history_detail', scan_id=x.id) }}">View</a></td></tr>{% endfor %}</tbody></table></div>
+{% macro scan_json(src) -%}
+{% set ns = namespace(r=[]) %}
+{% for x in src %}
+{% if x is mapping %}{% set ns.r = ns.r + [x] %}
+{% else %}
+{% set bn = namespace(t='', e='') %}
+{% for k, v in (x.__dict__.items() if x.__dict__ is defined else []) if not k.startswith('_') %}{% set bn.t = bn.t ~ ' ' ~ (v|string) %}{% endfor %}
+{% for k in ['scan_type','scan_kind','kind','type','category','module','section','tool','mode','source'] %}{% if x[k] %}{% set bn.e = bn.e ~ ' ' ~ (x[k]|string|lower) %}{% endif %}{% endfor %}
+{% set blob = bn.t ~ ' ' ~ ((x['result_json'] or x['result'] or x['details'] or x['data'] or '')|string) %}
+{% set pa = blob.split('relevancy_score') %}
+{% set seg = pa[1][:8] if pa|length > 1 else '' %}
+{% set rs = x['relevancy_score'] %}
+{% set has_rel = (seg and ('null' not in seg) and ('None' not in seg) and (seg|select('in', '0123456789')|list|length > 0)) or (rs is defined and rs is not none) %}
+{% set rn = namespace(v='') %}
+{% for key in ['detected_role','detected_domain','best_domain','preferred_domain'] %}{% if not rn.v %}{% for qt in ['"', "'"] %}{% if not rn.v %}{% set pp = blob.split(key ~ qt ~ ': ' ~ qt) %}{% if pp|length > 1 %}{% set rn.v = pp[1].split(qt)[0] %}{% endif %}{% endif %}{% endfor %}{% endif %}{% endfor %}
+{% set rt = namespace(v='') %}
+{% for key in ['job_title','position','role_title','file_name','filename','resume_name'] %}{% if not rt.v %}{% for qt in ['"', "'"] %}{% if not rt.v %}{% set pq = blob.split(key ~ qt ~ ': ' ~ qt) %}{% if pq|length > 1 %}{% set rt.v = pq[1].split(qt)[0] %}{% endif %}{% endif %}{% endfor %}{% endif %}{% endfor %}
+{% set tk = namespace(h='') %}
+{% for t in ['missing_keywords','present_skills','missing_skills','detected_domain','ranked_domains','best_domain','preferred_domain','semantic_similarity','jd_match','skills_detected','keyword_total','line_feedback','top_fixes','bullet_count','detected_sections'] %}{% if not tk.h and t in blob %}{% set tk.h = t %}{% endif %}{% endfor %}
+{% set rk = 'match' in ((x.risk or '')|string|lower) %}
+{% set ex_r = 'resume' in bn.e %}
+{% set ex_j = (not ex_r) and bn.e and ('job' in bn.e or 'detect' in bn.e or 'scam' in bn.e or 'posting' in bn.e) %}
+{% set is_r = ex_r or ((not ex_j) and (has_rel or tk.h or rk)) %}
+{% set ts = x.created_at %}
+{% set ns.r = ns.r + [{
+  'id': x.id,
+  'type': 'resume' if is_r else 'job',
+  'title': x.job_title or 'Untitled',
+  'company': x.company_name or x.company or '',
+  'risk': (x.risk or '')|string|lower,
+  'score': (rs if (rs is defined and rs is not none) else x.score) or 0,
+  'role': x['detected_role'] or x['role'] or rn.v or '',
+  'rtitle': rt.v,
+  'matched': 0, 'total': 0,
+  'ts': (ts.isoformat() + ('' if ts.tzinfo else 'Z')) if ts else '',
+  'url': url_for('history_detail', scan_id=x.id),
+  'why': 'type column says resume' if ex_r else 'type column says job' if ex_j else 'real relevancy_score found' if has_rel else ('resume-only field: ' ~ tk.h) if tk.h else 'risk label says match' if rk else 'no resume signal found'
+}] %}
+{% endif %}
+{% endfor %}
+{{ ns.r|tojson }}
+{%- endmacro %}{% set src = items if items else (history or recent_scans or scans or []) %}
+<main class="page"><div class="wrap dsh">
+{% if not src %}
+<div class="page-head"><div class="eyebrow">Dashboard</div><h1>Your safety overview.</h1><p>Run your first check and your statistics will appear here.</p></div>
+<div class="acts"><a class="btn btn-primary" href="/detector">Scan a job posting</a><a class="btn-ghost" href="/resume-screening">Screen a resume</a></div>
+{% else %}
+<div class="dh"><div><div class="ey">Dashboard</div><h1>Your safety overview</h1><p id="sum"></p></div>
+<div class="ctl"><div class="seg" id="rg"><button data-r="7">7 days</button><button class="on" data-r="30">30 days</button><button data-r="90">90 days</button><button data-r="0">All time</button></div><a class="btn btn-primary" href="/detector">Scan a job</a><a class="btn-ghost" href="/resume-screening">Screen a resume</a></div></div>
+{% if recent_scans and not items and not history and not scans %}<div class="notice" style="margin:16px 0 0;font-size:13px">Your dashboard route is only passing the latest {{ recent_scans|length }} scans, so the 7 / 30 / 90 day buttons cannot change the numbers. Pass all of your scans from the dashboard route as <code>history</code>.</div>{% endif %}
+<div class="kp" id="kp"></div>
+<div class="row r1">
+<div><div class="sh"><h3>Scam radar</h3><span class="hint">Hover a dot</span></div><div class="ch rdr" id="radar"></div></div>
+<div><div class="sh"><h3>Scan activity</h3><span class="hint"><span class="k" style="--c:var(--m)">Jobs</span><span class="k" style="--c:var(--v)">Resumes</span></span></div><div class="ch" id="chart"></div></div>
+<div><div class="sh"><h3>Verdicts</h3><span class="hint">Select to open</span></div><div id="rings"></div></div>
+</div>
+<div class="row r2">
+<div><div class="sh"><h3>Score distribution</h3><span class="hint">Job postings</span></div><div id="dist"></div></div>
+<div><div class="sh"><h3>Safety trend</h3><span class="hint">Average over time</span></div><div class="ch" id="trend"></div></div>
+<div><div class="sh"><h3>Resume fit by role</h3><span class="hint">Match score</span></div><div class="ch" id="plot"></div></div>
+</div>
+<div class="row r3">
+<div><div class="sh"><h3>When you scan</h3><span class="hint">Weekday and time</span></div><div class="ch" id="punch"></div></div>
+<div><div class="sh"><h3>Red-flag words</h3></div><div class="words" id="words"></div></div>
+<div><div class="sh"><h3>Employers to watch</h3></div><div id="cos"></div></div>
+</div>
+<div class="row r4">
+<div><div class="sh"><h3>Latest job postings</h3><a class="btn-ghost" href="/history?type=job">View all</a></div><div class="fl" id="fj"></div></div>
+<div><div class="sh"><h3>Latest resume screenings</h3><a class="btn-ghost" href="/history?type=resume">View all</a></div><div class="fl" id="fr"></div></div>
+</div>
 {% endif %}
 </div></main>
+<style>
+.page:has(.dsh){padding:30px 0 56px}
+.dsh{--l:rgba(255,255,255,.1);--m:#66d9c9;--v:#9fbfff;--mut:#bbc7c6}
+.dsh h1,.dsh h3,.dsh b,.dsh strong{font-weight:500}
+.dsh a:focus-visible,.dsh button:focus-visible{outline:2px solid var(--m);outline-offset:3px}
+.dsh .seg{display:inline-flex;border:1px solid var(--l);border-radius:999px;padding:3px;max-width:100%;overflow-x:auto}
+.dsh .seg button{border:0;background:none;color:var(--mut);padding:7px 15px;border-radius:999px;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap}
+.dsh .seg button:hover{color:#fff}.dsh .seg button.on{background:var(--gradient-aurora);color:#062522}
+.dsh .dh{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.dsh .ey{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.dsh h1{font-size:clamp(26px,3.4vw,36px);letter-spacing:-.02em;line-height:1.1}.dsh .dh p{font-size:13px;color:var(--mut);margin-top:6px}
+.dsh .ctl{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.dsh .btn-primary{padding:11px 18px}
+.dsh .kp{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--l);border-bottom:1px solid var(--l)}
+.dsh .ki{display:flex;align-items:center;gap:12px;padding:14px 14px;border-left:1px solid var(--l);min-width:0}.dsh .ki:first-child{border-left:0;padding-left:0}
+.dsh .ki svg{width:52px;height:52px;flex:none}.dsh .ki b{display:block;font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+.dsh .ki span{display:block;font-size:12px;color:var(--mut);margin-top:2px}.dsh .ki i{display:block;font-style:normal;font-size:11px;color:var(--slate-deep)}
+.dsh .kr,.dsh .rs{transition:stroke-dasharray .9s ease}
+.dsh .row{display:grid;gap:34px;margin-top:30px}.dsh .r1{grid-template-columns:4fr 5fr 3fr}.dsh .r2{grid-template-columns:repeat(3,1fr)}.dsh .r3{grid-template-columns:5fr 3fr 4fr}.dsh .r4{grid-template-columns:1fr 1fr}
+.dsh .row>div{min-width:0}
+.dsh .sh{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--l);padding-bottom:10px;margin-bottom:16px}
+.dsh .sh h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}.dsh .hint{font-size:12px;color:var(--slate-deep)}
+.dsh .k{margin-left:12px}.dsh .k:before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px}
+.dsh .ch{position:relative}.dsh .ch svg{display:block}.dsh #chart svg,.dsh #trend svg,.dsh #punch svg{width:100%;height:auto}.dsh .rdr{max-width:330px;margin:0 auto}.dsh .rdr svg{width:100%;height:auto}
+.dsh .tip{position:absolute;top:0;pointer-events:none;background:#011d1c;border:1px solid var(--l);border-radius:6px;padding:7px 11px;font-size:12px;line-height:1.55;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:3}
+.dsh .sw{transform-origin:180px 180px;animation:sw 7s linear infinite}@keyframes sw{to{transform:rotate(360deg)}}
+.dsh .pu{transform-box:fill-box;transform-origin:center;animation:pu 2.2s ease-out infinite}@keyframes pu{from{transform:scale(1);opacity:.7}to{transform:scale(3.2);opacity:0}}
+.dsh .rdr a circle,.dsh #plot a circle,.dsh #trend a circle,.dsh #punch a circle{transition:transform .2s;transform-box:fill-box;transform-origin:center;animation:pop .5s backwards;animation-delay:var(--d,0s);cursor:pointer}
+.dsh .rdr a:hover circle,.dsh #plot a:hover circle,.dsh #trend a:hover circle,.dsh #punch a:hover circle{transform:scale(1.7)}@keyframes pop{from{transform:scale(0);opacity:0}}
+.dsh .rn{display:flex;align-items:center;gap:12px;margin-bottom:10px}.dsh .rn svg{width:96px;flex:none}.dsh .lg{flex:1;min-width:0}
+.dsh .lg a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;font-size:13px;color:var(--mut)}.dsh .lg a:hover{color:#fff}.dsh .lg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+.dsh .dist{display:flex;align-items:flex-end;gap:5px;height:170px}
+.dsh .dist>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:2px;height:100%;font-size:11px;color:var(--mut);text-align:center}
+.dsh .dist u{display:block;border-radius:3px;transition:height .6s}.dsh .dist small{margin-top:6px;color:var(--slate-deep)}.dsh .dist span{margin-bottom:3px;min-height:14px}
+.dsh .words{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;line-height:1.25}.dsh .words a{transition:transform .2s;display:inline-block}.dsh .words a:hover{transform:translateY(-2px);color:#fff!important}.dsh .words sup{font-size:10px;color:var(--slate-deep);margin-left:2px}
+.dsh .hb2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--l);font-size:13px}.dsh .hb2:first-child{padding-top:0}
+.dsh em{font-style:normal;font-size:11px;padding:3px 8px;border-radius:4px;margin-left:5px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c)}
+.dsh .em{color:var(--slate-deep);font-size:13px}
+.dsh .fl a{display:grid;grid-template-columns:10px 1fr auto 96px;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--l);transition:background .2s}.dsh .fl a:hover{background:rgba(255,255,255,.03)}
+.dsh .dt{width:8px;height:8px;border-radius:50%}.dsh .tt{min-width:0}.dsh .tt b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsh .tt small{display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dsh .sc{font-size:12px;color:var(--slate-deep);text-align:right}.dsh .pl{font-size:11px;padding:3px 9px;border-radius:4px;white-space:nowrap;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c)}
+@media(max-width:1050px){.dsh .r1,.dsh .r2,.dsh .r3,.dsh .r4{grid-template-columns:1fr}.dsh .kp{grid-template-columns:1fr 1fr}.dsh .ki{border-left:0;border-top:1px solid var(--l);padding-left:0}.dsh .row{margin-top:26px}.dsh .fl a{grid-template-columns:10px 1fr auto}.dsh .sc{display:none}}
+@media(prefers-reduced-motion:reduce){.dsh .sw,.dsh .pu,.dsh a circle{animation:none}}
+</style>
+{% if src %}
+<script>
+(()=>{
+const SAFETY=true; /* set to false if a job "score" means risk (higher = riskier) */
+const M={low:'safe',medium:'caution',high:'risky'};
+const CO={safe:'#46c88c',strong:'#46c88c',caution:'#f0be46',moderate:'#f0be46',risky:'#e65a5a',weak:'#e65a5a'};
+const band=s=>s>=60?'strong':s>=40?'moderate':'weak';
+const lab=x=>x.type==='job'?cap(x.v):(/match/.test(x.risk||'')?cap(x.risk):cap(x.v)+' match');
+const D={{ scan_json(src) }}.map(x=>{const v=x.type==='job'?(M[x.risk]||x.risk):band(+x.score||0);return {...x,v,d:new Date(x.ts)}});
+const $=s=>document.querySelector(s),DAY=864e5,NOW=Date.now();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
+const avg=a=>a.length?Math.round(a.reduce((t,x)=>t+(+x.score||0),0)/a.length):0;
+const ago=d=>{const m=(NOW-d)/6e4;return m<60?Math.max(1,Math.round(m))+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago'};
+const fd=d=>d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+const sf=x=>SAFETY?(+x.score||0):100-(+x.score||0);
+(()=>{const g=t=>{const c={},n=D.filter(x=>x.type===t).length;D.forEach(x=>{if(x.type===t)c[x.title]=(c[x.title]||0)+1});
+D.forEach(x=>{if(x.type!==t)return;x.raw=x.title;if((c[x.title]>=3&&c[x.title]/n>=.4)||/^(untitled|resume( screening)?|job( posting)?|scan|screening|unknown)$/i.test(String(x.title).trim()))x.title=(x.rtitle&&x.rtitle!==x.title)?x.rtitle:(t==='resume'?'Resume screening':'Job posting')+', '+x.d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})})};g('job');g('resume')})();
+const J=a=>a.filter(x=>x.type==='job'),Z=a=>a.filter(x=>x.type==='resume');
+let R=30,F='all',cur=[],prev=[];
+
+function cu(){document.querySelectorAll('[data-n]').forEach(e=>{const n=+e.dataset.n,s=e.dataset.s||'';if(matchMedia('(prefers-reduced-motion:reduce)').matches){e.textContent=n+s;return}const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/700);e.textContent=Math.round(n*(1-Math.pow(1-k,3)))+s;if(k<1)requestAnimationFrame(f)})(t0)})}
+
+function sum(){const j=J(cur),r=Z(cur),k=j.filter(x=>x.v==='risky').length;
+$('#sum').textContent=`${j.length} job posting${j.length==1?'':'s'} and ${r.length} resume${r.length==1?'':'s'} checked ${R?'in the last '+R+' days':'so far'}`+(k?`, ${k} flagged risky.`:'.')}
+
+function kpis(){
+const j=J(cur),r=Z(cur),T=Math.max(1,j.length+r.length),k=j.filter(x=>x.v==='risky').length,s=j.filter(x=>x.v==='safe').length,pj=J(prev).length,pr=Z(prev).length;
+const dl=(c,p)=>R?`${c>=p?'▲':'▼'} ${Math.abs(c-p)} vs previous`:'';
+const pc=(a,b)=>b?Math.round(a/b*100):0,mx=r.length?Math.max(...r.map(x=>+x.score||0)):0;
+const it=[[j.length,'','Job postings scanned',j.length/T*100,'#66d9c9',dl(j.length,pj)],[pc(k,j.length),'%','Flagged risky',pc(k,j.length),CO.risky,k+' postings'],[pc(s,j.length),'%','Marked safe',pc(s,j.length),CO.safe,s+' postings'],[r.length,'','Resumes screened',r.length/T*100,'#9fbfff',dl(r.length,pr)],[avg(r),'%','Average match',avg(r),'#f0a6ff',''],[mx,'%','Best match',mx,'#f2c14e','']];
+$('#kp').innerHTML=it.map(([n,u,l,p,c,sub])=>`<div class="ki"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"/><circle class="kr" cx="27" cy="27" r="22" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" data-v="${Math.min(100,p)}" transform="rotate(-90 27 27)"/></svg><div><b data-n="${n}" data-s="${u}">0${u}</b><span>${l}</span><i>${sub}</i></div></div>`).join('');
+anim()}
+function anim(){requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelectorAll('.kr').forEach(e=>e.style.strokeDasharray=e.dataset.v+' 100');document.querySelectorAll('.rs').forEach(e=>e.style.strokeDasharray=e.dataset.l+' 400')}))}
+
+function area(){
+const el=$('#chart');
+const t0=Math.min(...D.map(x=>+x.d)),span=R||Math.min(180,Math.max(7,Math.ceil((NOW-t0)/DAY)+1)),st=span>31?7:1,n=Math.ceil(span/st);
+const j=Array(n).fill(0),r=Array(n).fill(0);
+cur.forEach(x=>{const i=n-1-Math.floor((NOW-x.d)/DAY/st);if(i>=0&&i<n)(x.type==='job'?j:r)[i]++});
+const W=Math.max(300,el.clientWidth),H=200,L=30,B=26,T=10,P=8,mx=Math.max(3,...j,...r),X=i=>L+i*(W-L-P)/Math.max(n-1,1),Y=v=>H-B-v/mx*(H-B-T);
+const pa=a=>a.map((v,i)=>`${i?'L':'M'}${X(i)} ${Y(v)}`).join('');
+const ar=(a,c,g)=>`<path d="${pa(a)}L${X(n-1)} ${Y(0)}L${X(0)} ${Y(0)}Z" fill="url(#${g})"/><path d="${pa(a)}" fill="none" stroke="${c}" stroke-width="2.5"/>`;
+const gd=(id,c)=>`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".35"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient>`;
+const gl=[0,.25,.5,.75,1].map(f=>`<line x1="${L}" x2="${W-P}" y1="${Y(mx*f)}" y2="${Y(mx*f)}" stroke="rgba(255,255,255,.08)"/><text x="${L-6}" y="${Y(mx*f)+4}" text-anchor="end" font-size="10" fill="currentColor" opacity=".5">${Math.round(mx*f)}</text>`).join('');
+const lb=[0,Math.floor((n-1)/2),n-1].map(i=>`<text x="${X(i)}" y="${H-6}" text-anchor="${i?(i==n-1?'end':'middle'):'start'}" font-size="10" fill="currentColor" opacity=".5">${fd(new Date(NOW-(n-1-i)*st*DAY))}</text>`).join('');
+el.innerHTML=`<svg viewBox="0 0 ${W} ${H}"><defs>${gd('gj','#66d9c9')}${gd('gr','#8fb4ff')}</defs>${gl}${ar(j,'#66d9c9','gj')}${ar(r,'#8fb4ff','gr')}${lb}<line id="sc" y1="${T}" y2="${H-B}" stroke="currentColor" opacity="0"/></svg><div class="tip" id="tp"></div>`;
+const sv=el.firstChild,sc=$('#sc'),tp=$('#tp');
+el.onpointermove=e=>{const b=sv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*W,i=Math.max(0,Math.min(n-1,Math.round((x-L)/((W-L-P)/Math.max(n-1,1)))));
+sc.setAttribute('x1',X(i));sc.setAttribute('x2',X(i));sc.setAttribute('opacity',.3);
+const a=new Date(NOW-(n-1-i)*st*DAY);
+tp.innerHTML=`<b>${st>1?fd(new Date(+a-6*DAY))+' to ':''}${fd(a)}</b><br>Job postings: ${j[i]}<br>Resumes: ${r[i]}`;
+const px=X(i)/W*b.width;tp.style.left=(px>b.width-140?px-130:px+10)+'px';tp.style.opacity=1};
+el.onpointerleave=()=>{sc.setAttribute('opacity',0);tp.style.opacity=0}}
+
+function tip(el,tp){el.onpointermove=e=>{const a=e.target.closest('a');if(!a){tp.style.opacity=0;return}const b=el.getBoundingClientRect(),r=a.getBoundingClientRect();tp.innerHTML='<b>'+E(a.dataset.a)+'</b><br>'+E(a.dataset.b);tp.style.left=Math.max(0,Math.min(r.left-b.left+14,b.width-190))+'px';tp.style.top=Math.max(0,r.top-b.top-46)+'px';tp.style.opacity=1};el.onpointerleave=()=>{tp.style.opacity=0}}
+
+function radar(){
+const j=[...J(cur)].sort((a,b)=>a.d-b.d),el=$('#radar'),c=180,Rm=160,r0=38,n=j.length,sf=x=>SAFETY?(+x.score||0):100-(+x.score||0);
+const t0=R?NOW-R*DAY:(n?+j[0].d:NOW-DAY),sp=Math.max(NOW-t0,DAY),rad=s=>r0+(100-s)/100*(Rm-r0);
+const idx=n?Math.round(j.reduce((t,x)=>t+(x.v==='safe'?1:x.v==='caution'?.5:0),0)/n*100):null;
+const ic=idx==null?'#8aa':idx>=75?CO.safe:idx>=50?CO.caution:CO.risky;
+const spk=[...Array(12)].map((_,i)=>{const a=i*Math.PI/6;return `<line x1="${c+r0*Math.cos(a)}" y1="${c+r0*Math.sin(a)}" x2="${c+Rm*Math.cos(a)}" y2="${c+Rm*Math.sin(a)}" stroke="rgba(255,255,255,.07)"/>`}).join('');
+const dots=j.map((x,i)=>{const a=(-90+360*Math.min(1,Math.max(0,(x.d-t0)/sp)))*Math.PI/180,r=rad(sf(x)),cx=c+r*Math.cos(a),cy=c+r*Math.sin(a),col=CO[x.v]||'#8aa';
+return `<a href="${E(x.url)}" data-a="${E(x.title)}" data-b="${E((x.company||'No company')+', '+cap(x.v)+', '+x.score+'/100')}">${x.v==='risky'?`<circle class="pu" cx="${cx}" cy="${cy}" r="5" fill="${col}"/>`:''}<circle cx="${cx}" cy="${cy}" r="5.5" fill="${col}" stroke="#011d1c" stroke-width="1.5" style="--d:${i*20}ms"/></a>`}).join('');
+const lab=(t,r)=>`<text x="180" y="${c+r+3}" text-anchor="middle" font-size="8" fill="currentColor" opacity=".35">${t}</text>`;
+const ring=(r,f)=>`<circle cx="180" cy="180" r="${r}" fill="${f}" stroke="rgba(255,255,255,.12)"/>`;
+el.innerHTML=`<svg viewBox="0 0 360 360"><defs><radialGradient id="rgd"><stop offset="0" stop-color="#66d9c9" stop-opacity="0"/><stop offset="1" stop-color="#66d9c9" stop-opacity=".35"/></radialGradient></defs>${ring(Rm,'rgba(230,90,90,.10)')}${ring(rad(40),'rgba(240,190,70,.10)')}${ring(rad(70),'rgba(70,200,140,.12)')}${spk}<g class="sw"><path d="M180 180L180 20A160 160 0 0 1 ${c+Rm*Math.cos(-Math.PI*2/9)} ${c+Rm*Math.sin(-Math.PI*2/9)}Z" fill="url(#rgd)"/></g>${lab('SAFE',(r0+rad(70))/2)}${lab('WATCH',(rad(70)+rad(40))/2)}${lab('RISKY',(rad(40)+Rm)/2)}<circle cx="180" cy="180" r="${r0}" fill="#011d1c" stroke="${ic}" stroke-width="2"/><text x="180" y="184" text-anchor="middle" font-size="24" font-weight="500" fill="currentColor">${idx==null?'--':idx}</text><text x="180" y="197" text-anchor="middle" font-size="7" fill="currentColor" opacity=".6">safety index</text>${dots}</svg><div class="tip" id="rtp"></div>`;
+tip(el,$('#rtp'))}
+
+function rings(){
+const mk=(a,t,l,parts)=>{const T=a.length,C=2*Math.PI*40;let o=0;
+const seg=parts.map(([k,s])=>{const n=a.filter(x=>x.v===k).length,len=T?n/T*C:0,e=n?`<circle class="rs" cx="55" cy="55" r="40" fill="none" stroke="${CO[k]}" stroke-width="14" data-l="${Math.max(len-2,.5)}" stroke-dasharray="0 400" stroke-dashoffset="${-o}" transform="rotate(-90 55 55)"><title>${s}: ${n}</title></circle>`:'';o+=len;return e}).join('');
+return `<div class="rn"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="14"/>${seg}<text x="55" y="58" text-anchor="middle" font-size="22" fill="currentColor" data-n="${T}">0</text><text x="55" y="73" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">${l}</text></svg><div class="lg">${parts.map(([k,s])=>`<a href="/history?type=${t}&v=${k}"><span><i style="background:${CO[k]}"></i>${s}</span><b data-n="${a.filter(x=>x.v===k).length}">0</b></a>`).join('')}</div></div>`};
+$('#rings').innerHTML=mk(J(cur),'job','postings',[['safe','Safe'],['caution','Caution'],['risky','Risky']])+mk(Z(cur),'resume','resumes',[['strong','Strong'],['moderate','Moderate'],['weak','Weak']]);anim()}
+
+function plot(){
+const el=$('#plot'),m={};Z(cur).forEach(x=>{if(x.role)(m[x.role]=m[x.role]||[]).push(x)});
+const e=Object.entries(m).sort((a,b)=>b[1].length-a[1].length).slice(0,6);
+if(!e.length){el.innerHTML='<p class="em">No detected roles in this period.</p>';return}
+const W=Math.max(300,el.clientWidth),L=106,rh=30,H=e.length*rh+26,X=s=>L+s/100*(W-L-14);
+const zn=[[0,40,CO.weak],[40,60,CO.moderate],[60,100,CO.strong]].map(([a,b,c])=>`<rect x="${X(a)}" y="0" width="${X(b)-X(a)}" height="${e.length*rh}" fill="${c}" opacity=".09"/>`).join('');
+const ax=[0,40,60,100].map(s=>`<text x="${X(s)}" y="${H-6}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".5">${s}</text>`).join('');
+const rows=e.map(([k,v],i)=>`<line x1="${L}" x2="${W-14}" y1="${i*rh+rh/2}" y2="${i*rh+rh/2}" stroke="rgba(255,255,255,.1)"/><text x="${L-10}" y="${i*rh+rh/2+4}" text-anchor="end" font-size="11" fill="currentColor">${E(k.length>13?k.slice(0,12)+'…':k)}</text>`+v.map((x,n)=>`<a href="${E(x.url)}" data-a="${E(x.title)}" data-b="${E(k+', '+x.score+'% match')}"><circle cx="${X(Math.min(100,+x.score||0))}" cy="${i*rh+rh/2+(n%2?5:-5)}" r="6.5" fill="${CO[x.v]}" stroke="#011d1c" stroke-width="1.5" style="--d:${n*30}ms"/></a>`).join('')).join('');
+el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${zn}${rows}${ax}</svg><div class="tip" id="ptp"></div>`;
+tip(el,$('#ptp'))}
+
+function trend(){
+const el=$('#trend'),j=J(cur),n=12;
+if(!j.length){el.innerHTML='<p class="em">No job postings in this period.</p>';return}
+const t0=R?NOW-R*DAY:Math.min(...j.map(x=>+x.d)),sl=Math.max(NOW-t0,DAY)/n,b=Array.from({length:n},()=>[]);
+j.forEach(x=>b[Math.min(n-1,Math.max(0,Math.floor((x.d-t0)/sl)))].push(sf(x)));
+const av=b.map(a=>a.length?Math.round(a.reduce((p,q)=>p+q,0)/a.length):null);
+const W=Math.max(300,el.clientWidth),H=205,L=34,B=28,T=12,P=12,X=i=>L+i*(W-L-P)/(n-1),Y=s=>H-B-s/100*(H-B-T);
+const zn=[[0,40,CO.risky],[40,70,CO.caution],[70,100,CO.safe]].map(([a,c,k])=>`<rect x="${L}" y="${Y(c)}" width="${W-L-P}" height="${Y(a)-Y(c)}" fill="${k}" opacity=".08"/>`).join('');
+const gl=[0,40,70,100].map(s=>`<line x1="${L}" x2="${W-P}" y1="${Y(s)}" y2="${Y(s)}" stroke="rgba(255,255,255,.08)"/><text x="${L-8}" y="${Y(s)+4}" text-anchor="end" font-size="10" fill="currentColor" opacity=".5">${s}</text>`).join('');
+let p='',pen=0;av.forEach((v,i)=>{if(v==null){pen=0;return}p+=(pen?'L':'M')+X(i)+' '+Y(v);pen=1});
+const dots=av.map((v,i)=>v==null?'':`<a data-a="${fd(new Date(t0+i*sl))} to ${fd(new Date(t0+(i+1)*sl))}" data-b="Average safety ${v}, ${b[i].length} posting${b[i].length>1?'s':''}"><circle cx="${X(i)}" cy="${Y(v)}" r="6" fill="${v>=70?CO.safe:v>=40?CO.caution:CO.risky}" stroke="#012624" stroke-width="2" style="--d:${i*40}ms"/></a>`).join('');
+el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${zn}${gl}<path d="${p}" fill="none" stroke="rgba(237,255,254,.55)" stroke-width="1.5"/>${dots}<text x="${L}" y="${H-8}" font-size="10" fill="currentColor" opacity=".5">${fd(new Date(t0))}</text><text x="${W-P}" y="${H-8}" text-anchor="end" font-size="10" fill="currentColor" opacity=".5">Now</text></svg><div class="tip" id="ttp"></div>`;
+tip(el,$('#ttp'))}
+
+function dist(){
+const j=J(cur),bn=Array.from({length:10},()=>({n:0})),m0=['risky','caution','safe'];
+j.forEach(x=>{const b=bn[Math.min(9,Math.floor(sf(x)/10))];b[x.v]=(b[x.v]||0)+1;b.n++});
+const m=Math.max(1,...bn.map(b=>b.n));
+$('#dist').innerHTML=j.length?`<div class="dist">${bn.map((b,i)=>`<div title="Score ${i*10} to ${i==9?100:i*10+9}: ${b.n} posting${b.n==1?'':'s'}"><span>${b.n||''}</span>${m0.map(k=>b[k]?`<u style="height:${b[k]/m*100}px;background:${CO[k]}"></u>`:'').join('')}<small>${i*10}</small></div>`).join('')}</div>`:'<p class="em">No job postings in this period.</p>'}
+
+function punch(){
+const el=$('#punch'),m=Array.from({length:7},()=>Array(12).fill(0)),dn=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+cur.forEach(x=>m[(x.d.getDay()+6)%7][Math.floor(x.d.getHours()/2)]++);
+const mx=Math.max(1,...m.flat()),W=Math.max(300,el.clientWidth),L=46,cw=(W-L-8)/12,rh=25,H=7*rh+26,hr=h=>(h%12||12)+(h<12?'am':'pm');
+el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${dn.map((n,r)=>`<text x="${L-12}" y="${r*rh+rh/2+4}" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">${n.slice(0,3)}</text><line x1="${L}" x2="${W-8}" y1="${r*rh+rh/2}" y2="${r*rh+rh/2}" stroke="rgba(255,255,255,.06)"/>`+m[r].map((v,c)=>`<a data-a="${n}, ${hr(c*2)} to ${hr(c*2+2)}" data-b="${v} scan${v==1?'':'s'}"><circle cx="${L+cw*c+cw/2}" cy="${r*rh+rh/2}" r="${v?4+v/mx*10:2}" fill="${v?'#66d9c9':'rgba(255,255,255,.12)'}" opacity="${v?.35+.65*v/mx:1}" style="--d:${(r*12+c)*6}ms"/></a>`).join('')).join('')}${[0,3,6,9].map(c=>`<text x="${L+cw*c}" y="${H-6}" font-size="10" fill="currentColor" opacity=".5">${hr(c*2)}</text>`).join('')}</svg><div class="tip" id="utp"></div>`;
+tip(el,$('#utp'))}
+
+function words(){
+const st=new Set('the and for with from you your our new job jobs hiring wanted required needed apply now posting resume screening jan feb mar apr may jun jul aug sep oct nov dec'.split(' ')),m={};
+J(cur).filter(x=>x.v!=='safe').forEach(x=>(String(x.rtitle||x.raw||x.title).toLowerCase().match(/[a-z]{3,}/g)||[]).forEach(w=>{if(!st.has(w))m[w]=(m[w]||0)+1}));
+const e=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,14),mx=e.length?e[0][1]:1;
+$('#words').innerHTML=e.length?e.map(([w,c])=>`<a href="/history?type=job&q=${encodeURIComponent(w)}" style="font-size:${14+c/mx*20}px;color:${c/mx>.6?CO.risky:c/mx>.3?CO.caution:'#bbc7c6'}" title="${c} cautioned or risky posting${c>1?'s':''}">${E(w)}<sup>${c}</sup></a>`).join(''):'<p class="em">Not enough distinct titles in cautioned or risky postings yet.</p>'}
+
+function cos(){const m={};J(cur).forEach(x=>{if(!x.company||x.v==='safe')return;const o=m[x.company]=m[x.company]||{r:0,c:0};x.v==='risky'?o.r++:o.c++});
+const e=Object.entries(m).sort((a,b)=>b[1].r-a[1].r||b[1].c-a[1].c).slice(0,5);
+$('#cos').innerHTML=e.length?e.map(([k,o])=>`<div class="hb2"><span>${E(k)}</span><span>${o.r?`<em style="--c:${CO.risky}">${o.r} risky</em>`:''}${o.c?`<em style="--c:${CO.caution}">${o.c} caution</em>`:''}</span></div>`).join(''):'<p class="em">No cautioned or risky employers in this period.</p>'}
+
+function feed(){
+const row=x=>`<a href="${E(x.url)}"><i class="dt" style="background:${CO[x.v]||'#8aa'}"></i><span class="tt"><b>${E(x.title)}</b><small>${E(x.type==='job'?(x.company||'Company not provided'):(x.role?'Detected role: '+x.role:'Resume screening'))}</small></span><span class="pl" style="--c:${CO[x.v]||'#8aa'}">${lab(x)}</span><small class="sc">${x.score}${x.type==='job'?'/100':'%'}, ${ago(x.d)}</small></a>`;
+const L=t=>[...D].filter(x=>x.type===t).sort((p,q)=>q.d-p.d).slice(0,6).map(row).join('')||'<p class="em">Nothing here yet.</p>';
+$('#fj').innerHTML=L('job');$('#fr').innerHTML=L('resume')}
+
+function render(){
+cur=R?D.filter(x=>NOW-x.d<=R*DAY):D;
+prev=R?D.filter(x=>{const t=NOW-x.d;return t>R*DAY&&t<=2*R*DAY}):[];
+sum();kpis();radar();area();trend();dist();rings();plot();words();punch();cos();cu()}
+
+document.querySelectorAll('#rg button').forEach(b=>b.onclick=()=>{R=+b.dataset.r;document.querySelectorAll('#rg button').forEach(c=>c.classList.toggle('on',c===b));render()});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{area();plot();trend();punch()},150)});
+feed();render();
+})();
+</script>
+{% endif %}
 {% endblock %}

@@ -17,15 +17,24 @@
   }
 }
 
-/* Sticky Right Column Simulation Container */
+/* Sticky Right Column: stays pinned under the 80px sticky navbar while the page scrolls */
+.detector-page,
+.detector-page .wrap,
+.scan-hero-grid { overflow: visible; }
+
 .sticky-preview-rail {
   position: -webkit-sticky;
   position: sticky;
-  top: 24px;
+  top: 104px;
+  align-self: start;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   z-index: 10;
+  max-height: calc(100vh - 120px);
+}
+@media (max-width: 1024px) {
+  .sticky-preview-rail { position: static; max-height: none; }
 }
 
 /* Typography Refinements for Simulation Card */
@@ -83,44 +92,217 @@
   white-space: nowrap;
 }
 
-/* High-Contrast Confidence Bars */
-.confidence-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+/* ==========================================================================
+   JOBSHIELD THEME - resume screening results & upload
+   Matches the site's dark-teal glass look (home.html). Scoped by .rs- classes,
+   so base.html / style.css / the resume-quality page are not affected.
+   ========================================================================== */
+.detector-page {
+  --rs-deep: #011d1c;
+  --rs-mint: #cbfffc;
+  --rs-silver: #bbc7c6;
+  --rs-slate: #8fa2a1;
+  --rs-lav: #fde9ff;
+  --rs-amber: #ffd9a0;
+  --rs-line: rgba(237, 255, 254, 0.12);
+  --rs-glass: linear-gradient(145deg, rgba(0, 55, 52, 0.74), rgba(0, 29, 28, 0.74));
+  --rs-bio: linear-gradient(90deg, #00827c 0%, #cbfffc 100%);
 }
-.confidence-name {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #0f172a !important;
-  min-width: 220px;
-  flex: 1;
+
+@property --rs-p { syntax: "<number>"; inherits: false; initial-value: 0; }
+@keyframes rs-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes rs-grow { from { width: 0; } }
+@keyframes rs-fill { to { --rs-p: var(--pct); } }
+
+/* make sure [hidden] always wins over the display:grid/flex set on these containers */
+#input-section[hidden], #results-view[hidden], #intro-hero[hidden], .rs-drop[hidden] { display: none !important; }
+
+/* ---- Upload drop zone ---- */
+.rs-drop {
+  display: block; position: relative; cursor: pointer; text-align: center;
+  padding: 30px 20px 26px; border-radius: 16px;
+  border: 1.5px dashed rgba(203, 255, 252, 0.32);
+  background:
+    radial-gradient(ellipse 70% 90% at 50% 0%, rgba(0, 130, 124, 0.26), transparent 70%),
+    rgba(0, 55, 52, 0.32);
+  transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
 }
-.confidence-bar-wrap {
-  flex: 2;
-  background: #e2e8f0;
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
+.rs-drop:hover, .rs-drop.drag {
+  border-color: var(--rs-mint);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px rgba(203, 255, 252, 0.07), 0 14px 34px rgba(0, 0, 0, 0.25);
 }
-.confidence-bar-fill {
-  background: #4f46e5;
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s ease;
+.rs-drop input[type="file"] {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
 }
-.confidence-pct {
-  font-size: 13px;
-  font-weight: 700;
-  color: #312e81 !important;
-  min-width: 45px;
-  text-align: right;
+.rs-drop-icon {
+  width: 50px; height: 50px; margin: 0 auto 14px; border-radius: 14px;
+  background: var(--rs-bio); display: grid; place-items: center;
+  box-shadow: 0 8px 22px rgba(0, 130, 124, 0.35);
+}
+.rs-drop-icon svg { width: 24px; height: 24px; stroke: #012624; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rs-drop strong { display: block; color: #fff; font-size: 15px; font-weight: 600; }
+.rs-drop p { margin: 6px 0 0; color: var(--rs-silver); font-size: 13px; }
+.rs-drop p u { text-decoration: none; color: var(--rs-mint); border-bottom: 1px solid rgba(203, 255, 252, .4); }
+.rs-drop .rs-file {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 6px 14px;
+  border-radius: 999px; font-size: 12.5px; color: var(--rs-silver);
+  background: rgba(203, 255, 252, 0.06); border: 1px solid var(--rs-line);
+}
+.rs-drop.has-file { border-style: solid; border-color: rgba(203, 255, 252, 0.5); }
+.rs-drop.has-file .rs-file { color: var(--rs-mint); border-color: rgba(203, 255, 252, 0.4); background: rgba(203, 255, 252, 0.1); }
+
+/* ---- ATS tips card (right rail) ---- */
+.rs-anatomy {
+  margin-top: 22px; padding: 16px 18px; border-radius: 16px; background: var(--rs-glass);
+  border: 1px solid var(--rs-line); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+.rs-tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 720px) { .rs-tips { grid-template-columns: 1fr; } }
+.rs-anatomy-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.rs-anatomy-head strong { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #fff; font-weight: 600; }
+.rs-tip { display: flex; gap: 10px; align-items: flex-start; padding: 10px 11px; border-radius: 10px; background: rgba(0, 0, 0, 0.18); border: 1px solid var(--rs-line); }
+.rs-tip-n { flex: none; width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #012624; background: var(--rs-bio); }
+.rs-tip b { display: block; font-size: 12.5px; color: #fff; font-weight: 600; }
+.rs-tip div span { display: block; font-size: 11.5px; line-height: 1.45; color: var(--rs-silver); margin-top: 2px; }
+.rs-anatomy-foot { margin-top: 10px; text-align: center; font-size: 11px; color: var(--rs-slate); }
+
+/* ---- Results layout ---- */
+.rs-topbar {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--rs-line);
+}
+.rs-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.rs-topbar .rs-title { font-size: 22px; font-weight: 500; color: #fff; letter-spacing: -0.01em; }
+.rs-topbar .rs-sub { display: block; margin-top: 4px; font-size: 13px; color: var(--rs-silver); }
+
+#summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px; }
+#detail-grid { display: flex; flex-direction: column; gap: 20px; }
+
+.rs-ring-card, .rs-card {
+  position: relative; border-radius: 18px; background: var(--rs-glass); border: 1px solid var(--rs-line);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: rs-rise .6s cubic-bezier(.22, .61, .36, 1) both;
+}
+.rs-ring-card { display: flex; align-items: center; gap: 18px; padding: 18px 20px; overflow: hidden; }
+.rs-ring-card::after {
+  content: ""; position: absolute; right: -50px; top: -50px; width: 150px; height: 150px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 130, 124, 0.35), transparent 70%); pointer-events: none;
+}
+.rs-ring-card:nth-child(2), .rs-card:nth-child(2) { animation-delay: .1s; }
+.rs-ring-card:nth-child(3), .rs-card:nth-child(3) { animation-delay: .2s; }
+.rs-card { padding: 22px; }
+
+.rs-ring {
+  --pct: 0; --c: var(--rs-mint);
+  position: relative; flex: none; width: 88px; height: 88px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--c) calc(var(--rs-p) * 1%), rgba(255, 255, 255, 0.09) 0);
+  animation: rs-fill 1.1s .25s cubic-bezier(.22, .61, .36, 1) both;
+  filter: drop-shadow(0 0 10px rgba(203, 255, 252, 0.18));
+}
+.rs-ring::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #01302d; }
+.rs-ring span { position: relative; font-size: 25px; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.rs-ring-label { position: relative; z-index: 1; min-width: 0; }
+.rs-ring-label b { display: block; font-size: 15px; font-weight: 600; color: #fff; line-height: 1.25; }
+.rs-ring-label small { display: block; margin-top: 5px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--rs-silver); }
+
+/* ---- Cards ---- */
+.rs-card-head {
+  display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;
+  padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--rs-line);
+}
+.rs-card-head h3 { margin: 0 0 5px; font-size: 18px; font-weight: 500; line-height: 1.25; color: #fff; }
+.rs-card-head small { font-size: 13px; color: var(--rs-silver); }
+.rs-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
+.rs-pill.mint { background: rgba(203, 255, 252, 0.12); color: var(--rs-mint); border: 1px solid rgba(203, 255, 252, 0.3); }
+.rs-pill.amber { background: rgba(255, 217, 160, 0.12); color: var(--rs-amber); border: 1px solid rgba(255, 217, 160, 0.32); }
+.rs-pill.lav { background: rgba(253, 233, 255, 0.12); color: var(--rs-lav); border: 1px solid rgba(253, 233, 255, 0.3); }
+.rs-summary { margin: 0 0 18px; font-size: 14.5px; line-height: 1.7; color: #d6e3e2; }
+
+.rs-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.rs-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
+.rs-list { padding: 14px 16px; border-radius: 14px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rs-line); }
+.rs-list h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--rs-silver); font-weight: 600; }
+.rs-list ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: #d6e3e2; }
+.rs-list li { margin: 0 0 6px; }
+.rs-metric .rs-insight { display: block; margin-top: 10px; font-size: 12.5px; line-height: 1.55; font-weight: 400; color: var(--rs-silver); letter-spacing: 0; text-transform: none; }
+.rs-metric { padding: 14px 16px; border-radius: 14px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rs-line); }
+.rs-metric label { display: block; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--rs-silver); font-weight: 600; margin: 0; }
+.rs-metric b { display: block; margin-top: 6px; font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.rs-metric b small { font-size: 13px; font-weight: 400; color: var(--rs-slate); }
+
+.rs-meter { height: 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.09); overflow: hidden; margin-top: 10px; }
+.rs-meter i { display: block; height: 100%; width: var(--w); border-radius: 4px; background: var(--rs-bio); animation: rs-grow 1s .3s cubic-bezier(.22, .61, .36, 1) both; }
+
+.rs-note { margin: 0 0 14px; font-size: 13px; font-weight: 500; }
+.rs-note.ok { color: var(--rs-mint); }
+.rs-note.warn { color: var(--rs-amber); }
+
+.rs-rank { display: flex; align-items: center; gap: 14px; padding: 11px 14px; margin-bottom: 8px; border-radius: 12px; background: rgba(0, 0, 0, 0.18); border: 1px solid var(--rs-line); }
+.rs-rank.top { border-color: rgba(203, 255, 252, 0.4); background: rgba(203, 255, 252, 0.06); }
+.rs-rank-idx { flex: none; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--rs-mint); background: rgba(203, 255, 252, 0.1); }
+.rs-rank.top .rs-rank-idx { color: #012624; background: var(--rs-bio); }
+.rs-rank-name { flex: 1.5; min-width: 0; font-size: 13.5px; font-weight: 500; color: #fff; }
+.rs-rank .rs-meter { flex: 2; margin: 0; }
+.rs-rank-pct { min-width: 46px; text-align: right; font-size: 13px; font-weight: 600; color: var(--rs-mint); }
+
+/* ---- Match breakdown (preferred role) ---- */
+.rs-match { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; padding: 4px 0 6px; }
+.rs-match .rs-ring { width: 118px; height: 118px; }
+.rs-match .rs-ring::before { inset: 10px; }
+.rs-match .rs-ring span { font-size: 34px; }
+.rs-match-label { font-size: 20px; font-weight: 500; color: #fff; }
+.rs-match-sub { margin-top: 4px; font-size: 13px; color: var(--rs-silver); line-height: 1.5; }
+.rs-match-sub b { color: #fff; font-weight: 600; }
+.rs-meter-row { display: grid; grid-template-columns: 190px 1fr 40px; gap: 12px; align-items: center; margin-top: 10px; font-size: 12.5px; color: var(--rs-silver); }
+.rs-meter-row .rs-meter { margin: 0; }
+.rs-meter-row em { font-style: normal; text-align: right; color: #fff; font-weight: 600; }
+.rs-related { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; font-size: 12px; color: var(--rs-silver); }
+.rs-related .rs-chip { font-size: 12px; }
+
+/* ---- Skills ---- */
+.rs-skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin-top: 18px; }
+.rs-skillbox { padding: 16px 18px; border-radius: 14px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rs-line); }
+.rs-skillbox-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
+.rs-skillbox-head span { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; color: var(--rs-silver); }
+.rs-count { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: rgba(203, 255, 252, 0.12); color: var(--rs-mint); }
+.rs-count.gap { background: rgba(253, 233, 255, 0.1); color: var(--rs-lav); }
+.rs-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.rs-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 500; }
+.rs-chip.good { background: rgba(0, 130, 124, 0.28); color: var(--rs-mint); border: 1px solid rgba(203, 255, 252, 0.30); }
+.rs-chip.gap { background: rgba(253, 233, 255, 0.10); color: var(--rs-lav); border: 1px solid rgba(253, 233, 255, 0.34); }
+.rs-chip.gap.high { background: rgba(255, 217, 160, 0.16); color: var(--rs-amber); border-color: rgba(255, 217, 160, 0.5); font-weight: 600; }
+.rs-gaps { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 4px; }
+.rs-gap { position: relative; padding: 9px 12px 9px 15px; border-radius: 10px; background: rgba(255, 217, 160, 0.08); border: 1px solid rgba(255, 217, 160, 0.22); font-size: 12.5px; font-weight: 600; color: var(--rs-mint); line-height: 1.3; }
+.rs-gap::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--rs-amber); }
+.rs-gap small { display: block; margin-top: 2px; font-size: 10.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--rs-amber); opacity: .85; }
+.rs-chip.core { background: rgba(0, 150, 142, 0.34); border-color: rgba(203, 255, 252, 0.45); font-weight: 600; }
+
+.rs-verdict { display: flex; gap: 20px; align-items: center; padding: 18px 20px; border-radius: 14px; margin: 4px 0 6px; background: linear-gradient(135deg, rgba(203,255,252,.09), rgba(203,255,252,.02)); border: 1px solid var(--rs-line); }
+.rs-verdict h4 { margin: 0 0 6px; font-size: 17px; font-weight: 600; color: var(--rs-mint); letter-spacing: .01em; }
+.rs-verdict p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--rs-silver); }
+.rs-verdict .rs-verdict-note { margin-top: 8px; font-size: 12.5px; color: var(--rs-amber); }
+.rs-verdict .rs-ring { flex: 0 0 auto; }
+.rs-steps { display: grid; gap: 8px; margin-bottom: 4px; }
+.rs-step { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 10px; background: rgba(255,217,160,.07); border: 1px solid rgba(255,217,160,.22); font-size: 13px; font-weight: 600; color: var(--rs-mint); }
+.rs-step b { flex: 0 0 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--rs-amber); color: #012624; font-size: 12px; font-weight: 700; }
+@media (max-width: 560px) { .rs-verdict.with-ring { flex-direction: column; align-items: flex-start; } }
+.rs-subhead { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin: 10px 0 6px; }
+.rs-subhead:first-child { margin-top: 0; }
+.rs-chip.rel { background: rgba(203, 255, 252, 0.07); color: var(--rs-mint); border: 1px solid var(--rs-line); }
+.rs-empty { font-size: 13px; font-style: italic; color: var(--rs-slate); }
+.rs-empty.ok { color: var(--rs-mint); font-style: normal; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .rs-match { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .rs-meter-row { grid-template-columns: 1fr 40px; }
+  .rs-meter-row .rs-meter { grid-column: 1 / -1; order: 3; }
+  .rs-rank { flex-wrap: wrap; }
+  .rs-rank .rs-meter { flex-basis: 100%; order: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rs-ring-card, .rs-card, .rs-ring, .rs-meter i { animation: none; }
+  .rs-ring { --rs-p: var(--pct); }
 }
 
 /* ==========================================================================
@@ -316,13 +498,15 @@
               </div>
 
               <div id="upload-mode" hidden>
-                <div style="border:2px dashed rgba(0,0,0,0.15); border-radius:12px; padding:28px 20px; text-align:center; background:#fafafa;">
-                  <div style="font-size:32px; margin-bottom:8px;">📄</div>
-                  <strong>Upload Resume Document</strong>
-                  <p style="margin:6px 0 16px; opacity:.7;">PDF or DOCX format.</p>
+                <label class="rs-drop" id="rs-drop" for="resume">
+                  <div class="rs-drop-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+                  </div>
+                  <strong>Drop your resume here</strong>
+                  <p>or <u>browse files</u> &middot; PDF or DOCX</p>
                   <input id="resume" name="resume" type="file" accept=".pdf,.docx">
-                  <div id="resume-file-name" class="file-help" style="margin-top:10px;">No file selected.</div>
-                </div>
+                  <div id="resume-file-name" class="file-help rs-file">No file selected.</div>
+                </label>
                 <button type="button" id="paste-toggle" class="btn btn-nav" style="margin-top:12px;">📝 Switch to Text Paste</button>
               </div>
 
@@ -368,6 +552,18 @@
           </div>
           <div class="progress-track"><div id="resume-progress-fill"></div></div>
           <div class="progress-steps"><span>Parsing</span><span>Verbs</span><span>Quantification</span><span>Competency</span></div>
+        </div>
+        <!-- ATS TIPS: lives under the form (left column) so the right rail only holds the pinned scanner -->
+        <div class="rs-anatomy">
+          <div class="rs-anatomy-head"><span>💡</span><strong>Anatomy of an ATS-ready resume</strong></div>
+
+          <div class="rs-tips">
+          <div class="rs-tip"><span class="rs-tip-n">1</span><div><b>The Google XYZ formula</b><span>Accomplished [X], measured by [Y], by doing [Z]. Lead with measurable outcomes.</span></div></div>
+          <div class="rs-tip"><span class="rs-tip-n">2</span><div><b>Contextual keywords</b><span>Show tools alongside outcomes and certifications. Don't keyword-stuff.</span></div></div>
+          <div class="rs-tip"><span class="rs-tip-n">3</span><div><b>Clean typography</b><span>Avoid tables, text boxes and icons that break plain-text parsers.</span></div></div>
+          </div>
+
+          <div class="rs-anatomy-foot">Audited against 113 specialisations</div>
         </div>
       </div>
 
@@ -424,68 +620,22 @@
             </div>
           </div>
         </div>
-
-        <!-- 2. BOTTOM PART: THE ANATOMY OF AN ATS-COMPLIANT RESUME -->
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-          
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <span style="font-size:16px;">💡</span>
-            <strong style="font-size:13px; color:#0f172a; text-transform:uppercase; letter-spacing:0.04em; font-weight:800;">The Anatomy of a Modern Resume</strong>
-          </div>
-
-          <p style="font-size:11.5px; line-height:1.55; color:#475569; margin:0 0 14px;">
-            A modern resume is not an exhaustive career autobiography—it is a <strong>targeted value proposition</strong>. Over 90% of Fortune 500 employers parse resumes through applicant tracking algorithms before a human recruiter ever sees them.
-          </p>
-
-          <div style="display:grid; grid-template-columns:1fr; gap:8px;">
-            
-            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
-              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span>
-              <div>
-                <div style="font-size:12px; font-weight:700; color:#0f172a;">The Google XYZ Formula</div>
-                <div style="font-size:11px; color:#64748b; line-height:1.4;">Accomplished <em>[X]</em>, as measured by <em>[Y]</em>, by doing <em>[Z]</em>. Eliminate vague duties; lead with measurable outcomes.</div>
-              </div>
-            </div>
-
-            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
-              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span>
-              <div>
-                <div style="font-size:12px; font-weight:700; color:#0f172a;">Contextual Keyword Density</div>
-                <div style="font-size:11px; color:#64748b; line-height:1.4;">Don't keyword-stuff. Modern ATS engines analyze tools in relation to outcomes and professional certifications.</div>
-              </div>
-            </div>
-
-            <div style="display:flex; gap:10px; align-items:flex-start; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:9px 11px;">
-              <span style="font-size:11px; font-weight:800; color:#4f46e5; background:#eef2ff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span>
-              <div>
-                <div style="font-size:12px; font-weight:700; color:#0f172a;">Clean Hierarchical Typography</div>
-                <div style="font-size:11px; color:#64748b; line-height:1.4;">Avoid complex multi-column tables, text boxes, and icons that corrupt plain-text parsers during extraction.</div>
-              </div>
-            </div>
-
-          </div>
-
-          <div style="margin-top:12px; font-size:10.5px; color:#64748b; text-align:center; font-weight:500;">
-            Audited continuously against 50+ enterprise industry benchmarks.
-          </div>
-        </div>
-
       </div>
 
     </div>
 
     <!-- REPORT VIEW -->
     <div id="results-view" hidden>
-      <div class="results-topbar" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:14px; margin-bottom:24px;">
-        <strong style="font-size:18px;">Executive Resume Assessment</strong>
-        <div style="display:flex; gap:10px;">
-          <button type="button" id="download-btn" class="btn btn-nav">⬇ Download Official PDF Report</button>
+      <div class="rs-topbar">
+        <div><span class="rs-title">Executive Resume Assessment</span><span class="rs-sub">Your ATS readiness, detected specialisation and role match.</span></div>
+        <div class="rs-actions">
+          <button type="button" id="download-btn" class="btn btn-nav">⬇ Download PDF Report</button>
           <button type="button" id="rescan-btn" class="btn btn-nav">↺ Audit Another Resume</button>
         </div>
       </div>
 
-      <div class="report-summary-row" id="summary-row"></div>
-      <div class="report-detail-grid" id="detail-grid" style="display:flex; flex-direction:column; gap:20px;"></div>
+      <div id="summary-row"></div>
+      <div id="detail-grid"></div>
     </div>
 
     <!-- PRINT / EXPORT CONTAINER -->
@@ -515,11 +665,27 @@ document.addEventListener("DOMContentLoaded", () => {
       uploadMode.hidden = true; pasteMode.hidden = false; uploadToggle.hidden = false;
     });
     if (resumeInput) {
+      const dropZone = document.getElementById("rs-drop");
       resumeInput.addEventListener("change", () => {
-        resumeFileName.textContent = resumeInput.files.length > 0
-          ? "Selected: " + resumeInput.files[0].name
-          : "No file selected.";
+        const has = resumeInput.files.length > 0;
+        resumeFileName.textContent = has ? "Selected: " + resumeInput.files[0].name : "No file selected.";
+        if (dropZone) dropZone.classList.toggle("has-file", has);
       });
+      if (dropZone) {
+        ["dragenter", "dragover"].forEach(ev => dropZone.addEventListener(ev, e => {
+          e.preventDefault(); dropZone.classList.add("drag");
+        }));
+        ["dragleave", "drop"].forEach(ev => dropZone.addEventListener(ev, e => {
+          e.preventDefault(); dropZone.classList.remove("drag");
+        }));
+        dropZone.addEventListener("drop", e => {
+          const f = e.dataTransfer && e.dataTransfer.files;
+          if (f && f.length && /\.(pdf|docx)$/i.test(f[0].name)) {
+            resumeInput.files = f;
+            resumeInput.dispatchEvent(new Event("change"));
+          }
+        });
+      }
     }
   }
 
@@ -547,15 +713,31 @@ document.addEventListener("DOMContentLoaded", () => {
       "BOQ", "BIM", "ROS", "SLAM", "IMU", "SRE", "TDD", "BDD", "CPA", "DCF", "LBO", "M&A", "WACC"
     ];
     
+    const BRANDS = {
+      "rabbitmq": "RabbitMQ", "postgresql": "PostgreSQL", "mysql": "MySQL", "mongodb": "MongoDB", "nosql": "NoSQL",
+      "nodejs": "Node.js", "node.js": "Node.js", "expressjs": "Express.js", "express.js": "Express.js", "nestjs": "NestJS",
+      "fastapi": "FastAPI", "github": "GitHub", "gitlab": "GitLab", "graphql": "GraphQL", "grpc": "gRPC",
+      "jwt": "JWT", "oauth2": "OAuth2", "rest": "REST", "restful": "RESTful", "dsa": "DSA", "oop": "OOP",
+      "devops": "DevOps", "typescript": "TypeScript", "javascript": "JavaScript", "asp.net": "ASP.NET",
+      "kubernetes": "Kubernetes", "tensorflow": "TensorFlow", "pytorch": "PyTorch", "ios": "iOS", "macos": "macOS",
+      "powerbi": "Power BI", "sqlalchemy": "SQLAlchemy", "pyspark": "PySpark", "numpy": "NumPy", "openapi": "OpenAPI",
+      "jira": "Jira", "ui": "UI", "ux": "UX", "ci/cd": "CI/CD", "html": "HTML", "css": "CSS"
+    };
     const exactUpper = acronyms.find(a => a.toLowerCase() === clean.toLowerCase());
     if (exactUpper) return exactUpper;
+    if (BRANDS[clean.toLowerCase()]) return BRANDS[clean.toLowerCase()];
 
     return clean.replace(/\w\S*/g, (w) => {
       const match = acronyms.find(a => a.toLowerCase() === w.toLowerCase());
       if (match) return match;
+      if (BRANDS[w.toLowerCase()]) return BRANDS[w.toLowerCase()];
       return w.charAt(0).toUpperCase() + w.substr(1).toLowerCase();
     });
   }
+
+  // Domain names in domain_keywords.json are already display-cased ("UI/UX & Interaction Design",
+  // "Mechanical Design (CAD/CAM)"), so they must NOT go through formatSkillName().
+  function formatDomainName(d) { return String(d == null ? "" : d).trim(); }
 
   fetch("/api/domain-list")
     .then(r => r.json())
@@ -563,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
       (data.domains || []).sort().forEach(d => {
         const opt = document.createElement("option");
         opt.value = d;
-        opt.textContent = formatSkillName(d.replace(/-/g, " "));
+        opt.textContent = formatDomainName(d);
         domainSelect.appendChild(opt);
       });
     })
@@ -585,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("download-btn");
   const printReport = document.getElementById("print-report");
 
-  downloadBtn.addEventListener("click", () => window.print());
+  downloadBtn.addEventListener("click", () => downloadReport());
 
   rescanBtn.addEventListener("click", () => {
     form.reset();
@@ -594,6 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (resumeInput) resumeInput.value = "";
     if (resumeFileName) resumeFileName.textContent = "No file selected.";
+    const dz = document.getElementById("rs-drop"); if (dz) dz.classList.remove("has-file");
 
     uploadMode.hidden = true;
     pasteMode.hidden = false;
@@ -646,29 +829,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       for (const stage of stages) {
-        await wait(180);
+        await wait(60);
         fill.style.width = stage[0] + "%";
         label.textContent = stage[1];
       }
 
       const scoreForm = new FormData(form);
-      const scoreData = await safeFetchJson("/api/screen-resume", scoreForm, "Resume analysis");
-
       const autoForm = new FormData(form);
       autoForm.delete("domain");
-      const autoData = await safeFetchJson("/api/screen-domain", autoForm, "Domain auto-detection");
-
-      let preferredData = null;
       const chosenDomain = domainSelect.value;
-      if (chosenDomain) {
-        const preferredForm = new FormData(form);
-        preferredForm.set("domain", chosenDomain);
-        preferredData = await safeFetchJson("/api/screen-domain", preferredForm, "Target domain verification");
-      }
+      let preferredForm = null;
+      if (chosenDomain) { preferredForm = new FormData(form); preferredForm.set("domain", chosenDomain); }
+      const [scoreData, autoData, preferredData] = await Promise.all([
+        safeFetchJson("/api/screen-resume", scoreForm, "Resume analysis"),
+        safeFetchJson("/api/screen-domain", autoForm, "Domain auto-detection"),
+        preferredForm ? safeFetchJson("/api/screen-domain", preferredForm, "Target domain verification") : Promise.resolve(null)
+      ]);
 
       fill.style.width = "100%";
       label.textContent = "Complete.";
-      await wait(200);
+      await wait(80);
 
       renderDashboard(scoreData, autoData, preferredData);
 
@@ -687,161 +867,259 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function pctNum(v) { return Math.max(0, Math.min(100, Math.round(Number(v) || 0))); }
+  function ringColor(p) { return p >= 75 ? "#cbfffc" : p >= 50 ? "#ffd9a0" : "#fde9ff"; }
+
   function scoreRing(pct, title, subtitle) {
-    const safePct = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+    const p = pctNum(pct);
     return `
-      <div class="score-ring-card">
-        <div class="score-ring" style="--pct:${safePct}"><span>${safePct}</span></div>
-        <div class="score-ring-label">${escapeHtml(title)}${subtitle ? `<small>${escapeHtml(subtitle)}</small>` : ""}</div>
-      </div>
-    `;
+      <div class="rs-ring-card">
+        <div class="rs-ring" style="--pct:${p}; --c:${ringColor(p)}"><span>${p}</span></div>
+        <div class="rs-ring-label"><b>${escapeHtml(title)}</b>${subtitle ? `<small>${escapeHtml(subtitle)}</small>` : ""}</div>
+      </div>`;
+  }
+
+  function meterRow(label, value) {
+    const p = pctNum(value);
+    return `<div class="rs-meter-row"><span>${escapeHtml(label)}</span><div class="rs-meter"><i style="--w:${p}%"></i></div><em>${p}%</em></div>`;
   }
 
   function renderConfidenceBlock(detection) {
-    if (!detection || !detection.ranked_domains) return "";
-    const rows = detection.ranked_domains.slice(0, 4).map(d => `
-      <div class="confidence-row">
-        <span class="confidence-name">${escapeHtml(formatSkillName(d.domain.replace(/-/g, " ")))}</span>
-        <div class="confidence-bar-wrap"><div class="confidence-bar-fill" style="width:${d.score}%;"></div></div>
-        <span class="confidence-pct">${d.score}%</span>
-      </div>
-    `).join("");
+    if (!detection || !detection.ranked_domains || !detection.ranked_domains.length) return "";
+    const rows = detection.ranked_domains.slice().sort((x, y) => y.score - x.score).slice(0, 5).map((d, i) => `
+      <div class="rs-rank ${i === 0 ? "top" : ""}">
+        <span class="rs-rank-idx">${i + 1}</span>
+        <span class="rs-rank-name">${escapeHtml(formatDomainName(d.domain))}</span>
+        <div class="rs-meter"><i style="--w:${pctNum(d.score)}%"></i></div>
+        <span class="rs-rank-pct">${pctNum(d.score)}%</span>
+      </div>`).join("");
+    return `<div class="rs-subhead">Roles your resume fits</div><div>${rows}</div>`;
+  }
 
-    const statement = detection.confident
-      ? '<div style="font-size:12.5px; color:#047857; margin-bottom:12px; font-weight:600;">✓ High taxonomy alignment with candidate profile.</div>'
-      : '<div style="font-size:12.5px; color:#b45309; margin-bottom:12px; font-weight:600;">Multi-disciplinary alignment identified across these top categories:</div>';
-    return `${statement}<div>${rows}</div>`;
+  const fmtSkill = n => (/[A-Z]/.test(n) ? n : formatSkillName(n));
+  const joinNames = arr => arr.length < 2 ? arr.join("") : arr.slice(0, -1).join(", ") + " and " + arr[arr.length - 1];
+
+  function skillLists(skills) {
+    const pdet = (skills.present_detail && skills.present_detail.length)
+      ? skills.present_detail : (skills.present_skills || []).map(n => ({ skill: n, type: "supporting" }));
+    const mdet = (skills.missing_detail && skills.missing_detail.length)
+      ? skills.missing_detail : (skills.missing_skills || []).map(n => ({ skill: n, priority: "normal" }));
+    return {
+      core: pdet.filter(d => d.type === "core").map(d => fmtSkill(d.skill)),
+      supp: pdet.filter(d => d.type !== "core").map(d => fmtSkill(d.skill)),
+      next: mdet.filter(d => d.priority === "high").map(d => fmtSkill(d.skill)),
+      more: mdet.filter(d => d.priority !== "high").map(d => fmtSkill(d.skill))
+    };
+  }
+
+  function insightData(m, skills, role) {
+    const L = skillLists(skills || {});
+    const c = (m && m.components) || {};
+    const clos = c.skill_closeness || 0, suff = c.skill_sufficiency || 0;
+    const sc = pctNum(m ? m.score : 0);
+    const head = sc >= 78 ? "Interview-ready for this path"
+      : sc >= 60 ? "A strong contender"
+      : sc >= 40 ? "A solid base, a few skills away"
+      : sc >= 20 ? "Foundations laid, time to build up"
+      : "A new direction for you";
+    const strong = L.core.slice(0, 3);
+    const gaps = L.next.slice(0, 3);
+    const parts = [];
+    parts.push(strong.length ? `You already bring ${joinNames(strong)}.`
+                             : `Your resume doesn't show the core tools of this field yet.`);
+    const other = !!(m && m.detected_domain && m.detected_domain !== m.preferred_domain);
+    if (other && clos < 0.45) {
+      parts.push(`Most of your skills point toward ${formatDomainName(m.detected_domain)}, so ${role} would be a pivot.`);
+    } else if (suff < 0.35 && gaps.length) {
+      parts.push(`${role} teams also look for ${joinNames(gaps)}, which are not on your resume yet.`);
+    } else if (clos >= 0.6 && suff >= 0.55) {
+      parts.push(`Your skills line up well with what ${role} teams look for.`);
+    } else if (gaps.length) {
+      parts.push(`Adding ${joinNames(gaps)} would round out your profile for ${role}.`);
+    }
+    const ev = m && m.evidence && m.evidence.level;
+    return {
+      sc, head, text: parts.join(" "),
+      better: other ? `Right now your resume fits ${formatDomainName(m.detected_domain)} better.` : "",
+      note: (ev === "limited" || ev === "moderate")
+        ? "Your resume lists only a handful of skills, so this is a cautious read. A dedicated Skills section naming your tools and technologies will sharpen it." : ""
+    };
+  }
+
+  function renderVerdict(m, skills, role, withRing) {
+    if (!m) return "";
+    const d = insightData(m, skills, role);
+    const ring = withRing
+      ? `<div class="rs-ring" style="--pct:${d.sc}; --c:${ringColor(d.sc)}"><span>${d.sc}</span></div>` : "";
+    return `
+      <div class="rs-verdict ${withRing ? "with-ring" : ""}">
+        ${ring}
+        <div>
+          <h4>${escapeHtml(d.head)}</h4>
+          <p>${escapeHtml(d.text)}</p>
+          ${d.better ? `<p class="rs-verdict-note">${escapeHtml(d.better)}</p>` : ""}
+          ${d.note ? `<p class="rs-verdict-note">${escapeHtml(d.note)}</p>` : ""}
+        </div>
+      </div>`;
   }
 
   function renderSkillsMatrix(skills) {
-    const presentList = (skills.present_skills || []).map(formatSkillName);
-    const missingList = (skills.missing_skills || []).map(formatSkillName);
-
-    const presentChips = presentList.length > 0
-      ? presentList.map(s => `
-          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:5px 11px; border-radius:6px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;">
-            <span style="font-size:10px; opacity:0.8;">●</span> ${escapeHtml(s)}
-          </span>
-        `).join("")
-      : '<span style="font-size:13px; color:#6b7280; font-style:italic;">No core competencies verified yet.</span>';
-
-    const missingChips = missingList.length > 0
-      ? missingList.map(s => `
-          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:5px 11px; border-radius:6px; background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">
-            <span style="font-size:10px; color:#64748b;">+</span> ${escapeHtml(s)}
-          </span>
-        `).join("")
-      : '<span style="font-size:13px; color:#15803d; font-weight:600;">✓ Full core taxonomy verified for this specialization.</span>';
-
+    const L = skillLists(skills);
+    const chip = (x, cls) => `<span class="rs-chip ${cls}">${escapeHtml(x)}</span>`;
+    const have = (L.core.length ? `<div class="rs-subhead">Core strengths</div><div class="rs-chips">${L.core.map(x => chip(x, "good core")).join("")}</div>` : "")
+      + (L.supp.length ? `<div class="rs-subhead">Supporting toolkit</div><div class="rs-chips">${L.supp.map(x => chip(x, "good")).join("")}</div>` : "");
+    const steps = L.next.length
+      ? `<div class="rs-steps">${L.next.map((x, i) => `<div class="rs-step"><b>${i + 1}</b><span>${escapeHtml(x)}</span></div>`).join("")}</div>` : "";
+    const more = L.more.length
+      ? `<div class="rs-subhead">Worth exploring</div><div class="rs-chips">${L.more.map(x => chip(x, "gap")).join("")}</div>` : "";
+    const unlocks = (steps || more) ? steps + more
+      : (L.core.length || L.supp.length
+          ? '<span class="rs-empty ok">Nothing left to unlock. You cover the key skills for this field.</span>'
+          : '<span class="rs-empty">No roadmap yet. Add the tools and methods you use to your Skills section.</span>');
     return `
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:16px; margin-top:16px;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
-            <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Validated Competencies</span>
-            <span style="font-size:11px; font-weight:600; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:10px;">${presentList.length} Found</span>
-          </div>
-          <div style="flex-wrap:wrap; display:flex; gap:6px;">${presentChips}</div>
+      <div class="rs-skills">
+        <div class="rs-skillbox">
+          <div class="rs-skillbox-head"><span>Skills you bring</span></div>
+          ${have || '<span class="rs-empty">No matching tools yet. Start with the unlocks next to this.</span>'}
         </div>
+        <div class="rs-skillbox">
+          <div class="rs-skillbox-head"><span>Your next unlocks</span></div>
+          ${unlocks}
+        </div>
+      </div>`;
+  }
 
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
-            <span style="font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; color:#0f172a;">Recommended Growth Keywords</span>
-            <span style="font-size:11px; font-weight:600; background:#f1f5f9; color:#475569; padding:2px 7px; border-radius:10px;">${missingList.length} Suggested</span>
-          </div>
-          <div style="flex-wrap:wrap; display:flex; gap:6px;">${missingChips}</div>
-        </div>
-      </div>
-    `;
+  const isUnplaced = d => /^Unclassified/i.test(String(d || ""));
+  const fieldName = d => (isUnplaced(d) ? "Not detected yet" : formatDomainName(d));
+
+  function matchOf(preferredData) {
+    const m = preferredData && preferredData.match;
+    return m && typeof m.score === "number" ? m : null;
+  }
+
+  function metricCard(m) {
+    return `
+      <div class="rs-metric"><label>${escapeHtml(m.label)} &middot; ${escapeHtml(m.level)}</label><b>${m.score}<small> / 100</small></b>
+        <div class="rs-meter"><i style="--w:${pctNum(m.score)}%"></i></div>
+        <span class="rs-insight">${escapeHtml(m.insight || "")}</span></div>`;
+  }
+
+  function listBlock(title, items) {
+    if (!items || !items.length) return "";
+    return `<div class="rs-list"><h4>${title}</h4><ul>${items.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`;
+  }
+
+  function renderFeedbackLists(d) {
+    const blocks = listBlock("What is working", d.strengths) + listBlock("How to raise this score", d.improvements);
+    const notes = (d.notices || []).length
+      ? `<p class="rs-note warn" style="margin-top:14px">${d.notices.map(escapeHtml).join("<br>")}</p>` : "";
+    return (blocks ? `<div class="rs-lists">${blocks}</div>` : "") + notes;
   }
 
   function renderDashboard(scoreData, autoData, preferredData) {
     const score = Number(scoreData.score ?? 0);
-    const verdictClass = score >= 80 ? "safe" : score >= 50 ? "medium" : "risky";
-    const verdictLabel = score >= 80 ? "Competitive" : score >= 50 ? "Developing" : "Needs Review";
+    const isResume = scoreData.is_resume !== false;
+    const verdictClass = score >= 75 ? "mint" : score >= 55 ? "amber" : "lav";
+    const verdictLabel = scoreData.verdict || (score >= 80 ? "Competitive" : score >= 50 ? "Developing" : "Needs Review");
+    const bd = scoreData.breakdown || { structure: 20, depth: 20, action: 18, impact: 16 };
+    const m = matchOf(preferredData);
 
-    let summaryHtml = scoreRing(score, "ATS Readiness");
+    if (!isResume) {
+      window.__jsReport = "";
+      summaryRow.innerHTML = scoreRing(score, "Document check", verdictLabel);
+      detailGrid.innerHTML = `
+        <div class="rs-card">
+          <div class="rs-card-head">
+            <div><h3>${escapeHtml(scoreData.headline || "This does not look like a resume")}</h3>
+              <small>We check every upload first, so scores only describe real resumes.</small></div>
+            <span class="rs-pill lav">${escapeHtml(verdictLabel)} &middot; ${score}/100</span>
+          </div>
+          <p class="rs-summary">${escapeHtml(scoreData.summary || "")}</p>
+          ${renderFeedbackLists({ improvements: scoreData.improvements })}
+        </div>`;
+      return;
+    }
+
+    let summaryHtml = scoreRing(score, "ATS Readiness", verdictLabel);
     summaryHtml += scoreRing(
-      autoData.skills ? autoData.skills.coverage : 0,
-      formatSkillName((autoData.domain || "").replace(/-/g, " ")),
-      "Auto-Detected"
+      matchOf(autoData) ? matchOf(autoData).score : (autoData.skills ? autoData.skills.coverage : 0),
+      fieldName(autoData.domain), "Auto-detected field"
     );
-
     if (preferredData) {
       summaryHtml += scoreRing(
-        preferredData.skills ? preferredData.skills.coverage : 0,
-        formatSkillName((preferredData.domain || "").replace(/-/g, " ")),
-        "Target Role"
+        m ? m.score : (preferredData.skills ? preferredData.skills.coverage : 0),
+        formatDomainName(preferredData.domain), m ? "Target role match" : "Target role"
       );
     }
     summaryRow.innerHTML = summaryHtml;
 
+    const metric = (label, v) => `
+      <div class="rs-metric"><label>${label}</label><b>${v}<small> / 25</small></b>
+        <div class="rs-meter"><i style="--w:${pctNum(v * 4)}%"></i></div></div>`;
+
     let detailHtml = `
-      <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; border-bottom:1px solid #f1f5f9; padding-bottom:12px; margin-bottom:12px;">
-          <div>
-            <h3 style="margin:0 0 4px; font-size:16px; color:#0f172a;">Executive Quality Assessment</h3>
-            <span style="font-size:13px; color:#64748b;">Linguistic diagnostics, quantification density, and verb strength.</span>
-          </div>
-          <span class="verdict ${verdictClass}" style="padding:4px 12px; border-radius:6px; font-size:12px; font-weight:600; text-transform:uppercase;">
-            ${escapeHtml(verdictLabel)} (${score}/100)
-          </span>
+      <div class="rs-card">
+        <div class="rs-card-head">
+          <div><h3>Executive Quality Assessment</h3><small>Content, skills, language and presentation, weighted into one score.</small></div>
+          <span class="rs-pill ${verdictClass}">${escapeHtml(verdictLabel)} &middot; ${score}/100</span>
         </div>
-        
-        <p style="font-size:14.5px; line-height:1.65; color:#334155; margin:0 0 16px;">
-          ${escapeHtml(scoreData.summary || "Evaluation complete.")}
-        </p>
-
-        <div style="display:flex; flex-wrap:wrap; gap:10px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #edf2f7;">
-          <div style="flex:1; min-width:140px;">
-            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Structure Quality</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.structure : 20}/25</div>
-          </div>
-          <div style="flex:1; min-width:140px;">
-            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Content Depth</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.depth : 20}/25</div>
-          </div>
-          <div style="flex:1; min-width:140px;">
-            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Action Verbs</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.action : 18}/25</div>
-          </div>
-          <div style="flex:1; min-width:140px;">
-            <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:600;">Impact Metrics</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;">${scoreData.breakdown ? scoreData.breakdown.impact : 16}/25</div>
-          </div>
+        ${scoreData.headline ? `<p class="rs-summary" style="margin-bottom:8px"><b style="color:#fff;font-size:16px;font-weight:600">${escapeHtml(scoreData.headline)}</b></p>` : ""}
+        <p class="rs-summary">${escapeHtml(scoreData.summary || "Evaluation complete.")}</p>
+        <div class="rs-metrics">
+          ${scoreData.metrics ? Object.values(scoreData.metrics).map(metricCard).join("") : `
+          ${metric("Structure quality", bd.structure)}
+          ${metric("Content depth", bd.depth)}
+          ${metric("Action verbs", bd.action)}
+          ${metric("Impact metrics", bd.impact)}`}
         </div>
+        ${renderFeedbackLists(scoreData)}
       </div>
 
-      <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
-          <div>
-            <h3 style="margin:0 0 2px; font-size:16px; color:#0f172a;">Primary Field Alignment: ${escapeHtml(formatSkillName((autoData.domain || "").replace(/-/g, " ")))}</h3>
-            <span style="font-size:12px; color:#64748b;">Deep taxonomy benchmark identified from credentials and experience.</span>
-          </div>
-          <span style="font-size:13px; font-weight:700; color:#312e81; background:#e0e7ff; padding:3px 10px; border-radius:6px;">
-            ${autoData.skills ? autoData.skills.coverage : 0}% Target Match
-          </span>
+      <div class="rs-card">
+        <div class="rs-card-head">
+          <div><h3>Primary field: ${escapeHtml(fieldName(autoData.domain))}</h3>
+            <small>The field your resume points to most strongly.</small></div>
+          <span class="rs-pill mint">${matchOf(autoData) ? matchOf(autoData).score : (autoData.skills ? autoData.skills.coverage : 0)}% match</span>
         </div>
-
-        <div style="margin-top:14px;">${renderConfidenceBlock(autoData.detection)}</div>
-        ${renderSkillsMatrix(autoData.skills || {})}
-      </div>
-    `;
+        ${autoData.error ? `<p class="rs-note warn">${escapeHtml(autoData.error)}</p>` : ""}
+        ${isUnplaced(autoData.domain)
+          ? `<div class="rs-verdict"><div><h4>We couldn't place this resume in a field yet</h4><p>It mostly lists general strengths. Add a Skills section with the specific tools, methods and certifications you use, plus one or two projects, and we can match it to a field.</p></div></div>`
+          : renderVerdict(matchOf(autoData), autoData.skills || {}, formatDomainName(autoData.domain), false)
+            + renderConfidenceBlock(autoData.detection)
+            + renderSkillsMatrix(autoData.skills || {})}
+      </div>`;
 
     if (preferredData) {
-      detailHtml += `
-        <div class="report-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
-            <div>
-              <h3 style="margin:0 0 2px; font-size:16px; color:#0f172a;">Specified Role: ${escapeHtml(formatSkillName((preferredData.domain || "").replace(/-/g, " ")))}</h3>
-              <span style="font-size:12px; color:#64748b;">Alignment verification against candidate preference.</span>
+      let matchBlock = "";
+      if (m) {
+        const c = m.components || {};
+        const same = m.detected_domain === m.preferred_domain;
+        const pillClass = m.score >= 75 ? "mint" : m.score >= 35 ? "amber" : "lav";
+        const related = (m.related_domains || []).map(d => `<span class="rs-chip rel">${escapeHtml(formatDomainName(d))}</span>`).join("");
+        matchBlock = `
+          ${renderVerdict(m, preferredData.skills || {}, formatDomainName(preferredData.domain), true)}
+          ${related ? `<div class="rs-related">Other suitable roles: ${related}</div>` : ""}`;
+        detailHtml += `
+          <div class="rs-card">
+            <div class="rs-card-head">
+              <div><h3>Target role: ${escapeHtml(formatDomainName(preferredData.domain))}</h3>
+                <small>How well your resume fits the role you want.</small></div>
+              <span class="rs-pill ${pillClass}">${pctNum(m.score)}% match</span>
             </div>
-            <span style="font-size:13px; font-weight:700; color:#065f46; background:#d1fae5; padding:3px 10px; border-radius:6px;">
-              ${preferredData.skills ? preferredData.skills.coverage : 0}% Target Match
-            </span>
-          </div>
-          ${renderSkillsMatrix(preferredData.skills || {})}
-        </div>
-      `;
+            ${matchBlock}
+            ${renderSkillsMatrix(preferredData.skills || {})}
+          </div>`;
+      } else {
+        detailHtml += `
+          <div class="rs-card">
+            <div class="rs-card-head">
+              <div><h3>Target role: ${escapeHtml(formatDomainName(preferredData.domain))}</h3>
+                <small>Alignment verification against your preference.</small></div>
+              <span class="rs-pill mint">${preferredData.skills ? preferredData.skills.coverage : 0}% skill coverage</span>
+            </div>
+            ${renderSkillsMatrix(preferredData.skills || {})}
+          </div>`;
+      }
     }
 
     detailGrid.innerHTML = detailHtml;
@@ -849,136 +1127,235 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function generateExecutiveReport(scoreData, autoData, preferredData, score, verdictLabel) {
+    const esc = escapeHtml;
     const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
-    const autoSkills = autoData.skills || {};
-    const presentList = (autoSkills.present_skills || []).map(formatSkillName);
-    const missingList = (autoSkills.missing_skills || []).map(formatSkillName);
+    const bd = scoreData.breakdown || { structure: 20, depth: 20, action: 18, impact: 16 };
+    const QSHORT = { information: "Content", skills: "Skills", language: "Language", format: "Format" };
+    const axes = scoreData.metrics
+      ? Object.entries(scoreData.metrics).map(([k, v]) => [QSHORT[k] || String(v.label || k).split(" ")[0], pctNum(v.score)])
+      : [["Structure", pctNum(bd.structure * 4)], ["Depth", pctNum(bd.depth * 4)], ["Action verbs", pctNum(bd.action * 4)], ["Impact", pctNum(bd.impact * 4)]];
+    const mA = matchOf(autoData);
+    const unplaced = isUnplaced(autoData.domain);
+    const autoRole = fieldName(autoData.domain);
+    const autoPct = mA ? mA.score : ((autoData.skills && autoData.skills.coverage) || 0);
+    const mP = preferredData ? matchOf(preferredData) : null;
+    const col = p => (p >= 75 ? "#00827c" : p >= 50 ? "#d99a2b" : "#8a5fb0");
+    const iA = insightData(mA, autoData.skills || {}, autoRole);
 
-    const presentChipsHtml = presentList.length > 0
-      ? presentList.map(s => `<span class="print-chip good">● ${escapeHtml(s)}</span>`).join(" ")
-      : '<span style="font-style:italic; color:#64748b;">No core competencies verified on resume.</span>';
+    // big gauge (SVG ring)
+    const gauge = (pct, size) => {
+      const p = pctNum(pct), r = 52, c = 2 * Math.PI * r, d = (p / 100) * c;
+      return `<svg class="gauge" viewBox="0 0 130 130" width="${size}" height="${size}">
+        <circle cx="65" cy="65" r="${r}" fill="none" stroke="#e1eeec" stroke-width="12"/>
+        <circle cx="65" cy="65" r="${r}" fill="none" stroke="${col(p)}" stroke-width="12" stroke-linecap="round"
+          stroke-dasharray="${d.toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 65 65)"/>
+        <text x="65" y="63" text-anchor="middle" font-size="34" font-weight="800" fill="#012624">${p}</text>
+        <text x="65" y="83" text-anchor="middle" font-size="11" fill="#6b8785" letter-spacing="1.5">PERCENT</text></svg>`;
+    };
 
-    const missingChipsHtml = missingList.length > 0
-      ? missingList.map(s => `<span class="print-chip missing">+ ${escapeHtml(s)}</span>`).join(" ")
-      : '<span style="color:#15803d; font-weight:600;">✓ Full core taxonomy verified for this specialization.</span>';
+    // radar for the resume-quality dimensions (any number of axes, values 0-100)
+    const radar = () => {
+      const n = axes.length, cx = 100, cy = 92, R = 62;
+      const ang = i => -Math.PI / 2 + i * (2 * Math.PI / n);
+      const pt = (i, f) => [cx + Math.cos(ang(i)) * R * f, cy + Math.sin(ang(i)) * R * f];
+      const ring = f => axes.map((_, i) => pt(i, f).map(v => v.toFixed(1)).join(",")).join(" ");
+      const fv = a => Math.max(0.06, Math.min(1, a[1] / 100));
+      const poly = axes.map((a, i) => pt(i, fv(a)).map(v => v.toFixed(1)).join(",")).join(" ");
+      const lab = i => {
+        const c = Math.cos(ang(i)), s = Math.sin(ang(i));
+        return [cx + c * (R + 12), cy + s * (R + 14) + 4, c > 0.3 ? "start" : c < -0.3 ? "end" : "middle"];
+      };
+      return `<svg viewBox="-34 0 268 190" width="300" height="213">
+        <polygon points="${ring(1)}" fill="#f4faf9" stroke="#cfe3e1"/><polygon points="${ring(0.66)}" fill="none" stroke="#dcebe9"/><polygon points="${ring(0.33)}" fill="none" stroke="#e6f0ef"/>
+        ${axes.map((_, i) => { const p = pt(i, 1); return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#dcebe9"/>`; }).join("")}
+        <polygon points="${poly}" fill="rgba(0,130,124,.28)" stroke="#00827c" stroke-width="2" stroke-linejoin="round"/>
+        ${axes.map((a, i) => { const p = pt(i, fv(a)); return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="#00827c"/>`; }).join("")}
+        ${axes.map((a, i) => { const l = lab(i); return `<text x="${l[0].toFixed(1)}" y="${l[1].toFixed(1)}" text-anchor="${l[2]}" font-size="10" font-weight="700" fill="#2d4f4c">${esc(a[0])} <tspan fill="#00827c">${a[1]}</tspan></text>`; }).join("")}
+      </svg>`;
+    };
 
-    let alternativesHtml = "";
-    if (autoData.detection && autoData.detection.ranked_domains) {
-      alternativesHtml = autoData.detection.ranked_domains.slice(0, 4).map(d => `
-        <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed #e2e8f0; font-size:11.5px;">
-          <span style="font-weight:600; color:#0f172a;">${escapeHtml(formatSkillName(d.domain.replace(/-/g, " ")))}</span>
-          <span style="font-weight:700; color:#4338ca;">${d.score}% Match</span>
-        </div>
-      `).join("");
+    const qList = (title, arr) => (arr && arr.length)
+      ? `<div class="ql"><h6>${title}</h6><ul>${arr.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
+    const chips = (arr, cls) => arr.map(x => `<span class="ch ${cls}">${esc(x)}</span>`).join("");
+    // roadmap timeline: where you are -> next -> then
+    const path = (skills, goal) => {
+      const L = skillLists(skills || {});
+      const here = L.core.length || L.supp.length
+        ? `<div class="chs">${chips(L.core.slice(0, 8), "co")}${chips(L.supp.slice(0, 6), "su")}</div>`
+        : `<p class="mu0">Your starting point: no matching tools on the resume yet.</p>`;
+      const next = L.next.length
+        ? `<ol class="steps">${L.next.slice(0, 4).map(x => `<li>${esc(x)}</li>`).join("")}</ol>`
+        : `<p class="mu0">No priority gaps. You cover the key skills.</p>`;
+      const then = L.more.length ? `<div class="chs">${chips(L.more.slice(0, 8), "mu")}</div>` : "";
+      return `<div class="tl">
+        <div class="nd"><h6>You are here</h6>${here}</div>
+        <div class="nd"><h6>Next up${goal ? " for " + esc(goal) : ""}</h6>${next}</div>
+        ${then ? `<div class="nd"><h6>Then explore</h6>${then}</div>` : ""}
+      </div>`;
+    };
+
+    // ranked roles as bars
+    const rows = ((autoData.detection && autoData.detection.ranked_domains) || []).slice()
+      .sort((x, y) => y.score - x.score).slice(0, 5).map(d => `
+      <div class="rk"><span>${esc(formatDomainName(d.domain))}</span>
+        <div class="tr"><u style="width:${pctNum(d.score)}%;background:${col(d.score)}"></u></div><em>${pctNum(d.score)}%</em></div>`).join("");
+
+    // next moves
+    const LA = skillLists(autoData.skills || {});
+    const moves = [];
+    if (LA.next.length) moves.push(`Learn <b>${esc(joinNames(LA.next.slice(0, 2)))}</b> first. They open the most doors in ${esc(autoRole)}.`);
+    if (scoreData.improvements && scoreData.improvements.length) {
+      scoreData.improvements.slice(0, 2).forEach(t => moves.push(esc(t)));
+    } else {
+      const fixes = [
+        [bd.structure, "Organise the resume into clear sections: Summary, Skills, Experience, Projects, Education."],
+        [bd.depth, "Add depth to each project: what you built, which tools you used and what your part was."],
+        [bd.action, "Start every bullet with a strong action verb such as Built, Led, Designed or Optimised."],
+        [bd.impact, "Add numbers to your results: users reached, speed gained, time saved or percentages."]
+      ].sort((x, y) => x[0] - y[0]);
+      moves.push(fixes[0][1]);
+      if (fixes[1][0] < 20) moves.push(fixes[1][1]);
+    }
+    if (unplaced) moves.unshift("Add a Skills section with the specific tools, methods and certifications you use, so your resume can be placed in a field.");
+    if (mP && preferredData) {
+      const LP = skillLists(preferredData.skills || {});
+      if (LP.next.length) moves.push(`For <b>${esc(formatDomainName(preferredData.domain))}</b>, build <b>${esc(joinNames(LP.next.slice(0, 2)))}</b> next.`);
     }
 
-    let reportHtml = `
-      <div class="report-header">
-        <div class="report-brand">
-          <h1>Job<span>Shield</span> ATS Report</h1>
-          <p>Official Candidate Resume Audit &amp; Taxonomic Specialization Analysis</p>
-        </div>
-        <div class="report-meta">
-          <div><strong>Date:</strong> ${escapeHtml(today)}</div>
-          <div><strong>Audit ID:</strong> JS-${Math.floor(100000 + Math.random() * 900000)}</div>
-          <div><strong>Engine:</strong> JobShield Universal ML v2.4</div>
-        </div>
-      </div>
+    let targetHtml = "";
+    if (mP && preferredData) {
+      const role = formatDomainName(preferredData.domain);
+      const iP = insightData(mP, preferredData.skills || {}, role);
+      targetHtml = `
+        <section class="sec">
+          <div class="sh"><b>04</b><h2>Your target role</h2></div>
+          <div class="hero2 sm">
+            <div>${gauge(mP.score, 112)}</div>
+            <div><div class="kick">Target role</div><h3>${esc(role)}</h3>
+              <h4>${esc(iP.head)}</h4><p>${esc(iP.text)}</p>
+              ${iP.better ? `<p class="nt">${esc(iP.better)}</p>` : ""}${iP.note ? `<p class="nt">${esc(iP.note)}</p>` : ""}</div>
+          </div>
+          ${path(preferredData.skills || {}, role)}
+        </section>`;
+    }
 
-      <div class="report-kpi-grid">
-        <div class="report-kpi-card">
-          <div class="kpi-label">Readiness Score</div>
-          <div class="kpi-val" style="color:#4f46e5;">${score}<span style="font-size:14px; font-weight:500;">/100</span></div>
-          <div class="kpi-sub">${escapeHtml(verdictLabel)}</div>
-        </div>
-        <div class="report-kpi-card">
-          <div class="kpi-label">Detected Discipline</div>
-          <div class="kpi-val" style="font-size:16px; padding-top:4px;">${escapeHtml(formatSkillName((autoData.domain || "").replace(/-/g, " ")))}</div>
-          <div class="kpi-sub">${autoSkills.coverage ?? 0}% Taxonomy Match</div>
-        </div>
-        <div class="report-kpi-card">
-          <div class="kpi-label">Action Verb Strength</div>
-          <div class="kpi-val">${scoreData.breakdown ? scoreData.breakdown.action : 18}<span style="font-size:14px; font-weight:500;">/25</span></div>
-          <div class="kpi-sub">Executive Tone</div>
-        </div>
-        <div class="report-kpi-card">
-          <div class="kpi-label">Impact Quantification</div>
-          <div class="kpi-val">${scoreData.breakdown ? scoreData.breakdown.impact : 16}<span style="font-size:14px; font-weight:500;">/25</span></div>
-          <div class="kpi-sub">Measurable Results</div>
-        </div>
-      </div>
+    const css = `
+      @page { size: A4; margin: 12mm 14mm; }
+      * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { margin: 0; font: 12px/1.55 "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #17332f; background: #fff; }
+      h1,h2,h3,h4,h5,h6,p { margin: 0; }
+      .hd { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 3px solid; border-image: linear-gradient(90deg, #00827c, #cbfffc) 1; }
+      .lg { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; letter-spacing: .02em; color: #012624; }
+      .mk { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #00827c, #7fe6dc); color: #fff; display: grid; place-items: center; font-size: 14px; }
+      .hd span { font-size: 11px; color: #6b8785; letter-spacing: .04em; }
+      .hero { display: grid; grid-template-columns: 1fr auto; gap: 26px; align-items: center; padding: 22px 0 14px; }
+      .kick { font-size: 10px; text-transform: uppercase; letter-spacing: .16em; color: #00827c; font-weight: 700; margin-bottom: 6px; }
+      .hero h1 { font-size: 30px; line-height: 1.12; letter-spacing: -.01em; color: #012624; margin-bottom: 8px; }
+      .hero h4 { font-size: 15px; color: #00514c; font-weight: 600; margin-bottom: 4px; }
+      .hero p { color: #3d5a58; max-width: 420px; }
+      .hero .nt, .nt { color: #a8741a; font-size: 11px; margin-top: 5px; }
+      .trio { display: flex; gap: 0; margin: 4px 0 6px; border-top: 1px solid #e0ecea; border-bottom: 1px solid #e0ecea; }
+      .trio div { flex: 1; padding: 12px 6px 12px 0; } .trio div + div { padding-left: 18px; border-left: 1px solid #e0ecea; }
+      .trio b { display: block; font-size: 26px; line-height: 1; color: #012624; letter-spacing: -.02em; } .trio b small { font-size: 13px; color: #8aa3a1; font-weight: 600; }
+      .trio span { display: block; margin-top: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #6b8785; }
+      .trio i { display: block; height: 4px; border-radius: 4px; background: #e4efee; margin-top: 7px; overflow: hidden; } .trio i u { display: block; height: 100%; }
+      .sec { padding-top: 18px; break-inside: avoid; }
+      .sh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+      .sh b { font-size: 24px; font-weight: 800; color: #c7e6e2; letter-spacing: -.02em; } .sh h2 { font-size: 15px; color: #012624; letter-spacing: .01em; }
+      .sh::after { content: ""; flex: 1; height: 1px; background: #e0ecea; align-self: center; }
+      .hero2 { display: flex; gap: 20px; align-items: center; margin-bottom: 10px; }
+      .hero2 h3 { font-size: 18px; color: #012624; margin-bottom: 4px; } .hero2 h4 { font-size: 14px; color: #00514c; margin-bottom: 3px; } .hero2 p { color: #3d5a58; }
+      .quote { border-left: 4px solid #00827c; background: linear-gradient(90deg, #eaf8f6, #fff); padding: 10px 14px; margin-bottom: 12px; border-radius: 0 10px 10px 0; }
+      .quote h4 { font-size: 15px; color: #00514c; margin-bottom: 2px; } .quote p { color: #3d5a58; }
+      .tl { position: relative; padding-left: 24px; }
+      .tl::before { content: ""; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(#00827c, #e0a030, #c9b8e0); border-radius: 2px; }
+      .nd { position: relative; margin-bottom: 11px; break-inside: avoid; }
+      .nd::before { content: ""; position: absolute; left: -24px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid #00827c; }
+      .nd:nth-child(2)::before { border-color: #e0a030; } .nd:nth-child(3)::before { border-color: #9a7fc4; }
+      .nd h6 { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #5c7a78; margin-bottom: 6px; }
+      .chs { display: flex; flex-wrap: wrap; gap: 5px; }
+      .ch { padding: 3px 10px; border-radius: 99px; font-size: 10.5px; font-weight: 600; }
+      .ch.co { background: #00827c; color: #fff; } .ch.su { background: #e1f4f1; color: #1d5c58; } .ch.mu { background: #f1ecf8; color: #5d4a7a; }
+      .steps { list-style: none; padding: 0; margin: 0; counter-reset: s; display: flex; flex-wrap: wrap; gap: 6px; }
+      .steps li { counter-increment: s; display: inline-flex; align-items: center; gap: 7px; background: #fff3dc; border-radius: 99px; padding: 4px 12px 4px 5px; font-weight: 700; color: #5b4310; }
+      .steps li::before { content: counter(s); width: 18px; height: 18px; border-radius: 50%; background: #e0a030; color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; }
+      .mu0 { color: #7b9391; font-style: italic; }
+      .two { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+      .qs { color: #3d5a58; }
+      .qs h4 { font-size: 14px; color: #00514c; margin-bottom: 4px; }
+      .ql { margin-top: 8px; } .ql h6 { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #5c7a78; margin-bottom: 3px; }
+      .ql ul { margin: 0; padding-left: 16px; } .ql li { margin-bottom: 2px; color: #3d5a58; }
+      .rk { display: grid; grid-template-columns: 1fr 190px 40px; gap: 12px; align-items: center; padding: 5px 0; font-size: 11.5px; border-bottom: 1px dotted #d6e6e4; }
+      .tr { height: 8px; border-radius: 99px; background: #e4efee; overflow: hidden; } .tr u { display: block; height: 100%; border-radius: 99px; }
+      .rk em { font-style: normal; font-weight: 800; text-align: right; }
+      .moves { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+      .moves li { display: flex; gap: 11px; align-items: flex-start; }
+      .moves li::before { content: ""; flex: none; width: 15px; height: 15px; margin-top: 2px; border: 2px solid #00827c; border-radius: 4px; }
+      .ft { margin-top: 18px; padding-top: 8px; border-top: 1px solid #e0ecea; display: flex; justify-content: space-between; color: #8aa3a1; font-size: 10px; }
+    `;
 
-      <div class="report-section">
-        <div class="report-section-title">
-          <span>Executive Linguistic Evaluation</span>
-          <span style="font-size:11px; color:#475569; text-transform:none;">Evaluated against Google XYZ framework</span>
-        </div>
-        <p style="margin:0; font-size:12.5px; line-height:1.65; color:#334155;">
-          ${escapeHtml(scoreData.summary || "Evaluation complete.")}
-        </p>
-      </div>
+    const doc = `<!doctype html><html><head><meta charset="utf-8"><title>JobShield Resume Report</title><style>${css}</style></head><body>
+      <header class="hd"><div class="lg"><div class="mk">&#10003;</div>JobShield</div><span>RESUME REPORT &middot; ${esc(today)}</span></header>
 
-      <div class="report-section">
-        <div class="report-section-title">
-          <span>Primary Discipline Competency Audit</span>
-          <span style="font-size:11px; color:#15803d; text-transform:none;">${presentList.length} Verified Competencies</span>
-        </div>
-        <div style="margin-bottom:12px;">
-          <strong style="display:block; font-size:11px; text-transform:uppercase; color:#0f172a; margin-bottom:6px;">Verified Core Competencies:</strong>
-          <div class="print-chips-grid">${presentChipsHtml}</div>
-        </div>
+      <section class="hero">
         <div>
-          <strong style="display:block; font-size:11px; text-transform:uppercase; color:#0f172a; margin-bottom:6px;">High-Value Growth Keywords to Integrate:</strong>
-          <div class="print-chips-grid">${missingChipsHtml}</div>
+          <div class="kick">${unplaced ? "Field" : "Best-fit field"}</div>
+          <h1>${esc(autoRole)}</h1>
+          <h4>${unplaced ? "We couldn't place this resume yet" : esc(iA.head)}</h4>
+          <p>${unplaced ? "It mostly lists general strengths. Add the specific tools, methods and certifications you use and it can be matched to a field." : esc(iA.text)}</p>
+          ${!unplaced && iA.note ? `<p class="nt">${esc(iA.note)}</p>` : ""}
         </div>
+        <div>${gauge(autoPct, 150)}</div>
+      </section>
+
+      <div class="trio">
+        <div><b>${pctNum(score)}<small>/100</small></b><span>Resume readiness &middot; ${esc(verdictLabel)}</span><i><u style="width:${pctNum(score)}%;background:${col(score)}"></u></i></div>
+        <div><b>${pctNum(autoPct)}<small>%</small></b><span>Field match</span><i><u style="width:${pctNum(autoPct)}%;background:${col(autoPct)}"></u></i></div>
+        ${mP ? `<div><b>${pctNum(mP.score)}<small>%</small></b><span>Target: ${esc(formatDomainName(preferredData.domain))}</span><i><u style="width:${pctNum(mP.score)}%;background:${col(mP.score)}"></u></i></div>` : ""}
       </div>
 
-      <div class="report-section">
-        <div class="report-section-title">
-          <span>Multi-Domain Taxonomic Alignment</span>
-          <span style="font-size:11px; color:#475569; text-transform:none;">Benchmarked against 50+ industries</span>
+      ${unplaced ? "" : `<section class="sec">
+        <div class="sh"><b>01</b><h2>Your skills roadmap</h2></div>
+        ${path(autoData.skills || {}, autoRole)}
+      </section>`}
+
+      <section class="sec">
+        <div class="sh"><b>02</b><h2>How the resume reads</h2></div>
+        <div class="two">${radar()}
+          <div class="qs"><h4>${esc(scoreData.headline || verdictLabel)} &middot; ${pctNum(score)}/100</h4><p>${esc(scoreData.summary || "")}</p>
+            ${qList("What is working", scoreData.strengths)}${qList("How to raise this score", scoreData.improvements)}</div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr; gap:4px;">
-          ${alternativesHtml}
-        </div>
-      </div>
-    `;
+      </section>
 
-    if (preferredData) {
-      const prefSkills = preferredData.skills || {};
-      const prefPresent = (prefSkills.present_skills || []).map(formatSkillName);
-      const prefMissing = (prefSkills.missing_skills || []).map(formatSkillName);
+      ${rows ? `<section class="sec"><div class="sh"><b>03</b><h2>Roles your resume fits</h2></div>${rows}</section>` : ""}
 
-      reportHtml += `
-        <div class="report-section print-page-break">
-          <div class="report-section-title">
-            <span>Candidate Selected Role: ${escapeHtml(formatSkillName((preferredData.domain || "").replace(/-/g, " ")))}</span>
-            <span style="font-size:11px; color:#065f46; text-transform:none;">${prefSkills.coverage ?? 0}% Match</span>
-          </div>
-          <div style="margin-bottom:12px;">
-            <strong style="display:block; font-size:11px; text-transform:uppercase; color:#0f172a; margin-bottom:6px;">Verified for Preferred Discipline:</strong>
-            <div class="print-chips-grid">
-              ${prefPresent.map(s => `<span class="print-chip good">● ${escapeHtml(s)}</span>`).join(" ")}
-            </div>
-          </div>
-          <div>
-            <strong style="display:block; font-size:11px; text-transform:uppercase; color:#0f172a; margin-bottom:6px;">Target Keywords for Preferred Field:</strong>
-            <div class="print-chips-grid">
-              ${prefMissing.map(s => `<span class="print-chip missing">+ ${escapeHtml(s)}</span>`).join(" ")}
-            </div>
-          </div>
-        </div>
-      `;
-    }
+      ${targetHtml}
 
-    reportHtml += `
-      <div class="report-footer">
-        <span>JobShield Enterprise ATS Compliance Audit &bull; Confidential Candidate Assessment</span>
-        <span>Generated automatically &bull; Page 1 of 1</span>
-      </div>
-    `;
+      <section class="sec">
+        <div class="sh"><b>${mP ? "05" : "04"}</b><h2>Your next moves</h2></div>
+        <ul class="moves">${moves.slice(0, 4).map(t => `<li><span>${t}</span></li>`).join("")}</ul>
+      </section>
 
-    printReport.innerHTML = reportHtml;
+      <footer class="ft"><span>JobShield &middot; Resume screening</span><span>Confidential candidate report</span></footer>
+    </body></html>`;
+    window.__jsReport = doc;
+    printReport.innerHTML = "";
+  }
+
+  function downloadReport() {
+    const html = window.__jsReport;
+    if (!html) return;
+    const f = document.createElement("iframe");
+    f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+    document.body.appendChild(f);
+    const d = f.contentWindow.document;
+    d.open(); d.write(html); d.close();
+    const prev = document.title;
+    document.title = "JobShield-Resume-Report";
+    const done = () => { document.title = prev; setTimeout(() => f.remove(), 800); };
+    f.contentWindow.addEventListener("afterprint", done);
+    setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print(); }, 120);
   }
 
   function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
