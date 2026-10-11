@@ -1608,6 +1608,82 @@ footer{
 }
 
 
+/* Mobile navigation toggle */
+.mobile-nav-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    padding: 9px;
+    margin-left: auto;
+    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.mobile-nav-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--platinum);
+    border-radius: 2px;
+}
+
+@media (max-width: 900px) {
+    header.nav {
+        position: relative;
+        z-index: 1000;
+    }
+
+    header.nav .wrap {
+        position: relative;
+    }
+
+    .mobile-nav-toggle {
+        display: inline-flex;
+    }
+
+    header.nav nav.links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1001;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 10px;
+        background: var(--liquid-deep);
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, .3);
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    header.nav nav.links.mobile-open {
+        display: flex;
+    }
+
+    header.nav nav.links a {
+        display: block;
+        padding: 13px 12px;
+        color: var(--silver-mist);
+        text-decoration: none;
+    }
+
+    header.nav nav.links a:hover {
+        color: var(--platinum);
+        background: rgba(237, 255, 254, .07);
+    }
+}
+
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -1844,8 +1920,18 @@ JOBSHIELD
 
 </a>
 
+<button
+    type="button"
+    class="mobile-nav-toggle"
+    aria-label="Open navigation menu"
+    aria-controls="primary-navigation"
+    aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
 
-<nav class="links" aria-label="Main navigation">
+<nav class="links" id="primary-navigation" aria-label="Main navigation">
 
 <a href="/detector">Detector</a>
 
@@ -3382,6 +3468,49 @@ document.addEventListener(
 );
 
 </script>
+
+<script>
+(() => {
+    const button = document.querySelector('.mobile-nav-toggle');
+    const menu = document.querySelector('#primary-navigation');
+
+    if (!button || !menu) return;
+
+    function closeMenu() {
+        menu.classList.remove('mobile-open');
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', 'Open navigation menu');
+    }
+
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+
+        const isOpen = menu.classList.toggle('mobile-open');
+
+        button.setAttribute('aria-expanded', String(isOpen));
+        button.setAttribute(
+            'aria-label',
+            isOpen ? 'Close navigation menu' : 'Open navigation menu'
+        );
+    });
+
+    menu.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!menu.contains(event.target) &&
+            !button.contains(event.target)) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMenu();
+    });
+})();
+</script>
+
 
 
 </body>

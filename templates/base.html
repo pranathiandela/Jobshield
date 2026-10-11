@@ -13,7 +13,10 @@
 <header class="nav">
   <div class="wrap">
     <a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#012624" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg></span>JOBSHIELD</a>
-    <nav class="links">
+    <button type="button" class="mobile-nav-toggle" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="links" id="primary-navigation" aria-label="Primary navigation">
       <a href="/detector" class="{{ 'active' if active=='detector' else '' }}">Detector</a>
       <a href="/resume-screening" class="{{ 'active' if active=='resume' else '' }}">Resume Screening</a>
       <a href="/dashboard" class="{{ 'active' if active=='dashboard' else '' }}">Dashboard</a>
@@ -41,18 +44,57 @@
 <footer><div class="wrap"><div class="footer-bottom"><span>© 2026 JobShield. All rights reserved.</span><span>AI-powered hiring safety</span></div></div></footer>
 <script>
 (function () {
+  const mobileToggle = document.querySelector('.mobile-nav-toggle');
+  const navigation = document.querySelector('#primary-navigation');
+
+  if (mobileToggle && navigation) {
+    function closeNavigation() {
+      navigation.classList.remove('mobile-open');
+      mobileToggle.setAttribute('aria-expanded', 'false');
+      mobileToggle.setAttribute('aria-label', 'Open navigation menu');
+    }
+
+    mobileToggle.addEventListener('click', function (event) {
+      event.stopPropagation();
+      const open = navigation.classList.toggle('mobile-open');
+      mobileToggle.setAttribute('aria-expanded', String(open));
+      mobileToggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+    });
+
+    navigation.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', closeNavigation);
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!navigation.contains(event.target) && !mobileToggle.contains(event.target)) {
+        closeNavigation();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeNavigation();
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 900) closeNavigation();
+    });
+  }
+
   const menu = document.querySelector('.account-menu');
-  if (!menu) return;
-  const trigger = menu.querySelector('.account-trigger');
-  trigger.addEventListener('click', function (event) {
-    event.stopPropagation();
-    const open = menu.classList.toggle('open');
-    trigger.setAttribute('aria-expanded', String(open));
-  });
-  document.addEventListener('click', function () {
-    menu.classList.remove('open');
-    trigger.setAttribute('aria-expanded', 'false');
-  });
+  if (menu) {
+    const trigger = menu.querySelector('.account-trigger');
+    trigger.addEventListener('click', function (event) {
+      event.stopPropagation();
+      const open = menu.classList.toggle('open');
+      trigger.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function (event) {
+      if (!menu.contains(event.target)) {
+        menu.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 })();
 </script>
 </body>
