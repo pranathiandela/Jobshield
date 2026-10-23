@@ -578,24 +578,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /*
      * ========================================================
-     * CIRCULAR SCORE
-     *
-     * Uses SVG so the visual does not depend on extra CSS.
-     * The circle represents the REAL backend score.
+     * PREMIUM CLOCK-TICK LEGITIMACY GAUGE
+     * Uses the existing backend-provided score without changing it.
      * ========================================================
      */
 
-    const circleRadius = 52;
+    const scoreGaugeEndAngle = Math.PI * (1 - score / 100);
+    const scoreGaugeEndX =
+      160 + 96 * Math.cos(scoreGaugeEndAngle);
+    const scoreGaugeEndY =
+      132 - 96 * Math.sin(scoreGaugeEndAngle);
 
-    const circleCircumference =
-      2 * Math.PI * circleRadius;
+    const scoreGaugeTicks = Array.from(
+      { length: 41 },
+      (_, i) => {
+        const angle = Math.PI - (i * Math.PI / 40);
+        const value = (i / 40) * 100;
+        const outerRadius = 105;
+        const innerRadius = i % 5 === 0 ? 86 : 89;
 
+        const x1 = 160 + outerRadius * Math.cos(angle);
+        const y1 = 132 - outerRadius * Math.sin(angle);
+        const x2 = 160 + innerRadius * Math.cos(angle);
+        const y2 = 132 - innerRadius * Math.sin(angle);
 
-    const scoreOffset =
-      circleCircumference -
-      (
-        score / 100
-      ) * circleCircumference;
+        const tickColor =
+          value < 33.333
+            ? "#c87570"
+            : value < 66.667
+              ? "#d9b779"
+              : "#80d5a8";
+
+        const active = value <= score;
+        const tickWidth = i % 5 === 0 ? 4 : 2.5;
+
+        return `
+          <line
+            x1="${x1.toFixed(2)}"
+            y1="${y1.toFixed(2)}"
+            x2="${x2.toFixed(2)}"
+            y2="${y2.toFixed(2)}"
+            stroke="${active ? tickColor : "#29463c"}"
+            stroke-opacity="${active ? "1" : ".42"}"
+            stroke-width="${tickWidth}"
+            stroke-linecap="round"
+          />
+        `;
+      }
+    ).join("");
+
+    const scoreLevel =
+      score < 40
+        ? "Low legitimacy"
+        : score < 70
+          ? "Moderate legitimacy"
+          : "Higher legitimacy";
+
+    const scoreLevelClass =
+      score < 40
+        ? "low"
+        : score < 70
+          ? "moderate"
+          : "high";
 
 
     /*
@@ -628,101 +672,79 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="result-hero">
 
 
-        <!-- CIRCULAR SCORE -->
+        <!-- PREMIUM CLOCK-TICK LEGITIMACY SCORE -->
 
         <div
-          class="score-ring"
-          aria-label="Legitimacy score ${score} out of 100"
-          style="
-            width:154px;
-            height:154px;
-            position:relative;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-          "
+          class="score-gauge"
+          role="group"
+          aria-label="Job legitimacy score ${score} out of 100"
         >
 
+          <div class="score-gauge-heading">
+            <span class="score-gauge-shield" aria-hidden="true">✓</span>
+            <span>Job Legitimacy</span>
+          </div>
+
           <svg
-            width="154"
-            height="154"
-            viewBox="0 0 154 154"
-            style="
-              position:absolute;
-              inset:0;
-              transform:rotate(-90deg);
-            "
-            aria-hidden="true"
+            class="score-gauge-svg"
+            viewBox="0 0 320 174"
+            role="img"
+            aria-label="Legitimacy score gauge: ${score} out of 100"
           >
 
-            <!-- Background circle -->
+            <g class="score-gauge-ticks">
+              ${scoreGaugeTicks}
+            </g>
 
             <circle
-              cx="77"
-              cy="77"
-              r="${circleRadius}"
-              fill="none"
-              stroke="rgba(255,255,255,.09)"
-              stroke-width="9"
-            ></circle>
+              id="score-gauge-endpoint"
+              cx="55"
+              cy="132"
+              r="5.5"
+              fill="#b5f0ce"
+              stroke="#173b30"
+              stroke-width="2.5"
+            />
 
+            <text
+              id="animated-score"
+              x="160"
+              y="91"
+              class="score-gauge-number"
+              text-anchor="middle"
+            >0</text>
 
-            <!-- Score circle -->
+            <text
+              x="160"
+              y="112"
+              class="score-gauge-out-of"
+              text-anchor="middle"
+            >OUT OF 100</text>
 
-            <circle
-              id="score-circle"
-              cx="77"
-              cy="77"
-              r="${circleRadius}"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="9"
-              stroke-linecap="round"
-              stroke-dasharray="${circleCircumference}"
-              stroke-dashoffset="${circleCircumference}"
-              style="
-                transition:
-                  stroke-dashoffset 1.2s ease;
-              "
-            ></circle>
+            <text
+              x="42"
+              y="158"
+              class="score-gauge-low-label"
+              text-anchor="middle"
+            >LOW</text>
+
+            <text
+              x="278"
+              y="158"
+              class="score-gauge-high-label"
+              text-anchor="middle"
+            >HIGH</text>
 
           </svg>
 
+          <div class="score-gauge-level score-gauge-level-${scoreLevelClass}">
+            ${escapeHtml(scoreLevel)}
+          </div>
 
-          <div
-            style="
-              position:relative;
-              z-index:2;
-              text-align:center;
-            "
-          >
-
-            <div
-              id="animated-score"
-              style="
-                font-size:42px;
-                font-weight:700;
-                line-height:1;
-                letter-spacing:-.04em;
-              "
-            >
-              0
-            </div>
-
-
-            <div
-              style="
-                margin-top:7px;
-                font-size:9px;
-                letter-spacing:.14em;
-                opacity:.65;
-                white-space:nowrap;
-              "
-            >
-              LEGITIMACY
-            </div>
-
+          <div class="score-gauge-legend" aria-label="Legitimacy score scale">
+            <span><i class="score-legend-low"></i>Low</span>
+            <span><i class="score-legend-moderate"></i>Moderate</span>
+            <span><i class="score-legend-high"></i>High</span>
           </div>
 
         </div>
@@ -869,60 +891,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
               <!-- FRAUD PROBABILITY -->
 
-              <div
-                style="
-                  margin:4px 0 18px;
-                "
-              >
-
-                <div
-                  style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    margin-bottom:9px;
-                    font-size:13px;
-                  "
-                >
-
-                  <span>
-                    Fraud probability
-                  </span>
-
+              <div style="margin:4px 0 18px;">
+                <div style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  gap:12px;
+                  margin-bottom:12px;
+                  font-size:13px;
+                ">
+                  <span>Fraud probability</span>
                   <strong>
-                    ${
-                      mlFraudPercentage !== null
-                        ? mlFraudPercentage.toFixed(2)
-                        : "N/A"
-                    }%
+                    ${mlFraudPercentage !== null
+                      ? mlFraudPercentage.toFixed(2)
+                      : "N/A"}%
                   </strong>
-
                 </div>
 
-
-                <div
-                  style="
-                    width:100%;
-                    height:9px;
-                    overflow:hidden;
-                    border-radius:999px;
-                    background:rgba(255,255,255,.08);
-                  "
-                >
-
-                  <div
-                    id="ml-fraud-bar"
-                    style="
-                      width:0%;
-                      height:100%;
-                      border-radius:999px;
-                      background:currentColor;
-                      transition:width 1.1s ease;
-                    "
-                  ></div>
-
+                <div class="ml-probability-track"
+                     role="img"
+                     aria-label="Fraud probability ${
+                       mlFraudPercentage !== null
+                         ? mlFraudPercentage.toFixed(2) + " percent"
+                         : "unavailable"
+                     }">
+                  <div id="ml-fraud-bar"
+                       class="ml-probability-fill"
+                       style="width:0%;"></div>
+                  <span id="ml-fraud-marker"
+                        class="ml-probability-marker"
+                        style="left:0%;"></span>
                 </div>
-
               </div>
 
 
@@ -1042,37 +1041,25 @@ document.addEventListener("DOMContentLoaded", () => {
      * ========================================================
      */
 
-    const scoreCircle =
-      document.getElementById(
-        "score-circle"
-      );
+    const scoreGaugeEndpoint =
+      document.getElementById("score-gauge-endpoint");
 
-
-    if (scoreCircle) {
-
-      /*
-       * Start completely empty.
-       */
-
-      scoreCircle.style.strokeDashoffset =
-        String(circleCircumference);
-
-
-      /*
-       * Small delay makes the animation visible.
-       */
+    if (scoreGaugeEndpoint) {
+      scoreGaugeEndpoint.setAttribute("cx", "55");
+      scoreGaugeEndpoint.setAttribute("cy", "132");
 
       requestAnimationFrame(() => {
-
         requestAnimationFrame(() => {
-
-          scoreCircle.style.strokeDashoffset =
-            String(scoreOffset);
-
+          scoreGaugeEndpoint.setAttribute(
+            "cx",
+            String(scoreGaugeEndX)
+          );
+          scoreGaugeEndpoint.setAttribute(
+            "cy",
+            String(scoreGaugeEndY)
+          );
         });
-
       });
-
     }
 
 
@@ -1082,40 +1069,19 @@ document.addEventListener("DOMContentLoaded", () => {
      * ========================================================
      */
 
-    const mlBar =
-      document.getElementById(
-        "ml-fraud-bar"
-      );
+    const mlBar = document.getElementById("ml-fraud-bar");
+    const mlMarker = document.getElementById("ml-fraud-marker");
 
-
-    if (
-      mlBar &&
-      mlFraudPercentage !== null
-    ) {
-
-      /*
-       * Start empty.
-       */
-
-      mlBar.style.width =
-        "0%";
-
-
-      /*
-       * Animate to the REAL backend value.
-       */
+    if (mlBar && mlMarker && mlFraudPercentage !== null) {
+      mlBar.style.width = "0%";
+      mlMarker.style.left = "0%";
 
       requestAnimationFrame(() => {
-
         requestAnimationFrame(() => {
-
-          mlBar.style.width =
-            mlBarWidth + "%";
-
+          mlBar.style.width = mlBarWidth + "%";
+          mlMarker.style.left = mlBarWidth + "%";
         });
-
       });
-
     }
 
 
