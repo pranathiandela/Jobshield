@@ -15,3 +15,9 @@ detection_ml/cleaned_dataset.csv
 instance/*.db
 *.db
 *.sqlite3
+.venv/
+backups/
+*.bak
+*.before-*
+static/uploads/profiles/*
+
