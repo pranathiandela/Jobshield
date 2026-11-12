@@ -39,6 +39,11 @@ init_google_oauth(app)
 app.register_blueprint(auth_bp)
 
 
+# Initialize database tables for both local and production
+with app.app_context():
+    db.create_all()
+    print("JobShield database tables initialized.")
+
 BASE = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
